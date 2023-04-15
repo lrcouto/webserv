@@ -14,9 +14,7 @@
 
 Socket::Socket(void) : _port(0) 
 {
-    _fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (_fd < 0)
-        throw (CreateSocketError());
+    _fd = -1;
 	return ;
 }
 
@@ -30,7 +28,7 @@ Socket::Socket(int port) : _port(port)
 
 Socket::~Socket(void) 
 {
-	close(_fd);
+	this->close();
 	return ;
 }
 
@@ -40,7 +38,18 @@ Socket::Socket(Socket const &other)
 	return ;
 }
 
-void    Socket::bind()
+const int Socket::getFd(void) const
+{
+    return this->_fd;
+}
+
+void Socket::setFd(int fd)
+{
+    this->_fd = fd;
+    return;
+}
+
+void    Socket::bind(void)
 {
     struct addrinfo info, *response;
 
@@ -57,15 +66,73 @@ void    Socket::bind()
     return;
 }
 
-void    Socket::listen();
+void    Socket::listen(int backlog)
+{
+    if (listen(_fd, backlog) < 0)
+        throw (BindSocketError());
+    
+    return;
+}
 
-void    Socket::accept();
+void    Socket::accept(void)
+{
+    int newFd;
+    struct sockaddr_in clientAddr = {};
+	socklen_t clientAddrLen = sizeof(clientAddr);
 
-void    Socket::send();
+    if ((newFd = accept(_fd, (struct sockaddr*)&clientAddr, &clientAddrLen)) < 0)
+        throw (AcceptSocketError())
 
-void    Socket::receive();
+    this->setFd(newFd);
 
-void    Socket::close();
+	return;
+}
+
+int    Socket::send(const std::string response)
+{
+    int bytesReturned, bytesTotal = 0;
+
+    while((unsigned long int)bytesTotal < response.size())
+    {
+        bytesReturned = send(this->getFd(), response.c_str(), response.size, 0)
+        
+        if (bytesReturned <= 0)
+            break;
+        bytesTotal += bytesReturned;
+    }    
+    return bytesReturned;
+}
+
+int    Socket::receive(const std::string &request)
+{
+    const int BUFFER_SIZE = 30000;
+    char buffer[BUFFER_SIZE];
+    int  bytesRead, totalBytes = 0;
+
+    while ((bytesRead = recv(this->getFd(), buffer, BUFFER_SIZE, 0)) > 0)
+    {
+        request.append(buffer, bytesRead);
+        if (request.find("Expect: 100-continue") != std::string::npos)
+        {
+            sleep(2);
+            continue;
+        }
+        totalBytes += bytesRead;
+        if (request.find("\r\n\r\n") != std::string::npos)
+            break;
+    }
+    return (bytesRead == -1) ? -1 : totalBytes;
+}
+
+void    Socket::close()
+{
+    if (_fd != -1) 
+    {
+		close(_fd);
+	    _fd = -1;
+	}
+    return;
+}
 
 Socket &Socket::operator=(Socket const &other)
 {

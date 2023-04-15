@@ -13,6 +13,8 @@
 #ifndef SOCKET_HPP
 # define SOCKET_HPP
 
+# include "libs.hpp"
+
 class Socket {
     private:
         int     _fd;
@@ -26,12 +28,13 @@ class Socket {
 		Socket &operator=(Socket const &other);
 
 		const int   getFd(void) const;
+        void        setFd(int fd);
 
-        void        bind();
-        void        listen();
+        void        bind(void);
+        void        listen(int backlog);
         void        accept();
-        void        send();
-        void        receive();
+        int         send(const std::string response);
+        int         receive(std::string &request);
         void        close();
 
         class CreateSocketError : public std::exception
@@ -49,6 +52,24 @@ class Socket {
 				virtual const char* what() const throw()
 				{
 					return ("\e[0;31Error: unable to bind socket.\e[0m");
+				}
+		};
+
+        class ListenSocketError : public std::exception
+		{
+			public:
+				virtual const char* what() const throw()
+				{
+					return ("\e[0;31Error: unable to listen.\e[0m");
+				}
+		};
+
+        class AcceptSocketError : public std::exception
+		{
+			public:
+				virtual const char* what() const throw()
+				{
+					return ("\e[0;31Error: unable to accept.\e[0m");
 				}
 		};
 };

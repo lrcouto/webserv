@@ -13,6 +13,8 @@
 #ifndef WEBSERVER_HPP
 # define WEBSERVER_HPP
 
+# include "libs.hpp"
+
 class WebServer {
     private:
 
