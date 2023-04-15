@@ -21,9 +21,12 @@ Socket::Socket(void) : _port(0)
 Socket::Socket(int port) : _port(port) 
 {
     _fd = socket(AF_INET, SOCK_STREAM, 0);
+
     if (_fd < 0)
+    {
         throw (CreateSocketError());
-	return ;
+    }
+	return;
 }
 
 Socket::~Socket(void) 
@@ -38,7 +41,7 @@ Socket::Socket(Socket const &other)
 	return ;
 }
 
-const int Socket::getFd(void) const
+int Socket::getFd(void) const
 {
     return this->_fd;
 }
@@ -52,15 +55,18 @@ void Socket::setFd(int fd)
 void    Socket::bind(void)
 {
     struct addrinfo info, *response;
+    std::stringstream ss;
+    ss << _port;
+    std::string port = ss.str();
 
     memset(&info, 0, sizeof(info));
     info.ai_family = AF_UNSPEC;
     info.ai_socktype = SOCK_STREAM;
     info.ai_flags = AI_PASSIVE;
 
-    getaddrinfo(NULL, _port, &info, &response)
+    getaddrinfo(NULL, port.c_str(), &info, &response);
     
-    if (bind(_fd, response->ai_family, response->ai_addrlen) < 0)
+    if (::bind(_fd, response->ai_addr, response->ai_addrlen) < 0)
         throw (BindSocketError());
     
     return;
@@ -68,20 +74,20 @@ void    Socket::bind(void)
 
 void    Socket::listen(int backlog)
 {
-    if (listen(_fd, backlog) < 0)
+    if (::listen(_fd, backlog) < 0)
         throw (BindSocketError());
     
     return;
 }
 
-void    Socket::accept(void)
+void    Socket::accept(int serverFd)
 {
     int newFd;
     struct sockaddr_in clientAddr = {};
 	socklen_t clientAddrLen = sizeof(clientAddr);
 
-    if ((newFd = accept(_fd, (struct sockaddr*)&clientAddr, &clientAddrLen)) < 0)
-        throw (AcceptSocketError())
+    if ((newFd = ::accept(serverFd, (struct sockaddr*)&clientAddr, &clientAddrLen)) < 0)
+        throw (AcceptSocketError());
 
     this->setFd(newFd);
 
@@ -94,7 +100,7 @@ int    Socket::send(const std::string response)
 
     while((unsigned long int)bytesTotal < response.size())
     {
-        bytesReturned = send(this->getFd(), response.c_str(), response.size, 0)
+        bytesReturned = ::send(this->getFd(), response.c_str(), response.size(), 0);
         
         if (bytesReturned <= 0)
             break;
@@ -103,7 +109,7 @@ int    Socket::send(const std::string response)
     return bytesReturned;
 }
 
-int    Socket::receive(const std::string &request)
+int    Socket::receive(std::string &request)
 {
     const int BUFFER_SIZE = 30000;
     char buffer[BUFFER_SIZE];
@@ -128,7 +134,7 @@ void    Socket::close()
 {
     if (_fd != -1) 
     {
-		close(_fd);
+		::close(_fd);
 	    _fd = -1;
 	}
     return;

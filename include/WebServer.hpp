@@ -14,6 +14,7 @@
 # define WEBSERVER_HPP
 
 # include "libs.hpp"
+# include "Socket.hpp"
 
 class WebServer {
     private:

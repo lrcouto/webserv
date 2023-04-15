@@ -27,12 +27,12 @@ class Socket {
 		Socket(Socket const &other);
 		Socket &operator=(Socket const &other);
 
-		const int   getFd(void) const;
+		int         getFd(void) const;
         void        setFd(int fd);
 
         void        bind(void);
         void        listen(int backlog);
-        void        accept();
+        void        accept(int serverFd);
         int         send(const std::string response);
         int         receive(std::string &request);
         void        close();
