@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 # include "libs.hpp"
+# include "WebServer.hpp"
 
 int main(int argc, char **argv)
 {
@@ -22,54 +23,9 @@ int main(int argc, char **argv)
     std::string input = argv[1];
     if (input.compare("GO!") == 0)
     {
-        int serverFd = socket(AF_INET, SOCK_STREAM, 0);
-        std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+        WebServer webserver;
 
-        if (serverFd < 0) 
-        {
-            std::cerr << "Error: unable to open socket." << std::endl;
-            exit(1);
-        }
-
-        struct sockaddr_in serverAddress;
-
-        serverAddress.sin_family = AF_INET;
-        serverAddress.sin_addr.s_addr = INADDR_ANY;
-        serverAddress.sin_port = htons(3007);
-
-        memset(serverAddress.sin_zero, '\0', sizeof(serverAddress.sin_zero));
-
-        if (bind(serverFd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
-        {
-            std::cerr << "Error: Unable to bind socket to server address" << std::endl;
-            exit(1);
-        }
-
-        if (listen(serverFd, 10) < 0)
-        {
-            std::cerr << "Error: Unable to listen" << std::endl;
-            exit(1);
-        }
-        
-        int new_socket;
-        int addrLen = sizeof(serverAddress);
-
-        while(1)
-        {
-            std::cerr << "Waiting for connection..." << std::endl;
-            if ((new_socket = accept(serverFd, (struct sockaddr *)&serverAddress, (socklen_t*)&addrLen)) < 0)
-            {
-                std::cerr << "Error: Unable to accept" << " " << errno << " " << strerror(errno) << std::endl;
-                exit(1);
-            }
-
-            char buffer[30000] = {0};
-            read(new_socket, buffer, 30000);
-            std::cout << buffer << std::endl;
-            write(new_socket, hello.c_str(), hello.length());
-            std::cout << "Hello message sent" << std::endl;
-            close(new_socket);
-        }
+        webserver.run();
     }
     return 0;
 }

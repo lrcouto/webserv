@@ -23,5 +23,7 @@
 # include <errno.h>
 # include <vector>
 # include <poll.h>
+# include <arpa/inet.h>
+# include <fcntl.h>
 
 #endif

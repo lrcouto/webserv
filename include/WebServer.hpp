@@ -15,7 +15,7 @@
 
 class WebServer {
     private:
-        
+
 
 	public:
 		WebServer(void);
@@ -23,10 +23,7 @@ class WebServer {
 		WebServer(WebServer const &other);
 		WebServer &operator=(WebServer const &other);
 
-		void	run(const int socket); // Temporary configuration because I don't have the parser yet.
-
-
-
+		void	run(void); // Temporary configuration because I don't have the parser yet.
 };
 
 std::ostream &operator<<(std::ostream &out, WebServer const &in);

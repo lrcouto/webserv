@@ -15,21 +15,44 @@
 
 class Socket {
     private:
+        int     _fd;
+        int     _port;
         
-
 	public:
 		Socket(void);
+        Socket(int port);
         ~Socket(void);
 		Socket(Socket const &other);
 		Socket &operator=(Socket const &other);
 
-		void	run(const int socket); // Temporary configuration because I don't have the parser yet.
+		const int   getFd(void) const;
 
+        void        bind();
+        void        listen();
+        void        accept();
+        void        send();
+        void        receive();
+        void        close();
 
+        class CreateSocketError : public std::exception
+		{
+			public:
+				virtual const char* what() const throw()
+				{
+					return ("\e[0;31mError: unable to create socket.\e[0m");
+				}
+		};
 
+		class BindSocketError : public std::exception
+		{
+			public:
+				virtual const char* what() const throw()
+				{
+					return ("\e[0;31Error: unable to bind socket.\e[0m");
+				}
+		};
 };
 
 std::ostream &operator<<(std::ostream &out, Socket const &in);
-
 
 #endif

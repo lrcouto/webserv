@@ -24,6 +24,7 @@ DIR_SRCS	=	src
 DIR_BUILD	=	build
 
 SRCS		=	$(DIR_SRCS)/main.cpp \
+				$(DIR_SRCS)/WebServer.cpp \
 
 BUILD		=	$(subst $(DIR_SRCS), $(DIR_BUILD), $(SRCS:.cpp=.o))
 
