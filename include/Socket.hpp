@@ -51,7 +51,7 @@ class Socket {
 			public:
 				virtual const char* what() const throw()
 				{
-					return ("\e[0;31Error: unable to bind socket.\e[0m");
+					return ("\e[0;31mError: unable to bind socket.\e[0m");
 				}
 		};
 
@@ -60,7 +60,7 @@ class Socket {
 			public:
 				virtual const char* what() const throw()
 				{
-					return ("\e[0;31Error: unable to listen.\e[0m");
+					return ("\e[0;31mError: unable to listen.\e[0m");
 				}
 		};
 
@@ -69,7 +69,7 @@ class Socket {
 			public:
 				virtual const char* what() const throw()
 				{
-					return ("\e[0;31Error: unable to accept.\e[0m");
+					return ("\e[0;31mError: unable to accept.\e[0m");
 				}
 		};
 };

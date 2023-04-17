@@ -15,10 +15,11 @@
 
 # include "libs.hpp"
 # include "Socket.hpp"
+# include "Poll.hpp"
 
 class WebServer {
     private:
-
+        Poll    _poll;
 
 	public:
 		WebServer(void);

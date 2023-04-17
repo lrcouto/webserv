@@ -26,6 +26,7 @@ DIR_BUILD	=	build
 SRCS		=	$(DIR_SRCS)/main.cpp \
 				$(DIR_SRCS)/WebServer.cpp \
 				$(DIR_SRCS)/Socket.cpp \
+				$(DIR_SRCS)/Poll.cpp \
 
 BUILD		=	$(subst $(DIR_SRCS), $(DIR_BUILD), $(SRCS:.cpp=.o))
 

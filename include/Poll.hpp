@@ -28,8 +28,9 @@ class Poll {
         void   insertSocket(Socket *socket);
         void   removeSocket(Socket *socket);
         void   execute(void);
+        bool   verifyEvenReturn(short revents);
         size_t getSize(void) const;
-        Socket getSocket(size_t index);
+        Socket *getSocket(size_t index);
         short  getEventReturn(size_t index);
 
 	    class PollError : public std::exception
@@ -37,7 +38,7 @@ class Poll {
 			public:
 				virtual const char* what() const throw()
 				{
-					return ("\e[0;31Error: unable to poll\e[0m");
+					return ("\e[0;31mError: unable to poll\e[0m");
 				}
 		};
 };

@@ -27,7 +27,7 @@ void   Poll::insertSocket(Socket *socket)
     pollfd pollFdToInsert;
 
     this->_sockets.push_back(socket);
-    pollFdToInsert.fd = socket.getFd();
+    pollFdToInsert.fd = socket->getFd();
     pollFdToInsert.events = POLLIN | POLLPRI | POLLOUT | POLLWRBAND;
     pollFdToInsert.revents = 0;
     this->_pollfds.push_back(pollFdToInsert);
@@ -37,11 +37,11 @@ void   Poll::insertSocket(Socket *socket)
 
 void   Poll::removeSocket(Socket *socket)
 {
-    for (std::vector<pollfd>::reverse_iterator it = _poolfds.rbegin(); it != _poolfds.rend(); ++it) 
+    for (std::vector<pollfd>::reverse_iterator it = _pollfds.rbegin(); it != _pollfds.rend(); ++it) 
     {
         if (it->fd == socket->getFd()) 
         {
-            _poolfds.erase(std::vector<pollfd>::iterator(&(*it)));
+            _pollfds.erase(std::vector<pollfd>::iterator(&(*it)));
             break;
         }
     }
@@ -56,22 +56,36 @@ void   Poll::removeSocket(Socket *socket)
 
 void   Poll::execute(void)
 {
-    int return = poll(this->_pollfds.data(), this->getSize(), 0);
-    if (return == -1)
+    int retValue = poll(this->_pollfds.data(), this->getSize(), 0);
+    if (retValue == -1)
         throw(PollError());
+    return;
+}
+
+bool	Poll::verifyEvenReturn(short revents)
+{
+	if ((revents & POLLIN) == POLLIN)
+		return (true);
+	if ((revents & POLLPRI) == POLLPRI)
+		return (true);
+	if ((revents & POLLOUT) == POLLOUT)
+		return (true);
+	if ((revents & POLLWRBAND) == POLLWRBAND)
+		return (true);
+	return (false);
 }
 
 size_t Poll::getSize(void) const 
 {
-	return (this->_poolfds.size());
+	return (this->_pollfds.size());
 }
 
-Socket Poll::getSocket(size_t index)
+Socket *Poll::getSocket(size_t index)
 {
     return (this->_sockets[index]);
 }
 
 short  Poll::getEventReturn(size_t index)
 {
-    return (this->_poolfds[index].revents);
+    return (this->_pollfds[index].revents);
 }
