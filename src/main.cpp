@@ -13,6 +13,15 @@
 # include "libs.hpp"
 # include "WebServer.hpp"
 
+WebServer webserver;
+
+void    interrupt(int sig)
+{
+    std::cout << std::endl << "Signal " << sig << " called." << std::endl;
+    webserver.stop();
+    exit(0);
+}
+
 int main(int argc, char **argv)
 {
     if (argc < 2)
@@ -23,7 +32,11 @@ int main(int argc, char **argv)
     std::string input = argv[1];
     if (input.compare("GO!") == 0)
     {
-        WebServer webserver;
+        struct sigaction interruptHandler;
+        interruptHandler.sa_handler = interrupt;
+        sigemptyset(&interruptHandler.sa_mask);
+        interruptHandler.sa_flags = 0;
+        sigaction(SIGINT, &interruptHandler, 0);
 
         webserver.run();
     }

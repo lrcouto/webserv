@@ -28,6 +28,7 @@ class WebServer {
 		WebServer &operator=(WebServer const &other);
 
 		void	run(void); // Temporary configuration because I don't have the parser yet.
+        void    stop(void);
 };
 
 std::ostream &operator<<(std::ostream &out, WebServer const &in);

@@ -32,6 +32,7 @@ class Poll {
         size_t getSize(void) const;
         Socket *getSocket(size_t index);
         short  getEventReturn(size_t index);
+        void   clear(void);
 
 	    class PollError : public std::exception
 		{

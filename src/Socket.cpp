@@ -52,7 +52,7 @@ void Socket::setFd(int fd)
     return;
 }
 
-void    Socket::bind(void)
+void    Socket::bind(int optval)
 {
     struct addrinfo info, *response;
     std::stringstream ss;
@@ -65,6 +65,8 @@ void    Socket::bind(void)
     info.ai_flags = AI_PASSIVE;
 
     getaddrinfo(NULL, port.c_str(), &info, &response);
+
+    setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
     
     if (::bind(_fd, response->ai_addr, response->ai_addrlen) < 0)
         throw (BindSocketError());
