@@ -69,6 +69,7 @@ void    Socket::bind(void)
     if (::bind(_fd, response->ai_addr, response->ai_addrlen) < 0)
         throw (BindSocketError());
     
+    freeaddrinfo(response);
     return;
 }
 
