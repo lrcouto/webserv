@@ -13,24 +13,28 @@
 #ifndef LIBS_HPP
 # define LIBS_HPP
 
-# include <iostream>
-# include <string>
-# include <sstream>
-# include <sys/socket.h>
-# include <sys/types.h>
-# include <unistd.h>
-# include <stdlib.h>
-# include <netinet/in.h>
-# include <string.h>
-# include <errno.h>
-# include <vector>
-# include <poll.h>
-# include <arpa/inet.h>
-# include <fcntl.h>
-# include <netdb.h>
-# include <unistd.h>
-# include <fcntl.h>
-# include <algorithm>
+// C LIBRARIES
+
+# include <arpa/inet.h>      // Functions to convert IP addresses.
+# include <errno.h>          // Error codes to indicate system call errors.
+# include <fcntl.h>          // File control operations like fcntl.
+# include <netdb.h>          // Functions to perform DNS lookups and IP address conversions.
+# include <netinet/in.h>     // Internet address-related data types and macros.
+# include <poll.h>           // The poll system call for I/O multiplexing.
+# include <stdlib.h>         // Standard C library.
+# include <string.h>         // C-style string functions like strlen and strcpy.
+# include <sys/socket.h>     // Socket-related system calls.
+# include <sys/types.h>      // System types like pid_t and size_t.
+# include <unistd.h>         // System calls like read, write, and close.
+
+// C++ LIBRARIES
+
+# include <algorithm>        // STL algorithms.
+# include <csignal>          // Signal handling.
+# include <iostream>         // Standard input/output operations.
+# include <sstream>          // Parsing strings.
+# include <string>           // String data type and its operations.
+# include <vector>           // Vector container class.
 
 
 #endif

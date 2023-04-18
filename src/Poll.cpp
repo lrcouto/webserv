@@ -75,17 +75,31 @@ bool	Poll::verifyEvenReturn(short revents)
 	return (false);
 }
 
-size_t Poll::getSize(void) const 
+size_t  Poll::getSize(void) const 
 {
 	return (this->_pollfds.size());
 }
 
-Socket *Poll::getSocket(size_t index)
+Socket  *Poll::getSocket(size_t index)
 {
     return (this->_sockets[index]);
 }
 
-short  Poll::getEventReturn(size_t index)
+short   Poll::getEventReturn(size_t index)
 {
     return (this->_pollfds[index].revents);
+}
+
+void    Poll::clear(void)
+{
+    for (std::vector<pollfd>::reverse_iterator it = _pollfds.rbegin(); it != _pollfds.rend(); ++it)
+    {
+        std::cout << "Closing fd " << it->fd << std::endl;
+        ::close(it->fd);
+    }
+    _pollfds.clear();
+
+    for (std::vector<Socket*>::reverse_iterator it = _sockets.rbegin(); it != _sockets.rend(); ++it) 
+        delete *it;
+    _sockets.clear();
 }

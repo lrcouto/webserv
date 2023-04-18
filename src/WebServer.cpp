@@ -14,19 +14,19 @@
 
 WebServer::WebServer(void) 
 {
-	std::cout << "Hello, this is your WebServer ready to go!\n";
+	std::cout << "Hello, this is your WebServer ready to go!" << std::endl;
 	return ;
 }
 
 WebServer::~WebServer(void) 
 {
-	std::cout << "Bye bye!";
+	std::cout << "Bye bye!" << std::endl;
 	return ;
 }
 
 WebServer::WebServer(WebServer const &other) 
 {
-	std::cout << "WebServer copy constructor called\n";
+	std::cout << "WebServer copy constructor called" << std::endl;
 	*this = other;
 	return ;
 }
@@ -34,7 +34,7 @@ WebServer::WebServer(WebServer const &other)
 WebServer &WebServer::operator=(WebServer const &other)
 {   	
     if (this != &other) {
-		std::cout << "WebServer copy assignment operator called\n";
+		std::cout << "WebServer copy assignment operator called" << std::endl;
 	}
 	return (*this);
 }
@@ -49,8 +49,8 @@ void WebServer::run(void)
 
     for(int i = 0; i < 3; i++) // hardcoded number of sockets because I have no input file yet.
     {
-        listener = new Socket(ports[i]); // sockets allocated with new will have to be explicitly deleted.
-        listener->bind();
+        listener = new Socket(ports[i]);
+        listener->bind(1); // 1 for forcefully releasing port, 0 for not doing that.
         listener->listen(SOMAXCONN); // add some sort of error handling to this, do not add socket to poll() if binding/listening fails.
         this->_poll.insertSocket(listener);
     }
@@ -93,11 +93,16 @@ void WebServer::run(void)
                             std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd() << "\e[0m" << std::endl;
                     }
                     this->_poll.removeSocket(client);
-                    client->close(); // listeners sockets will need to be explicitly closed on server shutdown.
                 }
             }
         }
     }
+}
+
+void WebServer::stop(void)
+{
+    std::cout << "Stopping Webserver..." << std::endl;
+    this->_poll.clear(); // in the future will also have to clear server data, request data, etc.
 }
 
 std::ostream &operator<<(std::ostream &out, WebServer const &in) 

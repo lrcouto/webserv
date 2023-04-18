@@ -30,7 +30,7 @@ class Socket {
 		int         getFd(void) const;
         void        setFd(int fd);
 
-        void        bind(void);
+        void        bind(int optval);
         void        listen(int backlog);
         void        accept(int serverFd);
         int         send(const std::string response);
