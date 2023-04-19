@@ -26,11 +26,10 @@ int main(int argc, char **argv)
 {
     if (argc < 2)
     {
-        std::cerr << "Say GO!" << std::endl; //TODO change this crap to something that makes sense.
+        std::cerr << "\e[0;31mError: webserv requires a config file.\e[0m" << std::endl;
         return 1;
     }
-    std::string input = argv[1];
-    if (input.compare("GO!") == 0)
+    else if (argc == 2)
     {
         struct sigaction interruptHandler;
         interruptHandler.sa_handler = interrupt;
@@ -38,7 +37,12 @@ int main(int argc, char **argv)
         interruptHandler.sa_flags = 0;
         sigaction(SIGINT, &interruptHandler, 0);
 
-        webserver.run();
+        webserver.run(argv[1]);
+    }
+    else
+    {
+        std::cerr << "\e[0;31mError: too many arguments.\e[0m" << std::endl;
+        return 1; 
     }
     return 0;
 }

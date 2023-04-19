@@ -12,7 +12,7 @@
 
 # include "WebServer.hpp"
 
-WebServer::WebServer(void) 
+WebServer::WebServer(void)
 {
 	std::cout << "Hello, this is your WebServer ready to go!" << std::endl;
 	return ;
@@ -24,7 +24,7 @@ WebServer::~WebServer(void)
 	return ;
 }
 
-WebServer::WebServer(WebServer const &other) 
+WebServer::WebServer(WebServer const &other)
 {
 	std::cout << "WebServer copy constructor called" << std::endl;
 	*this = other;
@@ -39,13 +39,15 @@ WebServer &WebServer::operator=(WebServer const &other)
 	return (*this);
 }
 
-void WebServer::run(void)
+void WebServer::run(const std::string &inputFilePath)
 {
     Socket *listener;
     Socket *client;
     int ports[3] = {3007, 3008, 3009};
     std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world! "; // hardcoded test message.
     std::string request;
+
+    this->_parseConfig.execute(inputFilePath);
 
     for(int i = 0; i < 3; i++) // hardcoded number of sockets because I have no input file yet.
     {
