@@ -16,10 +16,12 @@
 # include "libs.hpp"
 # include "Socket.hpp"
 # include "Poll.hpp"
+# include "ParseConfig.hpp"
 
 class WebServer {
     private:
-        Poll    _poll;
+        Poll            _poll;
+        ParseConfig     _parseConfig;
 
 	public:
 		WebServer(void);
@@ -27,7 +29,7 @@ class WebServer {
 		WebServer(WebServer const &other);
 		WebServer &operator=(WebServer const &other);
 
-		void	run(void); // Temporary configuration because I don't have the parser yet.
+		void	run(const std::string &inputFilePath);
         void    stop(void);
 };
 
