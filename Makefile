@@ -29,6 +29,7 @@ SRCS		=	$(DIR_SRCS)/main.cpp \
 				$(DIR_SRCS)/Poll.cpp \
 				$(DIR_SRCS)/ParseConfig.cpp \
 				$(DIR_SRCS)/ParseDirectives.cpp \
+				$(DIR_SRCS)/ftstring.cpp \
 
 BUILD		=	$(subst $(DIR_SRCS), $(DIR_BUILD), $(SRCS:.cpp=.o))
 
