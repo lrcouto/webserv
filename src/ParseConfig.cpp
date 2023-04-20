@@ -14,6 +14,8 @@
 
 ParseConfig::ParseConfig(void) 
 {
+    initConfigFns();
+    initDirectiveVector();
 	return ;
 }
 
@@ -30,18 +32,50 @@ ParseConfig &ParseConfig::operator=(ParseConfig const &other)
 	return (*this);
 }
 
+void	ParseConfig::initConfigFns(void)
+{
+    this->_parseConfigFns["autoindex"] = ParseDirectives::parseAutoindex;
+    this->_parseConfigFns["cgi"] = ParseDirectives::parseCgi;
+    this->_parseConfigFns["client_max_body_size"] = ParseDirectives::parseClientMaxBodySize;
+    this->_parseConfigFns["error_page"] = ParseDirectives::parseErrorPage;
+    this->_parseConfigFns["index"] = ParseDirectives::parseIndex;
+    this->_parseConfigFns["limit_except"] = ParseDirectives::parseLimitExcept;
+    this->_parseConfigFns["listen"] = ParseDirectives::parseListen;
+    this->_parseConfigFns["location"] = ParseDirectives::parseLocation;
+    this->_parseConfigFns["redirect"] = ParseDirectives::parseRedirect;
+    this->_parseConfigFns["root"] = ParseDirectives::parseRoot;
+    this->_parseConfigFns["server_name"] = ParseDirectives::parseServerName;
+}
+
+void	ParseConfig::initDirectiveVector(void)
+{
+    for (std::map<std::string, _parseConfigFn>::iterator it = this->_parseConfigFns.begin(); it != this->_parseConfigFns.end(); ++it)
+        this->_directives.push_back(it->first);
+}
+
 void    ParseConfig::execute(std::string inputFilePath)
 {
     std::ifstream       inputFile(inputFilePath.c_str());
     std::stringstream   content;
 
     content << inputFile.rdbuf();
-    inputFile.close();
     this->_inputFile = content.str();
+    inputFile.close();
     normalizeWhitespaces();
 
     if (checkCurlyBracesMatch() && checkServerBlock())
-        std::cout << "No errors" << std::endl << this->_inputFile << std::endl; // this is where the actual parsing methods would be called.
+    {
+        std::istringstream iss(this->_inputFile);
+        std::string line;
+        std::string key;
+        while (std::getline(iss, line))
+        {
+            key = findDirective(line);
+            std::map<std::string, _parseConfigFn>::iterator it = this->_parseConfigFns.find(key);
+                if (it != this->_parseConfigFns.end())
+                    it->second(line);
+        }
+    }
     else
         throw(ParseSyntaxError());
     return ;
@@ -86,4 +120,14 @@ bool    ParseConfig::checkServerBlock(void)
     if ((this->_inputFile.substr(0, pos) == "server ") || (this->_inputFile.substr(0, pos + 1) == "server{")) //does not cover most bad syntax cases.
         return true;
     return false;
+}
+
+std::string ParseConfig::findDirective(std::string line)
+{
+    for (std::vector<std::string>::const_iterator it = this->_directives.begin(); it != this->_directives.end(); ++it) 
+    {
+        if (line.find(*it) != std::string::npos)
+            return *it;
+    }
+    return "";
 }
