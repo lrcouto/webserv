@@ -38,5 +38,8 @@
 # include <string>           // String data type and its operations.
 # include <vector>           // Vector container class.
 
+// LOCAL LIBRARIES
+
+# include "ftstring.hpp"     // String manipulation functions.
 
 #endif
