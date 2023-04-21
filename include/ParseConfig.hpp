@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #ifndef PARSECONFIG_HPP
-# define PARSECONFIG_HPP
+#define PARSECONFIG_HPP
 
 # include "libs.hpp"
 # include "ParseDirectives.hpp"
@@ -20,17 +20,17 @@
 
 class ParseConfig {
     private:
-		typedef std::pair<std::string, std::vector<std::string> > (*_parseConfigFn)(const std::string &line);
+        typedef ParseDirectives::DirectiveType (*_parseConfigFn)(std::string const &line);
 
         std::string 							_inputFile;
 		std::vector<std::string>				_directives;
 		std::map<std::string, _parseConfigFn>	_parseConfigFns;
 		std::vector<Server>						_serverData;
 
-	public:
+    public:
         ParseConfig(void);
         ~ParseConfig(void);
-		ParseConfig &operator=(ParseConfig const &other);
+        ParseConfig &operator=(ParseConfig const &other);
 
 		void					initConfigFns(void);
 		void					initDirectiveVector(void);
@@ -43,14 +43,13 @@ class ParseConfig {
 		void 					splitOffLocationBlocks(std::string &serverBlock, Server &server);
 		void 					processLocation(std::string locationBlock, Location &location);
 
-	    class ParseSyntaxError : public std::exception
-		{
-			public:
-				virtual const char* what() const throw()
-				{
-					return ("\e[0;31mError: Invalid syntax on config file.\e[0m");
-				}
-		};
+        class ParseSyntaxError : public std::exception {
+            public:
+                virtual char const *what() const throw()
+                {
+                    return ("\e[0;31mError: Invalid syntax on config file.\e[0m");
+                }
+        };
 };
 
 #endif

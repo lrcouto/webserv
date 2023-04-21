@@ -10,10 +10,10 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef  PARSEDIRECTIVES_HPP
-# define PARSEDIRECTIVES_HPP
+#ifndef PARSEDIRECTIVES_HPP
+#define PARSEDIRECTIVES_HPP
 
-# include "libs.hpp"
+#include "libs.hpp"
 
 class ParseDirectives {
     public:
