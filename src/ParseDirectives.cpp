@@ -40,7 +40,8 @@ ParseDirectives::DirectiveType ParseDirectives::parseClientMaxBodySize(std::stri
     if (tokens.size() != 2)
         throw std::exception(); // TODO: Create custom exception
     hasSizeType = false;
-    for (std::string::iterator it = tokens[1].begin(); it != tokens[1].end(); ++it) {
+    std::string::const_iterator it;
+    for (it = tokens[1].begin(); it != tokens[1].end(); ++it) {
         if (hasSizeType && it != tokens[1].end())
             throw std::exception(); // TODO: Create custom exception
         if (!std::isdigit(*it)) {
@@ -72,7 +73,8 @@ ParseDirectives::DirectiveType ParseDirectives::parseErrorPage(std::string const
     tokens = ftstring::split(line, ' ');
     if (tokens.size() < 3)
         throw std::exception(); // TODO: Create custom exception
-    for (std::vector<std::string>::iterator it = tokens.begin() + 1; it != tokens.end() - 1; ++it) {
+    std::vector<std::string>::const_iterator it;
+    for (it = tokens.begin() + 1; it != tokens.end() - 1; ++it) {
         if (std::find(http_codes.begin(), http_codes.end(), *it) != http_codes.end()) {
             arguments.push_back(*it);
         } else {
@@ -89,7 +91,8 @@ ParseDirectives::DirectiveType ParseDirectives::parseIndex(std::string const &li
     tokens = ftstring::split(line, ' ');
     if (tokens.size() < 2)
         throw std::exception(); // TODO: Create custom exception
-    for (std::vector<std::string>::iterator it = tokens.begin() + 1; it != tokens.end(); ++it)
+    std::vector<std::string>::const_iterator it;
+    for (it = tokens.begin() + 1; it != tokens.end(); ++it)
         arguments.push_back(*it);
     return (std::make_pair(tokens[0], arguments));
 }
@@ -104,7 +107,8 @@ ParseDirectives::DirectiveType ParseDirectives::parseLimitExcept(std::string con
     tokens = ftstring::split(line, ' ');
     if (tokens.size() < 2)
         throw std::exception(); // TODO: Create custom exception
-    for (std::vector<std::string>::iterator it = tokens.begin() + 1; it != tokens.end(); ++it) {
+    std::vector<std::string>::const_iterator it;
+    for (it = tokens.begin() + 1; it != tokens.end(); ++it) {
         if (std::find(http_methods.begin(), http_methods.end(), *it) != http_methods.end())
             arguments.push_back(*it);
         else
