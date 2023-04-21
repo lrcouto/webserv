@@ -12,57 +12,90 @@
 
 # include "ParseDirectives.hpp"
 
-void ParseDirectives::parseAutoindex(const std::string &line)
+ParseDirectives::DirectiveType ParseDirectives::parseAutoindex(const std::string &line)
 {
-    std::cout << line << std::endl;
+    ParseDirectives::DirectiveType data;
+    data.first = "autoindex";
+    data.second.push_back(line);
+    return data;
 }
 
-void ParseDirectives::parseCgi(const std::string &line)
+ParseDirectives::DirectiveType ParseDirectives::parseCgi(const std::string &line)
 {
-    std::cout << line << std::endl;
+    ParseDirectives::DirectiveType data;
+    data.first = "cgi";
+    data.second.push_back(line);
+    return data;
 }
 
-void ParseDirectives::parseClientMaxBodySize(const std::string &line)
+ParseDirectives::DirectiveType ParseDirectives::parseClientMaxBodySize(const std::string &line)
 {
-    std::cout << line << std::endl;
+    ParseDirectives::DirectiveType data;
+    data.first = "client_max_body_size";
+    data.second.push_back(line);
+    return data;
 }
 
-void ParseDirectives::parseErrorPage(const std::string &line)
+ParseDirectives::DirectiveType ParseDirectives::parseErrorPage(const std::string &line)
 {
-    std::cout << line << std::endl;
+    ParseDirectives::DirectiveType data;
+    data.first = "error_page";
+    data.second.push_back(line);
+    return data;
 }
 
-void ParseDirectives::parseIndex(const std::string &line)
+ParseDirectives::DirectiveType ParseDirectives::parseIndex(const std::string &line)
 {
-    std::cout << line << std::endl;
+    ParseDirectives::DirectiveType data;
+    data.first = "index";
+    data.second.push_back(line);
+    return data;
 }
 
-void ParseDirectives::parseLimitExcept(const std::string &line)
+ParseDirectives::DirectiveType ParseDirectives::parseLimitExcept(const std::string &line)
 {
-    std::cout << line << std::endl;
+    ParseDirectives::DirectiveType data;
+    data.first = "limit_except";
+    data.second.push_back(line);
+    return data;
 }
 
-void ParseDirectives::parseListen(const std::string &line)
+ParseDirectives::DirectiveType ParseDirectives::parseListen(const std::string &line)
 {
-    std::cout << line << std::endl;
+    ParseDirectives::DirectiveType data;
+    data.first = "listen";
+    data.second.push_back(line);
+    return data;
 }
 
-void ParseDirectives::parseLocation(const std::string &line)
+ParseDirectives::DirectiveType ParseDirectives::parseLocation(const std::string &line)
 {
-    std::cout << line << std::endl;
+    ParseDirectives::DirectiveType data;
+    data.first = "location";
+    data.second.push_back(line);
+    return data;
 }
 
-void ParseDirectives::parseRedirect(const std::string &line)
+ParseDirectives::DirectiveType ParseDirectives::parseRedirect(const std::string &line)
 {
-    std::cout << line << std::endl;
+    ParseDirectives::DirectiveType data;
+    data.first = "redirect";
+    data.second.push_back(line);
+    return data;
 }
 
-void ParseDirectives::parseRoot(const std::string &line)
+ParseDirectives::DirectiveType ParseDirectives::parseRoot(const std::string &line)
 {
-    std::cout << line << std::endl;
+    ParseDirectives::DirectiveType data;
+    data.first = "root";
+    data.second.push_back(line);
+    return data;
 }
 
-void ParseDirectives::parseServerName(const std::string &line)
+ParseDirectives::DirectiveType ParseDirectives::parseServerName(const std::string &line)
 {
-    std::cout << line << std::endl;
+    ParseDirectives::DirectiveType data;
+    data.first = "server_name";
+    data.second.push_back(line);
+    return data;
 }

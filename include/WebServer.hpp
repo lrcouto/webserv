@@ -17,11 +17,13 @@
 # include "Socket.hpp"
 # include "Poll.hpp"
 # include "ParseConfig.hpp"
+# include "Server.hpp"
 
 class WebServer {
     private:
-        Poll            _poll;
-        ParseConfig     _parseConfig;
+        Poll                    _poll;
+        ParseConfig             _parseConfig;
+        std::vector<Server>    _serverData;
 
 	public:
 		WebServer(void);
@@ -31,6 +33,7 @@ class WebServer {
 
 		void	run(const std::string &inputFilePath);
         void    stop(void);
+
 };
 
 std::ostream &operator<<(std::ostream &out, WebServer const &in);

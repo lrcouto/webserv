@@ -17,17 +17,19 @@
 
 class ParseDirectives {
     public:
-        static void parseAutoindex(const std::string &line);
-        static void parseCgi(const std::string &line);
-        static void parseClientMaxBodySize(const std::string &line);
-        static void parseErrorPage(const std::string &line);
-        static void parseIndex(const std::string &line);
-        static void parseLimitExcept(const std::string &line);
-        static void parseListen(const std::string &line);
-        static void parseLocation(const std::string &line);
-        static void parseRedirect(const std::string &line);
-        static void parseRoot(const std::string &line);
-        static void parseServerName(const std::string &line);
+        typedef std::pair<std::string, std::vector<std::string> > DirectiveType;
+
+        static DirectiveType parseAutoindex(std::string const &line);
+        static DirectiveType parseCgi(std::string const &line);
+        static DirectiveType parseClientMaxBodySize(std::string const &line);
+        static DirectiveType parseErrorPage(std::string const &line);
+        static DirectiveType parseIndex(std::string const &line);
+        static DirectiveType parseLimitExcept(std::string const &line);
+        static DirectiveType parseListen(std::string const &line);
+        static DirectiveType parseLocation(std::string const &line);
+        static DirectiveType parseRedirect(std::string const &line);
+        static DirectiveType parseRoot(std::string const &line);
+        static DirectiveType parseServerName(std::string const &line);
 };
 
 #endif
