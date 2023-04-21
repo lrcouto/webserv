@@ -37,6 +37,7 @@
 # include <sstream>          // Parsing strings.
 # include <string>           // String data type and its operations.
 # include <vector>           // Vector container class.
+# include <utility>          // Pair class.
 
 // LOCAL LIBRARIES
 

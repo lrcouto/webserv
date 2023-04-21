@@ -11,40 +11,39 @@
 /* ************************************************************************** */
 
 #ifndef PARSECONFIG_HPP
-# define PARSECONFIG_HPP
+#define PARSECONFIG_HPP
 
-# include "libs.hpp"
-# include "ParseDirectives.hpp"
+#include "ParseDirectives.hpp"
+#include "libs.hpp"
 
 class ParseConfig {
     private:
-		typedef void (*_parseConfigFn)(const std::string &line);
+        typedef ParseDirectives::DirectiveType (*_parseConfigFn)(std::string const &line);
 
-        std::string 							_inputFile;
-		std::vector<std::string>				_directives;
-		std::map<std::string, _parseConfigFn>	_parseConfigFns;
+        std::string                           _inputFile;
+        std::vector<std::string>              _directives;
+        std::map<std::string, _parseConfigFn> _parseConfigFns;
 
-	public:
+    public:
         ParseConfig(void);
         ~ParseConfig(void);
-		ParseConfig &operator=(ParseConfig const &other);
+        ParseConfig &operator=(ParseConfig const &other);
 
-		void		initConfigFns(void);
-		void		initDirectiveVector(void);
-        void    	execute(std::string inputFilePath);
-        void    	normalizeWhitespaces(void);
-        bool    	checkCurlyBracesMatch(void);
-        bool    	checkServerBlock(void);
-		std::string	findDirective(std::string line);
+        void        initConfigFns(void);
+        void        initDirectiveVector(void);
+        void        execute(std::string inputFilePath);
+        void        normalizeWhitespaces(void);
+        bool        checkCurlyBracesMatch(void);
+        bool        checkServerBlock(void);
+        std::string findDirective(std::string line);
 
-	    class ParseSyntaxError : public std::exception
-		{
-			public:
-				virtual const char* what() const throw()
-				{
-					return ("\e[0;31mError: Invalid syntax on config file.\e[0m");
-				}
-		};
+        class ParseSyntaxError : public std::exception {
+            public:
+                virtual char const *what() const throw()
+                {
+                    return ("\e[0;31mError: Invalid syntax on config file.\e[0m");
+                }
+        };
 };
 
 #endif

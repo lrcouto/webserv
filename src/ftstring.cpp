@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/20 18:37:02 by maolivei          #+#    #+#             */
-/*   Updated: 2023/04/20 18:44:43 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/04/20 21:15:23 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,22 @@ std::string reduce(std::string const &str, std::string const &set, std::string c
         beginSet = result.find_first_of(set, newStart);
     }
     return (result);
+}
+
+std::vector<std::string> split(std::string const &str, char delimiter)
+{
+    std::string              tmp;
+    std::stringstream        ss(str);
+    std::vector<std::string> substrings;
+
+    while (std::getline(ss, tmp, delimiter))
+        substrings.push_back(tmp);
+    return (substrings);
+}
+
+bool is_positive_integer(std::string const &str)
+{
+    return (!str.empty() && str.find_first_not_of("0123456789") == std::string::npos);
 }
 
 } /* ftstring */
