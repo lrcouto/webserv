@@ -47,7 +47,13 @@ void WebServer::run(const std::string &inputFilePath)
     std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world! "; // hardcoded test message.
     std::string request;
 
-    this->_parseConfig.execute(inputFilePath);
+    this->_serverData = this->_parseConfig.execute(inputFilePath);
+
+    for (size_t i = 0; i < this->_serverData.size(); i++)
+    {
+        std::vector<std::string> value = this->_serverData[i].getValue("listen");
+        std::cout << "\e[0;32m" << value[0] << "\e[0m" << std::endl;
+    }
 
     for(int i = 0; i < 3; i++) // hardcoded number of sockets because I have no input file yet.
     {

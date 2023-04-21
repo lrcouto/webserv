@@ -50,10 +50,11 @@ void ParseConfig::initDirectiveVector(void)
         this->_directives.push_back(it->first);
 }
 
-void ParseConfig::execute(std::string inputFilePath)
+std::vector<Server> ParseConfig::execute(std::string inputFilePath)
 {
-    std::ifstream     inputFile(inputFilePath.c_str());
-    std::stringstream content;
+    std::ifstream       inputFile(inputFilePath.c_str());
+    std::stringstream   content;
+    std::vector<Server> serverData;
 
     content << inputFile.rdbuf();
     this->_inputFile = content.str();
@@ -62,16 +63,28 @@ void ParseConfig::execute(std::string inputFilePath)
     if (!checkCurlyBracesMatch() || !checkServerBlock())
         throw ParseSyntaxError();
 
-    std::istringstream iss(this->_inputFile);
-    std::string        line, key;
-    while (std::getline(iss, line)) {
-        std::map<std::string, _parseConfigFn>::iterator it;
-
-        key = findDirective(line);
-        it  = this->_parseConfigFns.find(key);
-        if (it != this->_parseConfigFns.end())
-            it->second(line);
+    int     braces = 0;
+    size_t  blockStart = 0;
+    bool    insideServerBlock = false;
+    for (size_t i = 0; i < this->_inputFile.size(); i++) {
+        char c = this->_inputFile[i];
+        if (c == '{') {
+            if (insideServerBlock == false) {
+                insideServerBlock = true;
+                blockStart = i;                
+            }
+            braces++;
+        }
+        else if (c == '}') {
+            braces--;
+            if (braces == 0) {
+                processServer(this->_inputFile.substr(blockStart, i - blockStart + 1));
+                insideServerBlock = false;
+                blockStart = i;
+            }
+        }
     }
+    return this->_serverData;
 }
 
 bool ParseConfig::checkServerBlock(void)
@@ -107,11 +120,41 @@ bool ParseConfig::checkCurlyBracesMatch(void)
 
 std::string ParseConfig::findDirective(std::string line)
 {
+    line = ftstring::reduce(line, " \f\n\r\t\v", " ");
     for (std::vector<std::string>::const_iterator it = this->_directives.begin();
          it != this->_directives.end();
          ++it) {
-        if (line.find(*it) != std::string::npos)
+        if (line.find(*it) != std::string::npos) {
+            std::istringstream iss(line);
+            std::string firstToken;
+            std::getline(iss, firstToken, ' ');
+            if (firstToken != *it)
+                throw (ParseSyntaxError());
             return *it;
+        }
     }
     return "";
 }
+
+void ParseConfig::processServer(std::string serverBlock)
+{
+    serverBlock = ftstring::trim(serverBlock, " {}\t\v\f\r");
+    std::cout << "\nBLOCK START\n" <<  serverBlock << "\nBLOCK END\n" <<  std::endl;
+
+    Server server;
+
+    std::istringstream iss(serverBlock);
+    std::string line, key;
+
+    while (std::getline(iss, line)) {
+        std::map<std::string, _parseConfigFn>::iterator it;
+        key = findDirective(line);
+        it  = this->_parseConfigFns.find(key);
+        if (it != this->_parseConfigFns.end()) {
+            server.insertServerData(it->second(line));
+        }
+    }
+
+    this->_serverData.push_back(server);
+}
+
