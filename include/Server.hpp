@@ -34,7 +34,7 @@ class Server {
 			public:
 				virtual const char* what() const throw()
 				{
-					return ("\e[0;31mError: directives 'autoindex', 'root' and 'client_max_body_size' must be unique.\e[0m");
+					return ("\e[0;31mError: directives 'listen', 'autoindex', 'root' and 'client_max_body_size' must be unique.\e[0m");
 				}
 		};
 

@@ -120,17 +120,25 @@ bool ParseConfig::checkCurlyBracesMatch(void)
 
 std::string ParseConfig::findDirective(std::string line)
 {
+    line = ftstring::reduce(line, " \f\n\r\t\v", " ");
     for (std::vector<std::string>::const_iterator it = this->_directives.begin();
          it != this->_directives.end();
          ++it) {
-        if (line.find(*it) != std::string::npos)
+        if (line.find(*it) != std::string::npos) {
+            std::istringstream iss(line);
+            std::string firstToken;
+            std::getline(iss, firstToken, ' ');
+            if (firstToken != *it)
+                throw (ParseSyntaxError());
             return *it;
+        }
     }
     return "";
 }
 
 void ParseConfig::processServer(std::string serverBlock)
 {
+    serverBlock = ftstring::trim(serverBlock, " {}\t\v\f\r");
     std::cout << "\nBLOCK START\n" <<  serverBlock << "\nBLOCK END\n" <<  std::endl;
 
     Server server;

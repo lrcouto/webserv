@@ -24,7 +24,7 @@ Server::~Server(void)
 
 void    Server::insertServerData(std::pair<std::string, std::vector<std::string> > directive)
 {
-    bool    isUniqueDirective = (directive.first == "root" || directive.first == "client_max_body_size" || directive.first == "autoindex");
+    bool    isUniqueDirective = (directive.first == "root" || directive.first == "client_max_body_size" || directive.first == "autoindex" || directive.first == "listen");
     bool    directiveNotOnMap = (this->_serverData.find(directive.first) != this->_serverData.end());
 
     if (isUniqueDirective)
