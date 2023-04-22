@@ -49,3 +49,13 @@ std::vector<std::string>    Location::getValue(std::string key)
     
     return value;
 }
+
+void    Location::setPath(std::string path)
+{
+    this->_path = path;
+}
+
+std::string Location::getPath(void)
+{
+    return this->_path;
+}

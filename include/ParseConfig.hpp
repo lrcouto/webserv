@@ -41,7 +41,7 @@ class ParseConfig {
 		std::string				findDirective(std::string line);
 		void    				processServer(std::string serverBlock);
 		void 					splitOffLocationBlocks(std::string &serverBlock, Server &server);
-		void 					processLocation(std::string locationBlock); //pass location reference
+		void 					processLocation(std::string locationBlock, Location &location);
 
 	    class ParseSyntaxError : public std::exception
 		{

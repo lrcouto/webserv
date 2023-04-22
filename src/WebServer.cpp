@@ -49,11 +49,18 @@ void WebServer::run(const std::string &inputFilePath)
 
     this->_serverData = this->_parseConfig.execute(inputFilePath);
 
+    // vvvvv PRINTING FOR TESTING - REMOVE THIS BLOCK vvvvv
+
     for (size_t i = 0; i < this->_serverData.size(); i++)
     {
         std::vector<std::string> value = this->_serverData[i].getValue("listen");
-        std::cout << "\e[0;32m" << value[0] << "\e[0m" << std::endl;
+        std::cout << "\e[1;32m" << value[0] << "\e[0m" << std::endl;
+        std::vector<Location> locations = this->_serverData[i].getLocations();
+        for (size_t i = 0; i < locations.size(); i++)
+            std::cout << "\e[0;32m" << locations[i].getPath() << "\e[0m" << std::endl;
     }
+
+    // ^^^^^ PRINTING FOR TESTING - REMOVE THIS BLOCK ^^^^^
 
     for(int i = 0; i < 3; i++) // hardcoded number of sockets because I have no input file yet.
     {

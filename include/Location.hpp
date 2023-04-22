@@ -17,6 +17,7 @@
 
 class Location {
     private:
+        std::string                                      _path;
         std::map<std::string, std::vector<std::string> > _locationData;
     
     public:
@@ -27,6 +28,8 @@ class Location {
 
         void                        insertLocationData(std::pair<std::string, std::vector<std::string> > directive);
         std::vector<std::string>    getValue(std::string key);    
+		void						setPath(std::string path);
+		std::string					getPath(void);
 
         class DuplicateDirectiveError : public std::exception
 		{
