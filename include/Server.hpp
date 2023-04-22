@@ -14,11 +14,12 @@
 # define SERVER_HPP
 
 # include "libs.hpp"
+# include "Location.hpp"
 
 class Server {
     private:
-        std::map<std::string, std::vector<std::string> > _serverData;
-        // std::vector<Location>                         _locations;
+        std::map<std::string, std::vector<std::string> >    _serverData;
+        std::vector<Location>                               _locations;
     
     public:
     	Server(void);
@@ -27,7 +28,8 @@ class Server {
 		// Server &operator=(Server const &other);
 
         void                        insertServerData(std::pair<std::string, std::vector<std::string> > directive);
-        std::vector<std::string>    getValue(std::string key);    
+        std::vector<std::string>    getValue(std::string key);
+        void                        insertLocation(Location location);
 
         class DuplicateDirectiveError : public std::exception
 		{

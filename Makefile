@@ -31,6 +31,7 @@ SRCS		=	$(DIR_SRCS)/main.cpp \
 				$(DIR_SRCS)/ParseDirectives.cpp \
 				$(DIR_SRCS)/ftstring.cpp \
 				$(DIR_SRCS)/Server.cpp \
+				$(DIR_SRCS)/Location.cpp \
 
 BUILD		=	$(subst $(DIR_SRCS), $(DIR_BUILD), $(SRCS:.cpp=.o))
 

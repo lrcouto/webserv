@@ -139,10 +139,8 @@ std::string ParseConfig::findDirective(std::string line)
 void ParseConfig::processServer(std::string serverBlock)
 {
     serverBlock = ftstring::trim(serverBlock, " {}\t\v\f\r");
-    std::cout << "\nBLOCK START\n" <<  serverBlock << "\nBLOCK END\n" <<  std::endl;
-
     Server server;
-
+    splitOffLocationBlocks(serverBlock, server);
     std::istringstream iss(serverBlock);
     std::string line, key;
 
@@ -157,4 +155,27 @@ void ParseConfig::processServer(std::string serverBlock)
 
     this->_serverData.push_back(server);
 }
+
+void ParseConfig::splitOffLocationBlocks(std::string &serverBlock, Server &server)
+{
+    Location location;
+    std::string delimiter = "location ";
+    size_t pos = 0;
+
+    while ((pos = serverBlock.find(delimiter, pos)) != std::string::npos) {
+        size_t blockStart = pos;
+        size_t blockEnd = serverBlock.find_first_of('}', pos);
+
+        processLocation(serverBlock.substr(blockStart, blockEnd - blockStart + 1)); //pass location reference
+        server.insertLocation(location);
+        serverBlock.erase(blockStart, blockEnd - blockStart + 1);
+        pos = blockStart;
+    }
+}
+
+void ParseConfig::processLocation(std::string locationBlock) //pass location reference
+{
+    std::cout << "\nBLOCK START\n" << locationBlock << "\nBLOCK END\n" <<  std::endl;
+}
+
 
