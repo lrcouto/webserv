@@ -49,3 +49,8 @@ std::vector<std::string>    Server::getValue(std::string key)
     
     return value;
 }
+
+void    Server::insertLocation(Location location)
+{
+    this->_locations.push_back(location);
+}
