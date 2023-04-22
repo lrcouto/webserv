@@ -30,6 +30,7 @@ class Server {
         void                        insertServerData(std::pair<std::string, std::vector<std::string> > directive);
         std::vector<std::string>    getValue(std::string key);
         void                        insertLocation(Location location);
+		std::vector<Location>		getLocations(void);
 
         class DuplicateDirectiveError : public std::exception
 		{

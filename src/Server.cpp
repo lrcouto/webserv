@@ -54,3 +54,8 @@ void    Server::insertLocation(Location location)
 {
     this->_locations.push_back(location);
 }
+
+std::vector<Location>    Server::getLocations(void)
+{
+    return this->_locations;
+}
