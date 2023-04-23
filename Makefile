@@ -18,7 +18,7 @@ CC	= clang++
 
 RM	= rm -rf
 
-CFLAGS	= -Wall -Wextra -Werror -g -std=c++98
+CFLAGS	= -Wall -Wextra -Werror -std=c++98 
 
 DIR_SRCS	=	src
 DIR_BUILD	=	build
@@ -36,6 +36,10 @@ endif
 
 ifeq ($(SANITIZE_L),true)
 	CFLAGS += -fsanitize=leak -fno-omit-frame-pointer
+endif
+
+ifeq ($(DEBUG),true)
+	CFLAGS += -g -fno-limit-debug-info
 endif
 
 $(NAME): $(BUILD)
