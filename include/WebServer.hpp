@@ -18,6 +18,7 @@
 # include "Poll.hpp"
 # include "ParseConfig.hpp"
 # include "Server.hpp"
+# include "Location.hpp"
 
 class WebServer {
     private:

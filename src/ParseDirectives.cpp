@@ -68,14 +68,6 @@ ParseDirectives::DirectiveType ParseDirectives::parseListen(const std::string &l
     return data;
 }
 
-ParseDirectives::DirectiveType ParseDirectives::parseLocation(const std::string &line)
-{
-    ParseDirectives::DirectiveType data;
-    data.first = "location";
-    data.second.push_back(line);
-    return data;
-}
-
 ParseDirectives::DirectiveType ParseDirectives::parseRedirect(const std::string &line)
 {
     ParseDirectives::DirectiveType data;

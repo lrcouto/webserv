@@ -26,7 +26,6 @@ class ParseDirectives {
         static DirectiveType parseIndex(std::string const &line);
         static DirectiveType parseLimitExcept(std::string const &line);
         static DirectiveType parseListen(std::string const &line);
-        static DirectiveType parseLocation(std::string const &line);
         static DirectiveType parseRedirect(std::string const &line);
         static DirectiveType parseRoot(std::string const &line);
         static DirectiveType parseServerName(std::string const &line);

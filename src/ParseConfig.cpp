@@ -36,7 +36,6 @@ void ParseConfig::initConfigFns(void)
     this->_parseConfigFns["index"]                = ParseDirectives::parseIndex;
     this->_parseConfigFns["limit_except"]         = ParseDirectives::parseLimitExcept;
     this->_parseConfigFns["listen"]               = ParseDirectives::parseListen;
-    this->_parseConfigFns["location"]             = ParseDirectives::parseLocation;
     this->_parseConfigFns["redirect"]             = ParseDirectives::parseRedirect;
     this->_parseConfigFns["root"]                 = ParseDirectives::parseRoot;
     this->_parseConfigFns["server_name"]          = ParseDirectives::parseServerName;
@@ -138,11 +137,9 @@ std::string ParseConfig::findDirective(std::string line)
 
 void ParseConfig::processServer(std::string serverBlock)
 {
-    serverBlock = ftstring::trim(serverBlock, " {}\t\v\f\r");
-    std::cout << "\nBLOCK START\n" <<  serverBlock << "\nBLOCK END\n" <<  std::endl;
-
     Server server;
-
+    splitOffLocationBlocks(serverBlock, server);
+    serverBlock = ftstring::trim(serverBlock, " {}\n\t\v\f\r");
     std::istringstream iss(serverBlock);
     std::string line, key;
 
@@ -154,7 +151,50 @@ void ParseConfig::processServer(std::string serverBlock)
             server.insertServerData(it->second(line));
         }
     }
-
+    std::cout << "\e[0;34m" << "\nSERVER BLOCK START\n\n" << serverBlock << "\n\nSERVER BLOCK END\n" << "\e[0m" <<  std::endl; // <<< PRINTING FOR TESTING - REMOVE THIS LINE
     this->_serverData.push_back(server);
 }
 
+void ParseConfig::splitOffLocationBlocks(std::string &serverBlock, Server &server)
+{
+    std::string delimiter = "location ";
+    size_t pos = 0;
+
+    while ((pos = serverBlock.find(delimiter, pos)) != std::string::npos) {
+        size_t blockStart = pos;
+        size_t blockEnd = serverBlock.find_first_of('}', pos);
+
+        Location location;
+        processLocation(serverBlock.substr(blockStart, blockEnd - blockStart + 1), location);
+        server.insertLocation(location);
+        serverBlock.erase(blockStart, blockEnd - blockStart + 1);
+        pos = blockStart;
+    }
+}
+
+void ParseConfig::processLocation(std::string locationBlock, Location &location)
+{
+    std::cout << "\e[0;33m" << "\nLOCATION BLOCK START\n\n" << locationBlock << "\n\nLOCATION BLOCK END\n" << "\e[0m" <<  std::endl; // <<< PRINTING FOR TESTING - REMOVE THIS LINE
+
+    
+    std::istringstream iss(locationBlock);
+    std::string line, key, token;
+
+    std::getline(iss, line);
+    std::istringstream firstLine(line);
+
+    std::getline(firstLine, token, ' ');
+    std::getline(firstLine, token, ' ');
+    location.setPath(token);
+
+    std::cout << "\e[0;35m" << "\nPATH START\n\n" << location.getPath() << "\n\nPATH END\n" << "\e[0m" <<  std::endl; // <<< PRINTING FOR TESTING - REMOVE THIS LINE
+
+    while (std::getline(iss, line)) {
+        std::map<std::string, _parseConfigFn>::iterator it;
+        key = findDirective(line);
+        it  = this->_parseConfigFns.find(key);
+        if (it != this->_parseConfigFns.end()) {
+            location.insertLocationData(it->second(line));
+        }
+    }
+}

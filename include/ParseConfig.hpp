@@ -16,6 +16,7 @@
 # include "libs.hpp"
 # include "ParseDirectives.hpp"
 # include "Server.hpp"
+# include "Location.hpp"
 
 class ParseConfig {
     private:
@@ -39,6 +40,8 @@ class ParseConfig {
         bool    				checkServerBlock(void);
 		std::string				findDirective(std::string line);
 		void    				processServer(std::string serverBlock);
+		void 					splitOffLocationBlocks(std::string &serverBlock, Server &server);
+		void 					processLocation(std::string locationBlock, Location &location);
 
 	    class ParseSyntaxError : public std::exception
 		{
