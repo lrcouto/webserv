@@ -19,6 +19,7 @@
 # include "ParseConfig.hpp"
 # include "Server.hpp"
 # include "Location.hpp"
+# include "Request.hpp"
 
 class WebServer {
     private:

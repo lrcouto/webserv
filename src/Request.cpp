@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/23 21:44:28 by lcouto            #+#    #+#             */
-/*   Updated: 2023/04/23 22:04:12 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/04/24 00:36:08 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,11 +34,11 @@ Request::Request(Request const &other)
 }
 
 Request &Request::operator=(Request const &other)
-{   	
+{
     if (this != &other) {
-		std::cout << "Request copy assignment operator called" << std::endl;
-	}
-	return (*this);
+        this->_raw = other._raw;
+    }
+    return *this;
 }
 
 std::ostream &operator<<(std::ostream &out, Request const &in) 

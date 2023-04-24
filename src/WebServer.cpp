@@ -45,7 +45,7 @@ void WebServer::run(const std::string &inputFilePath)
     Socket *client;
     int ports[3] = {3007, 3008, 3009};
     std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world! "; // hardcoded test message.
-    std::string request;
+    std::string rawRequest;
 
     this->_serverData = this->_parseConfig.execute(inputFilePath);
 
@@ -93,17 +93,17 @@ void WebServer::run(const std::string &inputFilePath)
                 else
                 {
                     client = this->_poll.getSocket(i);
-                    request.clear();
+                    rawRequest.clear();
                     std::cout << "Receiving request through client fd " << client->getFd() << std::endl;
-                    if (client->receive(request) < 0)
+                    if (client->receive(rawRequest) < 0)
                     {
                         std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd() << "\e[0m" << std::endl;
                         this->_poll.removeSocket(client);
                         continue;
                     }
-                    if (!request.empty())
+                    if (!rawRequest.empty())
                     {
-                        std::cout << "\e[0;32m" << request << "\e[0m" << std::endl;
+                        Request request(rawRequest);
                         if (client->send(hello) <= 0) // will have to implement parsing the request and building the appropriate response.
                             std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd() << "\e[0m" << std::endl;
                     }
