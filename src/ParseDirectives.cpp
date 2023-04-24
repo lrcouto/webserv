@@ -92,9 +92,7 @@ ParseDirectives::DirectiveType ParseDirectives::parseIndex(std::string const &li
     tokens = ftstring::split(line, ' ');
     if (tokens.size() < 2)
         throw std::exception(); // TODO: Create custom exception
-    std::vector<std::string>::const_iterator it;
-    for (it = tokens.begin() + 1; it != tokens.end(); ++it)
-        arguments.push_back(*it);
+    arguments.insert(arguments.begin(), (tokens.begin() + 1), tokens.end());
     return (std::make_pair(tokens[0], arguments));
 }
 
@@ -157,16 +155,28 @@ ParseDirectives::DirectiveType ParseDirectives::parseRedirect(std::string const 
     return (std::make_pair(line, std::vector<std::string>()));
 }
 
-// TODO: Implement this function
 ParseDirectives::DirectiveType ParseDirectives::parseRoot(std::string const &line)
 {
-    return (std::make_pair(line, std::vector<std::string>()));
+    std::vector<std::string> tokens, arguments;
+
+    tokens = ftstring::split(line, ' ');
+    if (tokens.size() != 2)
+        throw std::exception(); // TODO: Create custom exception
+    // TODO: Maybe check wether the given directory exists
+    arguments.push_back(tokens[1]);
+    return (std::make_pair(tokens[0], arguments));
 }
 
-// TODO: Implement this function
 ParseDirectives::DirectiveType ParseDirectives::parseServerName(std::string const &line)
 {
-    return (std::make_pair(line, std::vector<std::string>()));
+    std::vector<std::string> tokens, arguments;
+
+    tokens = ftstring::split(line, ' ');
+    if (tokens.size() < 2)
+        throw std::exception(); // TODO: Create custom exception
+    // TODO: Maybe add syntax check for server_name, i.e "xyz." is not a valid domain
+    arguments.insert(arguments.begin(), (tokens.begin() + 1), tokens.end());
+    return (std::make_pair(tokens[0], arguments));
 }
 
 bool ParseDirectives::_isValidIp(std::string const &ip)
