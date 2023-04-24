@@ -25,6 +25,7 @@ ParseDirectives::DirectiveType ParseDirectives::parseAutoindex(std::string const
     return (std::make_pair(tokens[0], arguments));
 }
 
+// TODO: Implement this function
 ParseDirectives::DirectiveType ParseDirectives::parseCgi(std::string const &line)
 {
     return (std::make_pair(line, std::vector<std::string>()));
@@ -144,21 +145,25 @@ ParseDirectives::DirectiveType ParseDirectives::parseListen(std::string const &l
     return (std::make_pair(tokens[0], arguments));
 }
 
+// TODO: Implement this function
 ParseDirectives::DirectiveType ParseDirectives::parseLocation(std::string const &line)
 {
     return (std::make_pair(line, std::vector<std::string>()));
 }
 
+// TODO: Implement this function
 ParseDirectives::DirectiveType ParseDirectives::parseRedirect(std::string const &line)
 {
     return (std::make_pair(line, std::vector<std::string>()));
 }
 
+// TODO: Implement this function
 ParseDirectives::DirectiveType ParseDirectives::parseRoot(std::string const &line)
 {
     return (std::make_pair(line, std::vector<std::string>()));
 }
 
+// TODO: Implement this function
 ParseDirectives::DirectiveType ParseDirectives::parseServerName(std::string const &line)
 {
     return (std::make_pair(line, std::vector<std::string>()));
