@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/20 18:37:02 by maolivei          #+#    #+#             */
-/*   Updated: 2023/04/20 21:15:23 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/04/24 12:09:54 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,13 @@ std::vector<std::string> split(std::string const &str, char delimiter)
 bool is_positive_integer(std::string const &str)
 {
     return (!str.empty() && str.find_first_not_of("0123456789") == std::string::npos);
+}
+
+int strtoi(std::string const &str)
+{
+    size_t n;
+    std::istringstream(str) >> n;
+    return (n);
 }
 
 } /* ftstring */

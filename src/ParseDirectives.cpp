@@ -119,7 +119,29 @@ ParseDirectives::DirectiveType ParseDirectives::parseLimitExcept(std::string con
 
 ParseDirectives::DirectiveType ParseDirectives::parseListen(std::string const &line)
 {
-    return (std::make_pair(line, std::vector<std::string>()));
+    std::vector<std::string> tokens, arguments, splitIpPort;
+
+    tokens = ftstring::split(line, ' ');
+    if (tokens.size() != 2)
+        throw std::exception(); // TODO: Create custom exception
+    splitIpPort = ftstring::split(tokens[1], ':');
+    if (splitIpPort.size() > 2)
+        throw std::exception(); // TODO: Create custom exception
+    if (splitIpPort.size() == 1 && (_isValidIp(splitIpPort[0]) || _isValidPort(splitIpPort[0]))) {
+        if (splitIpPort[0] == "localhost")
+            arguments.push_back("127.0.0.1");
+        else
+            arguments.push_back(splitIpPort[0]);
+    } else {
+        if (!_isValidIp(splitIpPort[0]) || !_isValidPort(splitIpPort[1]))
+            throw std::exception(); // TODO: Create custom exception
+        if (splitIpPort[0] == "localhost")
+            arguments.push_back("127.0.0.1");
+        else
+            arguments.push_back(splitIpPort[0]);
+        arguments.push_back(splitIpPort[1]);
+    }
+    return (std::make_pair(tokens[0], arguments));
 }
 
 ParseDirectives::DirectiveType ParseDirectives::parseLocation(std::string const &line)
@@ -140,4 +162,30 @@ ParseDirectives::DirectiveType ParseDirectives::parseRoot(std::string const &lin
 ParseDirectives::DirectiveType ParseDirectives::parseServerName(std::string const &line)
 {
     return (std::make_pair(line, std::vector<std::string>()));
+}
+
+bool ParseDirectives::_isValidIp(std::string const &ip)
+{
+    std::vector<std::string> splitIp;
+
+    if (ip == "localhost")
+        return (true);
+    splitIp = ftstring::split(ip, '.');
+    if (splitIp.size() != 4)
+        return (false);
+    std::vector<std::string>::const_iterator it;
+    for (it = splitIp.begin(); it != splitIp.end(); ++it) {
+        int octet = ftstring::strtoi(*it);
+        if (!ftstring::is_positive_integer(*it) || octet < 0 || octet > 255)
+            return (false);
+    }
+    return (true);
+}
+
+bool ParseDirectives::_isValidPort(std::string const &ip)
+{
+    int port = ftstring::strtoi(ip);
+    if (!ftstring::is_positive_integer(ip) || port < 1 || port > 65535)
+        return (false);
+    return (true);
 }
