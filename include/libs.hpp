@@ -31,10 +31,16 @@
 
 # include <algorithm>        // STL algorithms.
 # include <csignal>          // Signal handling.
+# include <fstream>          // File stream.
 # include <iostream>         // Standard input/output operations.
+# include <map>              // Map container class.
 # include <sstream>          // Parsing strings.
 # include <string>           // String data type and its operations.
+# include <utility>          // Utility functions and templates.
 # include <vector>           // Vector container class.
 
+// LOCAL LIBRARIES
+
+# include "ftstring.hpp"     // String manipulation functions.
 
 #endif
