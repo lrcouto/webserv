@@ -25,18 +25,19 @@ Location::~Location(void)
 void    Location::insertLocationData(std::pair<std::string, std::vector<std::string> > directive)
 {
     bool    isUniqueDirective = (directive.first == "root" || directive.first == "autoindex");
-    bool    directiveNotOnMap = (this->_locationData.find(directive.first) != this->_locationData.end());
+    bool    isDirectiveOnMap = (this->_locationData.find(directive.first) != this->_locationData.end());
 
-    if (isUniqueDirective)
-        if (directiveNotOnMap)
+    if (isUniqueDirective) {
+        if (isDirectiveOnMap)
             throw (DuplicateDirectiveError());
         else
             this->_locationData.insert(directive);
-    else
-        if (directiveNotOnMap)
+    } else {
+        if (isDirectiveOnMap)
             this->_locationData.insert(directive);
         else
             this->_locationData[directive.first].insert(this->_locationData[directive.first].begin(), directive.second.begin(), directive.second.end());
+    }
 }
 
 std::vector<std::string>    Location::getValue(std::string key)
