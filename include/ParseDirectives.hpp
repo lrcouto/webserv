@@ -30,6 +30,10 @@ class ParseDirectives {
         static DirectiveType parseRedirect(std::string const &line);
         static DirectiveType parseRoot(std::string const &line);
         static DirectiveType parseServerName(std::string const &line);
+
+    private:
+        static bool _isValidIp(std::string const &ip);
+        static bool _isValidPort(std::string const &ip);
 };
 
 #endif
