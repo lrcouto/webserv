@@ -99,11 +99,11 @@ void WebServer::run(const std::string &inputFilePath)
                     {
                         std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd() << "\e[0m" << std::endl;
                         this->_poll.removeSocket(client);
-                        client->close();
                         continue;
                     }
                     if (!request.empty())
                     {
+                        std::cout << "\e[0;32m" << request << "\e[0m" << std::endl;
                         if (client->send(hello) <= 0) // will have to implement parsing the request and building the appropriate response.
                             std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd() << "\e[0m" << std::endl;
                     }
