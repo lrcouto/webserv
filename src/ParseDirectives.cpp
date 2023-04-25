@@ -126,11 +126,19 @@ ParseDirectives::DirectiveType ParseDirectives::parseListen(std::string const &l
     splitIpPort = ftstring::split(tokens[1], ':');
     if (splitIpPort.size() > 2)
         throw std::exception(); // TODO: Create custom exception
-    if (splitIpPort.size() == 1 && (_isValidIp(splitIpPort[0]) || _isValidPort(splitIpPort[0]))) {
-        if (splitIpPort[0] == "localhost")
+    if (splitIpPort.size() == 1) {
+        if (_isValidIp(splitIpPort[0])) {
+            if (splitIpPort[0] == "localhost")
+                arguments.push_back("127.0.0.1");
+            else
+                arguments.push_back(splitIpPort[0]);
+            arguments.push_back("8080");
+        } else if (_isValidPort(splitIpPort[0])) {
             arguments.push_back("127.0.0.1");
-        else
             arguments.push_back(splitIpPort[0]);
+        } else {
+            throw std::exception(); // TODO: Create custom exception
+        }
     } else {
         if (!_isValidIp(splitIpPort[0]) || !_isValidPort(splitIpPort[1]))
             throw std::exception(); // TODO: Create custom exception
