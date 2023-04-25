@@ -25,6 +25,7 @@ Location::~Location(void)
 void    Location::insertLocationData(std::pair<std::string, std::vector<std::string> > directive)
 {
     bool    isUniqueDirective = (directive.first == "root" || directive.first == "autoindex");
+    bool    isDirectiveNotAllowed = (directive.first == "listen" || directive.first == "server_name" || directive.first == "cgi" || directive.first == "redirect");
     bool    isDirectiveOnMap = (this->_locationData.find(directive.first) != this->_locationData.end());
 
     if (isUniqueDirective) {
@@ -32,6 +33,8 @@ void    Location::insertLocationData(std::pair<std::string, std::vector<std::str
             throw (DuplicateDirectiveError());
         else
             this->_locationData.insert(directive);
+    } else if (isDirectiveNotAllowed) {
+        throw (DirectiveNotAllowedError());
     } else {
         if (isDirectiveOnMap)
             this->_locationData.insert(directive);
