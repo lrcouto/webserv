@@ -24,7 +24,7 @@ class WebServer {
     private:
         Poll                    _poll;
         ParseConfig             _parseConfig;
-        std::vector<Server>    _serverData;
+        std::vector<Server>     _serverData;
 
 	public:
 		WebServer(void);

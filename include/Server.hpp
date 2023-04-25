@@ -41,6 +41,15 @@ class Server {
 				}
 		};
 
+		class DirectiveNotAllowedError : public std::exception
+		{
+			public:
+				virtual const char* what() const throw()
+				{
+					return ("\e[0;31mError: directive not allowed inside server block'.\e[0m");
+				}
+		};
+
 };
 
 #endif
