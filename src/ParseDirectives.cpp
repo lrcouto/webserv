@@ -84,7 +84,7 @@ ParseDirectives::DirectiveType ParseDirectives::parseErrorPage(std::string const
     if (tokens.size() < 3)
         throw std::exception(); // TODO: Create custom exception
     std::vector<std::string>::const_iterator it;
-    for (it = tokens.begin() + 1; it != tokens.end() - 1; ++it) {
+    for (it = (tokens.begin() + 1); it != (tokens.end() - 1); ++it) {
         if (std::find(http_codes.begin(), http_codes.end(), *it) != http_codes.end()) {
             arguments.push_back(*it);
         } else {
@@ -190,7 +190,17 @@ ParseDirectives::DirectiveType ParseDirectives::parseServerName(std::string cons
     tokens = ftstring::split(line, ' ');
     if (tokens.size() < 2)
         throw std::exception(); // TODO: Create custom exception
-    // TODO: Maybe add syntax check for server_name, i.e "xyz." is not a valid domain
+    std::vector<std::string>::const_iterator it;
+    for (it = (tokens.begin() + 1); it != tokens.end(); ++it) {
+        if (*((*it).begin()) == '.' || *((*it).end() - 1) == '.')
+            throw std::exception(); // TODO: Create custom exception
+        if ((*it).find("..") != std::string::npos)
+            throw std::exception(); // TODO: Create custom exception
+        std::string::const_iterator strIt;
+        for (strIt = (*it).begin(); strIt != (*it).end(); ++strIt)
+            if (!std::isalnum(*strIt) && *strIt != '.')
+                throw std::exception(); // TODO: Create custom exception
+    }
     arguments.insert(arguments.begin(), (tokens.begin() + 1), tokens.end());
     return (std::make_pair(tokens[0], arguments));
 }
