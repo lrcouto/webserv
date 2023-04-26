@@ -25,10 +25,19 @@ ParseDirectives::DirectiveType ParseDirectives::parseAutoindex(std::string const
     return (std::make_pair(tokens[0], arguments));
 }
 
-// TODO: Implement this function
 ParseDirectives::DirectiveType ParseDirectives::parseCgi(std::string const &line)
 {
-    return (std::make_pair(line, std::vector<std::string>()));
+    std::vector<std::string> tokens, arguments;
+
+    tokens = ftstring::split(line, ' ');
+    if (tokens.size() != 3)
+        throw std::exception(); // TODO: Create custom exception
+    if (!_isValidCgiExtension(tokens[1]))
+        throw std::exception(); // TODO: Create custom exception
+    if (!_isValidCgiExecutable(tokens[2]))
+        throw std::exception(); // TODO: Create custom exception
+    arguments.insert(arguments.begin(), (tokens.begin() + 1), tokens.end());
+    return (std::make_pair(tokens[0], arguments));
 }
 
 ParseDirectives::DirectiveType ParseDirectives::parseClientMaxBodySize(std::string const &line)
@@ -152,12 +161,6 @@ ParseDirectives::DirectiveType ParseDirectives::parseListen(std::string const &l
 }
 
 // TODO: Implement this function
-ParseDirectives::DirectiveType ParseDirectives::parseLocation(std::string const &line)
-{
-    return (std::make_pair(line, std::vector<std::string>()));
-}
-
-// TODO: Implement this function
 ParseDirectives::DirectiveType ParseDirectives::parseRedirect(std::string const &line)
 {
     return (std::make_pair(line, std::vector<std::string>()));
@@ -211,4 +214,31 @@ bool ParseDirectives::_isValidPort(std::string const &ip)
     if (!ftstring::is_positive_integer(ip) || port < 1 || port > 65535)
         return (false);
     return (true);
+}
+
+bool ParseDirectives::_isValidCgiExtension(std::string const &extension)
+{
+    if (extension[0] != '.' || !extension[1])
+        return (false);
+    std::string::const_iterator it;
+    for (it = extension.begin() + 1; it != extension.end(); ++it)
+        if (!::isalnum(*it))
+            return (false);
+    return (true);
+}
+
+bool ParseDirectives::_isValidCgiExecutable(std::string const &executable)
+{
+    std::vector<std::string> splitPath;
+
+    if (executable.find_first_of('/') != std::string::npos && access(executable.c_str(), X_OK) != 0)
+        return (false);
+    splitPath = ftstring::split(std::getenv("PATH"), ':');
+    std::vector<std::string>::const_iterator it;
+    for (it = splitPath.begin(); it != splitPath.end(); ++it) {
+        std::string binary((*it) + "/" + executable);
+        if (access(binary.c_str(), X_OK) == 0)
+            return (true);
+    }
+    return (false);
 }

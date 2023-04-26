@@ -33,6 +33,8 @@ class ParseDirectives {
     private:
         static bool _isValidIp(std::string const &ip);
         static bool _isValidPort(std::string const &ip);
+        static bool _isValidCgiExtension(std::string const &extension);
+        static bool _isValidCgiExecutable(std::string const &executable);
 };
 
 #endif
