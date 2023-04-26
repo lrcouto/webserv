@@ -26,6 +26,8 @@
 # include <sys/socket.h>     // Socket-related system calls.
 # include <sys/types.h>      // System types like pid_t and size_t.
 # include <unistd.h>         // System calls like read, write, and close.
+# include <cstdlib>          // Standard library implementation of C's stdlib.
+# include <cctype>          // Standard library implementation of C's ctype.
 
 // C++ LIBRARIES
 

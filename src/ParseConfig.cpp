@@ -36,7 +36,6 @@ void ParseConfig::initConfigFns(void)
     this->_parseConfigFns["index"]                = ParseDirectives::parseIndex;
     this->_parseConfigFns["limit_except"]         = ParseDirectives::parseLimitExcept;
     this->_parseConfigFns["listen"]               = ParseDirectives::parseListen;
-    this->_parseConfigFns["location"]             = ParseDirectives::parseLocation;
     this->_parseConfigFns["redirect"]             = ParseDirectives::parseRedirect;
     this->_parseConfigFns["root"]                 = ParseDirectives::parseRoot;
     this->_parseConfigFns["server_name"]          = ParseDirectives::parseServerName;
