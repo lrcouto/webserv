@@ -160,10 +160,15 @@ ParseDirectives::DirectiveType ParseDirectives::parseListen(std::string const &l
     return (std::make_pair(tokens[0], arguments));
 }
 
-// TODO: Implement this function
 ParseDirectives::DirectiveType ParseDirectives::parseRedirect(std::string const &line)
 {
-    return (std::make_pair(line, std::vector<std::string>()));
+    std::vector<std::string> tokens, arguments;
+
+    tokens = ftstring::split(line, ' ');
+    if (tokens.size() < 2)
+        throw std::exception(); // TODO: Create custom exception
+    arguments.insert(arguments.begin(), (tokens.begin() + 1), tokens.end());
+    return (std::make_pair(tokens[0], arguments));
 }
 
 ParseDirectives::DirectiveType ParseDirectives::parseRoot(std::string const &line)
