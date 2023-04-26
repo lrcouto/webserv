@@ -165,9 +165,9 @@ ParseDirectives::DirectiveType ParseDirectives::parseRedirect(std::string const 
     std::vector<std::string> tokens, arguments;
 
     tokens = ftstring::split(line, ' ');
-    if (tokens.size() < 2)
+    if (tokens.size() != 2)
         throw std::exception(); // TODO: Create custom exception
-    arguments.insert(arguments.begin(), (tokens.begin() + 1), tokens.end());
+    arguments.push_back(tokens[1]);
     return (std::make_pair(tokens[0], arguments));
 }
 
