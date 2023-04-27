@@ -151,7 +151,6 @@ void ParseConfig::processServer(std::string serverBlock)
             server.insertServerData(it->second(line));
         }
     }
-    std::cout << "\e[0;34m" << "\nSERVER BLOCK START\n\n" << serverBlock << "\n\nSERVER BLOCK END\n" << "\e[0m" <<  std::endl; // <<< PRINTING FOR TESTING - REMOVE THIS LINE
     this->_serverData.push_back(server);
 }
 
@@ -174,9 +173,6 @@ void ParseConfig::splitOffLocationBlocks(std::string &serverBlock, Server &serve
 
 void ParseConfig::processLocation(std::string locationBlock, Location &location)
 {
-    std::cout << "\e[0;33m" << "\nLOCATION BLOCK START\n\n" << locationBlock << "\n\nLOCATION BLOCK END\n" << "\e[0m" <<  std::endl; // <<< PRINTING FOR TESTING - REMOVE THIS LINE
-
-    
     std::istringstream iss(locationBlock);
     std::string line, key, token;
 
@@ -186,8 +182,6 @@ void ParseConfig::processLocation(std::string locationBlock, Location &location)
     std::getline(firstLine, token, ' ');
     std::getline(firstLine, token, ' ');
     location.setPath(token);
-
-    std::cout << "\e[0;35m" << "\nPATH START\n\n" << location.getPath() << "\n\nPATH END\n" << "\e[0m" <<  std::endl; // <<< PRINTING FOR TESTING - REMOVE THIS LINE
 
     while (std::getline(iss, line)) {
         std::map<std::string, _parseConfigFn>::iterator it;

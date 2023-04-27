@@ -45,22 +45,9 @@ void WebServer::run(const std::string &inputFilePath)
     Socket *client;
     int ports[3] = {3007, 3008, 3009};
     std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world! "; // hardcoded test message.
-    std::string request;
+    std::string rawRequest;
 
     this->_serverData = this->_parseConfig.execute(inputFilePath);
-
-    // vvvvv PRINTING FOR TESTING - REMOVE THIS BLOCK vvvvv
-
-    for (size_t i = 0; i < this->_serverData.size(); i++)
-    {
-        std::vector<std::string> value = this->_serverData[i].getValue("listen");
-        std::cout << "\e[1;32m" << value[0] << "\e[0m" << std::endl;
-        std::vector<Location> locations = this->_serverData[i].getLocations();
-        for (size_t i = 0; i < locations.size(); i++)
-            std::cout << "\e[0;32m" << locations[i].getPath() << "\e[0m" << std::endl;
-    }
-
-    // ^^^^^ PRINTING FOR TESTING - REMOVE THIS BLOCK ^^^^^
 
     for(int i = 0; i < 3; i++) // hardcoded number of sockets because I have no input file yet.
     {
@@ -93,19 +80,22 @@ void WebServer::run(const std::string &inputFilePath)
                 else
                 {
                     client = this->_poll.getSocket(i);
-                    request.clear();
+                    rawRequest.clear();
                     std::cout << "Receiving request through client fd " << client->getFd() << std::endl;
-                    if (client->receive(request) < 0)
+                    if (client->receive(rawRequest) < 0)
                     {
                         std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd() << "\e[0m" << std::endl;
                         this->_poll.removeSocket(client);
-                        client->close();
                         continue;
                     }
-                    if (!request.empty())
+                    if (!rawRequest.empty())
                     {
+                        Request request(rawRequest);
+                        request.parse();
+                        std::cout << request << std::endl;
                         if (client->send(hello) <= 0) // will have to implement parsing the request and building the appropriate response.
                             std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd() << "\e[0m" << std::endl;
+                        request.clear();
                     }
                     this->_poll.removeSocket(client);
                 }
