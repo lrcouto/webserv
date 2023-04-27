@@ -49,19 +49,6 @@ void WebServer::run(const std::string &inputFilePath)
 
     this->_serverData = this->_parseConfig.execute(inputFilePath);
 
-    // vvvvv PRINTING FOR TESTING - REMOVE THIS BLOCK vvvvv
-
-    for (size_t i = 0; i < this->_serverData.size(); i++)
-    {
-        std::vector<std::string> value = this->_serverData[i].getValue("listen");
-        std::cout << "\e[1;32m" << value[0] << "\e[0m" << std::endl;
-        std::vector<Location> locations = this->_serverData[i].getLocations();
-        for (size_t i = 0; i < locations.size(); i++)
-            std::cout << "\e[0;32m" << locations[i].getPath() << "\e[0m" << std::endl;
-    }
-
-    // ^^^^^ PRINTING FOR TESTING - REMOVE THIS BLOCK ^^^^^
-
     for(int i = 0; i < 3; i++) // hardcoded number of sockets because I have no input file yet.
     {
         listener = new Socket(ports[i]);
@@ -104,8 +91,11 @@ void WebServer::run(const std::string &inputFilePath)
                     if (!rawRequest.empty())
                     {
                         Request request(rawRequest);
+                        request.parse();
+                        std::cout << request << std::endl;
                         if (client->send(hello) <= 0) // will have to implement parsing the request and building the appropriate response.
                             std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd() << "\e[0m" << std::endl;
+                        request.clear();
                     }
                     this->_poll.removeSocket(client);
                 }
