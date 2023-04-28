@@ -18,7 +18,8 @@ CC	= clang++
 
 RM	= rm -rf
 
-CFLAGS	= -Wall -Wextra -Werror -g -std=c++98
+CFLAGS	= -Wall -Wextra -Werror -std=c++98
+
 
 DIR_SRCS	=	src
 DIR_BUILD	=	build
