@@ -55,6 +55,10 @@ std::vector<Server> ParseConfig::execute(std::string inputFilePath)
     std::stringstream   content;
     std::vector<Server> serverData;
 
+    if (!inputFile.is_open()) {
+        throw (CannotReadFileError());
+    }
+
     content << inputFile.rdbuf();
     this->_inputFile = content.str();
     inputFile.close();
@@ -117,9 +121,8 @@ bool ParseConfig::checkCurlyBracesMatch(void)
     return (true);
 }
 
-std::string ParseConfig::findDirective(std::string line)
+std::string ParseConfig::findDirective(std::string &line)
 {
-    line = ftstring::reduce(line, " \f\n\r\t\v", " ");
     for (std::vector<std::string>::const_iterator it = this->_directives.begin();
          it != this->_directives.end();
          ++it) {
@@ -145,6 +148,7 @@ void ParseConfig::processServer(std::string serverBlock)
 
     while (std::getline(iss, line)) {
         std::map<std::string, _parseConfigFn>::iterator it;
+        line = ftstring::reduce(line, " \f\n\r\t\v");
         key = findDirective(line);
         it  = this->_parseConfigFns.find(key);
         if (it != this->_parseConfigFns.end()) {
@@ -184,6 +188,7 @@ void ParseConfig::processLocation(std::string locationBlock, Location &location)
     location.setPath(token);
 
     while (std::getline(iss, line)) {
+        line = ftstring::trim(line, " {}\n\t\v\f\r");
         std::map<std::string, _parseConfigFn>::iterator it;
         key = findDirective(line);
         it  = this->_parseConfigFns.find(key);

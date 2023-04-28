@@ -40,7 +40,7 @@ class ParseConfig {
         void    				normalizeWhitespaces(void);
         bool    				checkCurlyBracesMatch(void);
         bool    				checkServerBlock(void);
-		std::string				findDirective(std::string line);
+		std::string				findDirective(std::string &line);
 		void    				processServer(std::string serverBlock);
 		void 					splitOffLocationBlocks(std::string &serverBlock, Server &server);
 		void 					processLocation(std::string locationBlock, Location &location);
@@ -50,6 +50,14 @@ class ParseConfig {
                 virtual char const *what() const throw()
                 {
                     return ("\e[0;31mError: Invalid syntax on config file.\e[0m");
+                }
+        };
+
+        class CannotReadFileError : public std::exception {
+            public:
+                virtual char const *what() const throw()
+                {
+                    return ("\e[0;31mError: cannot read input file.\e[0m");
                 }
         };
 };
