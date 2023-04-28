@@ -18,9 +18,9 @@ ParseDirectives::DirectiveType ParseDirectives::parseAutoindex(std::string const
 
     tokens = ftstring::split(line, ' ');
     if (tokens.size() != 2)
-        throw std::exception(); // TODO: Create custom exception
+        throw InvalidNumberArguments(tokens[0]);
     if (tokens[1] != "on" && tokens[1] != "off")
-        throw std::exception(); // TODO: Create custom exception
+        throw InvalidArgument(tokens[0], tokens[1]);
     arguments.push_back(tokens[1]);
     return (std::make_pair(tokens[0], arguments));
 }
@@ -31,11 +31,11 @@ ParseDirectives::DirectiveType ParseDirectives::parseCgi(std::string const &line
 
     tokens = ftstring::split(line, ' ');
     if (tokens.size() != 3)
-        throw std::exception(); // TODO: Create custom exception
+        throw InvalidNumberArguments(tokens[0]);
     if (!_isValidCgiExtension(tokens[1]))
-        throw std::exception(); // TODO: Create custom exception
+        throw InvalidArgument(tokens[0], tokens[1]);
     if (!_isValidCgiExecutable(tokens[2]))
-        throw std::exception(); // TODO: Create custom exception
+        throw SystemError(tokens[0], tokens[2]);
     arguments.insert(arguments.begin(), (tokens.begin() + 1), tokens.end());
     return (std::make_pair(tokens[0], arguments));
 }
@@ -48,12 +48,12 @@ ParseDirectives::DirectiveType ParseDirectives::parseClientMaxBodySize(std::stri
 
     tokens = ftstring::split(line, ' ');
     if (tokens.size() != 2)
-        throw std::exception(); // TODO: Create custom exception
+        throw InvalidNumberArguments(tokens[0]);
     hasSizeType = false;
     std::string::const_iterator it;
     for (it = tokens[1].begin(); it != tokens[1].end(); ++it) {
         if (hasSizeType && it != tokens[1].end())
-            throw std::exception(); // TODO: Create custom exception
+            throw InvalidArgument(tokens[0], tokens[1]);
         if (!std::isdigit(*it)) {
             if (size_type_charset.find(*it) != std::string::npos) {
                 if (!hasSizeType) {
@@ -61,7 +61,7 @@ ParseDirectives::DirectiveType ParseDirectives::parseClientMaxBodySize(std::stri
                     continue;
                 }
             } else {
-                throw std::exception(); // TODO: Create custom exception
+                throw InvalidArgument(tokens[0], tokens[1]);
             }
         }
     }
@@ -82,13 +82,13 @@ ParseDirectives::DirectiveType ParseDirectives::parseErrorPage(std::string const
 
     tokens = ftstring::split(line, ' ');
     if (tokens.size() < 3)
-        throw std::exception(); // TODO: Create custom exception
+        throw InvalidNumberArguments(tokens[0]);
     std::vector<std::string>::const_iterator it;
     for (it = (tokens.begin() + 1); it != (tokens.end() - 1); ++it) {
         if (std::find(http_codes.begin(), http_codes.end(), *it) != http_codes.end()) {
             arguments.push_back(*it);
         } else {
-            throw std::exception(); // TODO: Create custom exception
+            throw InvalidArgument(tokens[0], *it);
         }
     }
     return (std::make_pair(tokens[0], arguments));
@@ -100,7 +100,7 @@ ParseDirectives::DirectiveType ParseDirectives::parseIndex(std::string const &li
 
     tokens = ftstring::split(line, ' ');
     if (tokens.size() < 2)
-        throw std::exception(); // TODO: Create custom exception
+        throw InvalidNumberArguments(tokens[0]);
     arguments.insert(arguments.begin(), (tokens.begin() + 1), tokens.end());
     return (std::make_pair(tokens[0], arguments));
 }
@@ -114,13 +114,13 @@ ParseDirectives::DirectiveType ParseDirectives::parseLimitExcept(std::string con
 
     tokens = ftstring::split(line, ' ');
     if (tokens.size() < 2)
-        throw std::exception(); // TODO: Create custom exception
+        throw InvalidNumberArguments(tokens[0]);
     std::vector<std::string>::const_iterator it;
     for (it = tokens.begin() + 1; it != tokens.end(); ++it) {
         if (std::find(http_methods.begin(), http_methods.end(), *it) != http_methods.end())
             arguments.push_back(*it);
         else
-            throw std::exception(); // TODO: Create custom exception
+            throw InvalidArgument(tokens[0], *it);
     }
     return (std::make_pair(tokens[0], arguments));
 }
@@ -131,10 +131,10 @@ ParseDirectives::DirectiveType ParseDirectives::parseListen(std::string const &l
 
     tokens = ftstring::split(line, ' ');
     if (tokens.size() != 2)
-        throw std::exception(); // TODO: Create custom exception
+        throw InvalidNumberArguments(tokens[0]);
     splitIpPort = ftstring::split(tokens[1], ':');
     if (splitIpPort.size() > 2)
-        throw std::exception(); // TODO: Create custom exception
+        throw InvalidArgument(tokens[0], tokens[1]);
     if (splitIpPort.size() == 1) {
         if (_isValidIp(splitIpPort[0])) {
             if (splitIpPort[0] == "localhost")
@@ -146,11 +146,11 @@ ParseDirectives::DirectiveType ParseDirectives::parseListen(std::string const &l
             arguments.push_back("127.0.0.1");
             arguments.push_back(splitIpPort[0]);
         } else {
-            throw std::exception(); // TODO: Create custom exception
+            throw InvalidArgument(tokens[0], tokens[1]);
         }
     } else {
         if (!_isValidIp(splitIpPort[0]) || !_isValidPort(splitIpPort[1]))
-            throw std::exception(); // TODO: Create custom exception
+            throw InvalidArgument(tokens[0], tokens[1]);
         if (splitIpPort[0] == "localhost")
             arguments.push_back("127.0.0.1");
         else
@@ -166,7 +166,7 @@ ParseDirectives::DirectiveType ParseDirectives::parseRedirect(std::string const 
 
     tokens = ftstring::split(line, ' ');
     if (tokens.size() != 2)
-        throw std::exception(); // TODO: Create custom exception
+        throw InvalidNumberArguments(tokens[0]);
     arguments.push_back(tokens[1]);
     return (std::make_pair(tokens[0], arguments));
 }
@@ -177,7 +177,7 @@ ParseDirectives::DirectiveType ParseDirectives::parseRoot(std::string const &lin
 
     tokens = ftstring::split(line, ' ');
     if (tokens.size() != 2)
-        throw std::exception(); // TODO: Create custom exception
+        throw InvalidNumberArguments(tokens[0]);
     // TODO: Maybe check wether the given directory exists
     arguments.push_back(tokens[1]);
     return (std::make_pair(tokens[0], arguments));
@@ -189,17 +189,17 @@ ParseDirectives::DirectiveType ParseDirectives::parseServerName(std::string cons
 
     tokens = ftstring::split(line, ' ');
     if (tokens.size() < 2)
-        throw std::exception(); // TODO: Create custom exception
+        throw InvalidNumberArguments(tokens[0]);
     std::vector<std::string>::const_iterator it;
     for (it = (tokens.begin() + 1); it != tokens.end(); ++it) {
         if (*((*it).begin()) == '.' || *((*it).end() - 1) == '.')
-            throw std::exception(); // TODO: Create custom exception
+            throw InvalidArgument(tokens[0], *it);
         if ((*it).find("..") != std::string::npos)
-            throw std::exception(); // TODO: Create custom exception
+            throw InvalidArgument(tokens[0], *it);
         std::string::const_iterator strIt;
         for (strIt = (*it).begin(); strIt != (*it).end(); ++strIt)
             if (!std::isalnum(*strIt) && *strIt != '.')
-                throw std::exception(); // TODO: Create custom exception
+                throw InvalidArgument(tokens[0], *it);
     }
     arguments.insert(arguments.begin(), (tokens.begin() + 1), tokens.end());
     return (std::make_pair(tokens[0], arguments));
@@ -256,4 +256,35 @@ bool ParseDirectives::_isValidCgiExecutable(std::string const &executable)
             return (true);
     }
     return (false);
+}
+
+ParseDirectives::InvalidNumberArguments::InvalidNumberArguments(std::string const &str)
+{
+    this->_message = ERR_PARSE "invalid number of arguments in \"" + str + "\" directive";
+}
+
+char const *ParseDirectives::InvalidNumberArguments::what(void) const throw()
+{
+    return (this->_message.c_str());
+}
+
+ParseDirectives::InvalidArgument::InvalidArgument(std::string const &field,
+                                                  std::string const &value)
+{
+    this->_message = ERR_PARSE "invalid argument \"" + value + "\" in \"" + field + "\" directive";
+}
+
+char const *ParseDirectives::InvalidArgument::what(void) const throw()
+{
+    return (this->_message.c_str());
+}
+
+ParseDirectives::SystemError::SystemError(std::string const &field, std::string const &value)
+{
+    this->_message = ERR_PARSE "invalid \"" + value + "\" in \"" + field + "\": " + strerror(errno);
+}
+
+char const *ParseDirectives::SystemError::what(void) const throw()
+{
+    return (this->_message.c_str());
 }

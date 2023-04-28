@@ -18,7 +18,7 @@ CC	= clang++
 
 RM	= rm -rf
 
-CFLAGS	= -Wall -Wextra -Werror -std=c++98 
+CFLAGS	= -Wall -Wextra -Werror -g -std=c++98
 
 DIR_SRCS	=	src
 DIR_BUILD	=	build
@@ -33,6 +33,7 @@ SRCS		=	$(DIR_SRCS)/main.cpp \
 				$(DIR_SRCS)/Server.cpp \
 				$(DIR_SRCS)/Location.cpp \
 				$(DIR_SRCS)/Request.cpp \
+				$(DIR_SRCS)/ParametricException.cpp \
 
 BUILD		=	$(subst $(DIR_SRCS), $(DIR_BUILD), $(SRCS:.cpp=.o))
 
