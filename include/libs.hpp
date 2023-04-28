@@ -47,4 +47,10 @@
 
 #include "ftstring.hpp" // String manipulation functions.
 
+// HTTP DEFINES
+
+#define SP				" "
+#define CRLF			"\r\n"
+#define DOUBLE_CRLF		"\r\n\r\n"
+
 #endif
