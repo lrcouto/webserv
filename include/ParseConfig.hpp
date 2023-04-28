@@ -12,6 +12,7 @@
 
 #ifndef PARSECONFIG_HPP
 #define PARSECONFIG_HPP
+#define PARSECONFIG_HPP
 
 # include "libs.hpp"
 # include "ParseDirectives.hpp"
@@ -27,6 +28,7 @@ class ParseConfig {
 		std::map<std::string, _parseConfigFn>	_parseConfigFns;
 		std::vector<Server>						_serverData;
 
+    public:
     public:
         ParseConfig(void);
         ~ParseConfig(void);
