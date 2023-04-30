@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/04/29 23:16:41 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/04/29 23:53:11 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,15 +119,8 @@ void Response::assembleBody()
     std::string resourcePath, requestURI, root, resource;
     
     requestURI = this->_request.getRequestURI();
-    if (requestURI == "/")
-        requestURI = "./";
-
     root = this->_serverData->getValue("root")[0];
-
-    if (root[0] == '/' && requestURI.at(requestURI.length() - 1) == '/')
-        root.erase(0, 1);
-    
-    resourcePath = requestURI + root;
+    resourcePath = assemblePath(root, requestURI);
 
     struct stat buffer;
     std::vector<std::string> indexes = this->_serverData->getValue("index");   // not looking into locations yet.
@@ -164,6 +157,29 @@ void Response::assembleBody()
         this->_status = "204";
 
     this->_body = body;
+}
+
+std::string Response::assemblePath(std::string root, std::string requestURI) // extract this function to another class probably
+{
+    std::string path = ".";
+    std::string delimiter = "/";
+
+    ftstring::trim(root, "./\t\v\f\r\n");
+    ftstring::trim(requestURI, "/\t\v\f\r\n");
+
+    if (root != "" && requestURI != "") {
+        path += delimiter + root + delimiter + requestURI;
+    } else if (root != "") {
+        path += delimiter + root;
+    } else if (requestURI != "") {
+        path += delimiter + requestURI;
+    }
+
+    if (path[path.size() - 1] != '/') {
+        path += delimiter;
+    }
+
+    return path;
 }
 
 void Response::clear(void)

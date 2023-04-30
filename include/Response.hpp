@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/04/29 23:15:45 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/04/29 23:52:39 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ class Response {
         void        assembleStatusLine(void);
         void        assembleHeaders(void);
         void        assembleBody(void);
+
+        std::string assemblePath(std::string root, std::string requestURI);
 
         void        clear(void);
 };
