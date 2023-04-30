@@ -93,9 +93,13 @@ void WebServer::run(const std::string &inputFilePath)
                         Request request(rawRequest);
                         request.parse();
                         std::cout << request << std::endl;
-                        if (client->send(hello) <= 0) // will have to implement parsing the request and building the appropriate response.
+                        Response response(request);
+                        response.setServerData(&this->_serverData[0]); // hardcoded to always get the first server data structure for testing purposes
+                        response.assembleResponseString();
+                        if (client->send(response.getResponseString()) <= 0) // will have to implement parsing the request and building the appropriate response.
                             std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd() << "\e[0m" << std::endl;
                         request.clear();
+                        response.clear();
                     }
                     this->_poll.removeSocket(client);
                 }

@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/04/28 02:06:04 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/04/29 23:15:45 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 # include "libs.hpp"
 # include "Request.hpp"
+# include "Server.hpp"
+# include "Location.hpp"
 
 class Response {
     private:
@@ -24,6 +26,9 @@ class Response {
         void                                 _initContentTypes(void);
 
         Request                              _request;
+        Server                               *_serverData;
+        std::string                          _status;
+        std::string                          _type;
         std::string                          _responseString;
 
         std::string                          _statusLine;
@@ -38,9 +43,13 @@ class Response {
 		Response &operator=(Response const &other);
 
         std::string getResponseString(void);
+        void        setServerData(Server *serverData);
         void        setRequest(Request request);
 
         void        assembleResponseString(void);
+        void        assembleStatusLine(void);
+        void        assembleHeaders(void);
+        void        assembleBody(void);
 
         void        clear(void);
 };
