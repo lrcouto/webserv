@@ -10,119 +10,90 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "Socket.hpp"
+#include "Socket.hpp"
 
-Socket::Socket(void) : _port(0) 
+Socket::Socket(std::string port, std::string ip) : _port(port), _ip(ip), _fd(-1) {}
+
+Socket::Socket(Socket const &other) { *this = other; }
+
+Socket::~Socket(void) { this->close(); }
+
+Socket &Socket::operator=(Socket const &other)
 {
-    _fd = -1;
-	return ;
+    if (this != &other)
+        _fd = other._fd;
+    return *this;
 }
 
-Socket::Socket(int port) : _port(port) 
+void Socket::socket(void)
 {
-    _fd = socket(AF_INET, SOCK_STREAM, 0);
-
-    if (_fd < 0)
-    {
-        throw (CreateSocketError());
-    }
-	return;
+    if ((_fd = ::socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        throw CreateSocketError();
 }
 
-Socket::~Socket(void) 
+void Socket::bind(int optval)
 {
-	this->close();
-	return ;
-}
+    struct addrinfo  info = {};
+    struct addrinfo *response;
 
-Socket::Socket(Socket const &other) 
-{
-	*this = other;
-	return ;
-}
-
-int Socket::getFd(void) const
-{
-    return this->_fd;
-}
-
-void Socket::setFd(int fd)
-{
-    this->_fd = fd;
-    return;
-}
-
-void    Socket::bind(int optval)
-{
-    struct addrinfo info, *response;
-    std::stringstream ss;
-    ss << _port;
-    std::string port = ss.str();
-
-    memset(&info, 0, sizeof(info));
-    info.ai_family = AF_UNSPEC;
+    info.ai_family   = AF_UNSPEC;
     info.ai_socktype = SOCK_STREAM;
-    info.ai_flags = AI_PASSIVE;
-
-    getaddrinfo(NULL, port.c_str(), &info, &response);
-
-    setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
-    
+    if (getaddrinfo(_ip.c_str(), _port.c_str(), &info, &response) != 0)
+        throw std::exception(); // TODO: Create custom exception
+    if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) != 0)
+        throw std::exception(); // TODO: Create custom exception
     if (::bind(_fd, response->ai_addr, response->ai_addrlen) < 0)
-        throw (BindSocketError());
-    
+        throw BindSocketError();
     freeaddrinfo(response);
-    return;
 }
 
-void    Socket::listen(int backlog)
+void Socket::listen(int backlog)
 {
     if (::listen(_fd, backlog) < 0)
-        throw (BindSocketError());
-    
-    return;
+        throw BindSocketError();
 }
 
-void    Socket::accept(int serverFd)
+void Socket::connect(int backlog)
 {
-    int newFd;
-    struct sockaddr_in clientAddr = {};
-	socklen_t clientAddrLen = sizeof(clientAddr);
-
-    if ((newFd = ::accept(serverFd, (struct sockaddr*)&clientAddr, &clientAddrLen)) < 0)
-        throw (AcceptSocketError());
-
-    this->setFd(newFd);
-
-	return;
+    socket();
+    bind(1);
+    listen(backlog);
 }
 
-int    Socket::send(const std::string response)
+void Socket::accept(int serverFd)
+{
+    int                newFd;
+    struct sockaddr_in clientAddr    = {};
+    socklen_t          clientAddrLen = sizeof(clientAddr);
+
+    newFd = ::accept(serverFd, (struct sockaddr *)&clientAddr, &clientAddrLen);
+    if (newFd < 0)
+        throw AcceptSocketError();
+    _fd = newFd;
+}
+
+int Socket::send(std::string const response)
 {
     int bytesReturned, bytesTotal = 0;
 
-    while((unsigned long int)bytesTotal < response.size())
-    {
-        bytesReturned = ::send(this->getFd(), response.c_str(), response.size(), 0);
-        
+    while ((size_t)bytesTotal < response.size()) {
+        bytesReturned = ::send(_fd, response.c_str(), response.size(), 0);
         if (bytesReturned <= 0)
             break;
         bytesTotal += bytesReturned;
-    }    
+    }
     return bytesReturned;
 }
 
-int    Socket::receive(std::string &request)
+int Socket::receive(std::string &request)
 {
-    const int BUFFER_SIZE = 30000;
-    char buffer[BUFFER_SIZE];
-    int  bytesRead, totalBytes = 0;
+    int const BUFFER_SIZE = 30000;
+    char      buffer[BUFFER_SIZE];
+    int       bytesRead, totalBytes = 0;
 
-    while ((bytesRead = recv(this->getFd(), buffer, BUFFER_SIZE, 0)) > 0)
-    {
+    while ((bytesRead = recv(_fd, buffer, BUFFER_SIZE, 0)) > 0) {
         request.append(buffer, bytesRead);
-        if (request.find("Expect: 100-continue") != std::string::npos)
-        {
+        if (request.find("Expect: 100-continue") != std::string::npos) {
             sleep(2);
             continue;
         }
@@ -133,19 +104,14 @@ int    Socket::receive(std::string &request)
     return (bytesRead == -1) ? -1 : totalBytes;
 }
 
-void    Socket::close()
+void Socket::close(void)
 {
-    if (_fd != -1) 
-    {
-		::close(_fd);
-	    _fd = -1;
-	}
-    return;
+    if (_fd != -1) {
+        ::close(_fd);
+        _fd = -1;
+    }
 }
 
-Socket &Socket::operator=(Socket const &other)
-{
-	if (this != &other) 
-		_fd = other._fd;
-	return (*this);
-}
+int Socket::getFd(void) const { return this->_fd; }
+
+void Socket::setFd(int fd) { this->_fd = fd; }

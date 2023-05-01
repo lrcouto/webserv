@@ -10,56 +10,64 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "Server.hpp"
+#include "Server.hpp"
 
-Server::Server(void)
+Server::Server(void) {}
+
+Server::~Server(void) {}
+
+void Server::insertServerData(std::pair<std::string, std::vector<std::string> > directive)
 {
-	return ;
-}
-
-Server::~Server(void) 
-{
-	return ;
-}
-
-void    Server::insertServerData(std::pair<std::string, std::vector<std::string> > directive)
-{
-    bool    isUniqueDirective = (directive.first == "root" || directive.first == "client_max_body_size" || directive.first == "autoindex" || directive.first == "listen");
-    bool    isDirectiveNotAllowed = (directive.first == "limit_except");
-    bool    isDirectiveOnMap = (this->_serverData.find(directive.first) != this->_serverData.end());
-
-    if (isUniqueDirective) {
-        if (isDirectiveOnMap)
-            throw (DuplicateDirectiveError());
+    if (_isUniqueDirective(directive.first)) {
+        if (_isDirectiveOnMap(directive.first))
+            throw(DuplicateDirectiveError());
         else
             this->_serverData.insert(directive);
-    } else if (isDirectiveNotAllowed) {
-        throw (DirectiveNotAllowedError());
+    } else if (_isDirectiveNotAllowed(directive.first)) {
+        throw(DirectiveNotAllowedError());
     } else {
-        if (isDirectiveOnMap)
+        if (_isDirectiveOnMap(directive.first))
             this->_serverData.insert(directive);
         else
-            this->_serverData[directive.first].insert(this->_serverData[directive.first].begin(), directive.second.begin(), directive.second.end());
+            this->_serverData[directive.first].insert(this->_serverData[directive.first].begin(),
+                                                      directive.second.begin(),
+                                                      directive.second.end());
     }
 }
 
-std::vector<std::string>    Server::getValue(std::string key)
+std::vector<std::string> Server::getValue(std::string key)
 {
-    std::vector<std::string> value;
+    // std::vector<std::string>                                   value;
+    // std::map<std::string, std::vector<std::string> >::iterator it;
 
-    std::map<std::string, std::vector<std::string> >::iterator it = this->_serverData.find(key);
-    if (it != _serverData.end())
-        value = it->second;
-    
-    return value;
+    // it = this->_serverData.find(key);
+    // if (it != _serverData.end())
+    //     value = it->second;
+    // return value;
+    return (this->_serverData[key]);
 }
 
-void    Server::insertLocation(Location location)
+void Server::insertLocation(Location location) { this->_locations.push_back(location); }
+
+std::vector<Location> Server::getLocations(void) { return this->_locations; }
+
+bool Server::_isUniqueDirective(std::string const &directive) const
 {
-    this->_locations.push_back(location);
+    char const  *uniqueDirectives[] = {"root", "client_max_body_size", "autoindex", "listen"};
+    size_t const arrayLength        = sizeof(uniqueDirectives) / sizeof(uniqueDirectives[0]);
+
+    for (size_t i = 0; i < arrayLength; ++i)
+        if (directive == uniqueDirectives[i])
+            return (true);
+    return (false);
 }
 
-std::vector<Location>    Server::getLocations(void)
+bool Server::_isDirectiveNotAllowed(std::string const &directive) const
 {
-    return this->_locations;
+    return (directive == "limit_except");
+}
+
+bool Server::_isDirectiveOnMap(std::string const &directive) const
+{
+    return (this->_serverData.find(directive) != this->_serverData.end());
 }
