@@ -230,20 +230,20 @@ void Response::_initStatusCodes(void)
 
 void Response::_initContentTypes(void)
 {
-    this->_contentTypes.insert(std::make_pair("txt", "text/plain"));
-    this->_contentTypes.insert(std::make_pair("html", "text/html"));
-    this->_contentTypes.insert(std::make_pair("css", "text/css"));
-    this->_contentTypes.insert(std::make_pair("js", "text/javascript"));
-    this->_contentTypes.insert(std::make_pair("json", "application/json"));
-    this->_contentTypes.insert(std::make_pair("xml", "application/xml"));
-    this->_contentTypes.insert(std::make_pair("pdf", "application/pdf"));
-    this->_contentTypes.insert(std::make_pair("zip", "application/zip"));
-    this->_contentTypes.insert(std::make_pair("gzip", "application/gzip"));
-    this->_contentTypes.insert(std::make_pair("tar", "application/x-tar"));
-    this->_contentTypes.insert(std::make_pair("png", "image/png"));
-    this->_contentTypes.insert(std::make_pair("jpg", "image/jpeg"));
-    this->_contentTypes.insert(std::make_pair("jpeg", "image/jpeg"));
-    this->_contentTypes.insert(std::make_pair("gif", "image/gif"));
-    this->_contentTypes.insert(std::make_pair("svg", "image/svg+xml"));
-    this->_contentTypes.insert(std::make_pair("ico", "image/x-icon")); 
+    this->_contentTypes["txt"] = "text/plain";
+    this->_contentTypes["html"] = "text/html";
+    this->_contentTypes["css"] = "text/css";
+    this->_contentTypes["js"] = "text/javascript";
+    this->_contentTypes["json"] = "application/json";
+    this->_contentTypes["xml"] = "application/xml";
+    this->_contentTypes["pdf"] = "application/pdf";
+    this->_contentTypes["zip"] = "application/zip";
+    this->_contentTypes["gzip"] = "application/gzip";
+    this->_contentTypes["tar"] = "application/x-tar";
+    this->_contentTypes["png"] = "image/png";
+    this->_contentTypes["jpg"] = "image/jpeg";
+    this->_contentTypes["jpeg"] = "image/jpeg";
+    this->_contentTypes["gif"] = "image/gif";
+    this->_contentTypes["svg"] = "image/svg+xml";
+    this->_contentTypes["ico"] = "image/x-icon";
 }
