@@ -11,38 +11,37 @@
 /* ************************************************************************** */
 
 #ifndef POLL_HPP
-# define POLL_HPP
+#define POLL_HPP
 
-# include "libs.hpp"
-# include "Socket.hpp"
+#include "Socket.hpp"
+#include "libs.hpp"
+
 
 class Poll {
     private:
-        std::vector<Socket *>	_sockets;
-		std::vector<pollfd>		_pollfds;
+        std::vector<Socket *> _sockets;
+        std::vector<pollfd>   _pollfds;
 
-	public:
-		Poll(void);
+    public:
+        Poll(void);
         ~Poll(void);
 
-        void   insertSocket(Socket *socket);
-        void   removeSocket(Socket *socket);
-        void   execute(void);
-        bool   verifyEvenReturn(short revents);
-        size_t getSize(void) const;
+        void    insertSocket(Socket *socket);
+        void    removeSocket(Socket *socket);
+        void    execute(void);
+        bool    verifyEventReturn(short revents);
+        size_t  getSize(void) const;
         Socket *getSocket(size_t index);
-        short  getEventReturn(size_t index);
-        void   clear(void);
+        short   getEventReturn(size_t index);
+        void    clear(void);
 
-	    class PollError : public std::exception
-		{
-			public:
-				virtual const char* what() const throw()
-				{
-					return ("\e[0;31mError: unable to poll\e[0m");
-				}
-		};
+        class PollError : public std::exception {
+            public:
+                virtual char const *what() const throw()
+                {
+                    return ("\e[0;31mError: unable to poll\e[0m");
+                }
+        };
 };
-
 
 #endif

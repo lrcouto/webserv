@@ -11,67 +11,65 @@
 /* ************************************************************************** */
 
 #ifndef SOCKET_HPP
-# define SOCKET_HPP
+#define SOCKET_HPP
 
-# include "libs.hpp"
+#include "libs.hpp"
 
 class Socket {
     private:
-        int     _fd;
-        int     _port;
-        
-	public:
-		Socket(void);
-        Socket(int port);
+        std::string _port;
+        std::string _ip;
+        int         _fd;
+
+    public:
+        Socket(std::string port = "8080", std::string ip = "127.0.0.1");
         ~Socket(void);
-		Socket(Socket const &other);
-		Socket &operator=(Socket const &other);
+        Socket(Socket const &other);
+        Socket &operator=(Socket const &other);
 
-		int         getFd(void) const;
-        void        setFd(int fd);
+        void socket(void);
+        void bind(int optval);
+        void listen(int backlog);
+        void connect(int backlog);
+        void accept(int serverFd);
+        int  send(std::string const response);
+        int  receive(std::string &request);
+        void close();
 
-        void        bind(int optval);
-        void        listen(int backlog);
-        void        accept(int serverFd);
-        int         send(const std::string response);
-        int         receive(std::string &request);
-        void        close();
+        int  getFd(void) const;
+        void setFd(int fd);
 
-        class CreateSocketError : public std::exception
-		{
-			public:
-				virtual const char* what() const throw()
-				{
-					return ("\e[0;31mError: unable to create socket.\e[0m");
-				}
-		};
+        class CreateSocketError : public std::exception {
+            public:
+                virtual char const *what() const throw()
+                {
+                    return ("\e[0;31mError: unable to create socket.\e[0m");
+                }
+        };
 
-		class BindSocketError : public std::exception
-		{
-			public:
-				virtual const char* what() const throw()
-				{
-					return ("\e[0;31mError: unable to bind socket.\e[0m");
-				}
-		};
+        class BindSocketError : public std::exception {
+            public:
+                virtual char const *what() const throw()
+                {
+                    return ("\e[0;31mError: unable to bind socket.\e[0m");
+                }
+        };
 
-        class ListenSocketError : public std::exception
-		{
-			public:
-				virtual const char* what() const throw()
-				{
-					return ("\e[0;31mError: unable to listen.\e[0m");
-				}
-		};
+        class ListenSocketError : public std::exception {
+            public:
+                virtual char const *what() const throw()
+                {
+                    return ("\e[0;31mError: unable to listen.\e[0m");
+                }
+        };
 
-        class AcceptSocketError : public std::exception
-		{
-			public:
-				virtual const char* what() const throw()
-				{
-					return ("\e[0;31mError: unable to accept.\e[0m");
-				}
-		};
+        class AcceptSocketError : public std::exception {
+            public:
+                virtual char const *what() const throw()
+                {
+                    return ("\e[0;31mError: unable to accept.\e[0m");
+                }
+        };
 };
 
 std::ostream &operator<<(std::ostream &out, Socket const &in);

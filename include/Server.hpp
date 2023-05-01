@@ -10,46 +10,49 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef  SERVER_HPP
-# define SERVER_HPP
+#ifndef SERVER_HPP
+#define SERVER_HPP
 
-# include "libs.hpp"
-# include "Location.hpp"
+#include "Location.hpp"
+#include "Socket.hpp"
+#include "libs.hpp"
 
 class Server {
     private:
-        std::map<std::string, std::vector<std::string> >    _serverData;
-        std::vector<Location>                               _locations;
-    
+        std::map<std::string, std::vector<std::string> > _serverData;
+        std::vector<Location>                            _locations;
+
     public:
-    	Server(void);
+        Server(void);
         ~Server(void);
-		// Server(Server const &other);
-		// Server &operator=(Server const &other);
 
-        void                        insertServerData(std::pair<std::string, std::vector<std::string> > directive);
-        std::vector<std::string>    getValue(std::string key);
-        void                        insertLocation(Location location);
-		std::vector<Location>		getLocations(void);
+        void insertServerData(std::pair<std::string, std::vector<std::string> > directive);
+        void insertLocation(Location location);
 
-        class DuplicateDirectiveError : public std::exception
-		{
-			public:
-				virtual const char* what() const throw()
-				{
-					return ("\e[0;31mError: directives 'listen', 'autoindex', 'root' and 'client_max_body_size' must be unique.\e[0m");
-				}
-		};
+        std::vector<std::string> getValue(std::string key);
+        std::vector<Location>    getLocations(void);
 
-		class DirectiveNotAllowedError : public std::exception
-		{
-			public:
-				virtual const char* what() const throw()
-				{
-					return ("\e[0;31mError: directive not allowed inside server block'.\e[0m");
-				}
-		};
+        class DuplicateDirectiveError : public std::exception {
+            public:
+                virtual char const *what() const throw()
+                {
+                    return ("\e[0;31mError: directives 'listen', 'autoindex', 'root' and "
+                            "'client_max_body_size' must be unique.\e[0m");
+                }
+        };
 
+        class DirectiveNotAllowedError : public std::exception {
+            public:
+                virtual char const *what() const throw()
+                {
+                    return ("\e[0;31mError: directive not allowed inside server block'.\e[0m");
+                }
+        };
+
+    private:
+        bool _isUniqueDirective(std::string const &directive) const;
+        bool _isDirectiveNotAllowed(std::string const &directive) const;
+        bool _isDirectiveOnMap(std::string const &directive) const;
 };
 
 #endif
