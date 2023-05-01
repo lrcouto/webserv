@@ -55,8 +55,10 @@ void Poll::execute(void)
     return;
 }
 
-bool Poll::verifyEventReturn(short revents)
+bool Poll::verifyEventReturn(size_t index)
 {
+    short revents = this->_pollfds[index].revents;
+
     if ((revents & POLLIN) == POLLIN)
         return (true);
     if ((revents & POLLPRI) == POLLPRI)
