@@ -29,7 +29,7 @@ class Poll {
         void    insertSocket(Socket *socket);
         void    removeSocket(Socket *socket);
         void    execute(void);
-        bool    verifyEventReturn(short revents);
+        bool    verifyEventReturn(size_t index);
         size_t  getSize(void) const;
         Socket *getSocket(size_t index);
         short   getEventReturn(size_t index);
