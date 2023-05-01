@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/04/29 23:52:39 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/01 01:36:08 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include "Request.hpp"
 # include "Server.hpp"
 # include "Location.hpp"
+# include "ResponseTools.hpp"
 
 class Response {
     private:

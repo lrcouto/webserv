@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/04/29 23:53:11 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/01 01:52:05 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,13 +120,12 @@ void Response::assembleBody()
     
     requestURI = this->_request.getRequestURI();
     root = this->_serverData->getValue("root")[0];
-    resourcePath = assemblePath(root, requestURI);
+    resourcePath = ResponseTools::assemblePath(root, requestURI);
 
-    struct stat buffer;
     std::vector<std::string> indexes = this->_serverData->getValue("index");   // not looking into locations yet.
     for (size_t i = 0; i < indexes.size(); i++) {
         resource = resourcePath + indexes[i];
-        if (stat(resource.c_str(), &buffer) == 0) {
+        if (ResponseTools::fileExists(resource)) {
             this->_status = "200";
             break ;
         }
@@ -143,13 +142,7 @@ void Response::assembleBody()
         return ;
     }
     
-    size_t period = resource.rfind(".");
-    if (period == std::string::npos) {
-        this->_type = "";
-    } else {
-        this->_type = resource.substr(period + 1);
-    }
-
+    this->_type = ResponseTools::getFileExtension(resource);
     std::ifstream resourceContent(resource.c_str());
     std::string body((std::istreambuf_iterator<char>(resourceContent)), std::istreambuf_iterator<char>());
 
@@ -157,29 +150,6 @@ void Response::assembleBody()
         this->_status = "204";
 
     this->_body = body;
-}
-
-std::string Response::assemblePath(std::string root, std::string requestURI) // extract this function to another class probably
-{
-    std::string path = ".";
-    std::string delimiter = "/";
-
-    ftstring::trim(root, "./\t\v\f\r\n");
-    ftstring::trim(requestURI, "/\t\v\f\r\n");
-
-    if (root != "" && requestURI != "") {
-        path += delimiter + root + delimiter + requestURI;
-    } else if (root != "") {
-        path += delimiter + root;
-    } else if (requestURI != "") {
-        path += delimiter + requestURI;
-    }
-
-    if (path[path.size() - 1] != '/') {
-        path += delimiter;
-    }
-
-    return path;
 }
 
 void Response::clear(void)
