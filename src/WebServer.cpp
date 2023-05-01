@@ -101,17 +101,18 @@ void WebServer::run(std::string const &inputFilePath)
         this->_poll.execute();
         for (size_t i = 0; i < this->_poll.getSize(); ++i) {
             if (this->_poll.verifyEventReturn(i)) {
+                Socket *socket = this->_poll.getSocket(i);
                 if (i < this->_servers.size()) {
-                    if (sockaccept(this->_poll.getSocket(i)) != 0)
+                    if (sockaccept(socket) != 0)
                         continue;
                 } else {
-                    if (sockreceive(this->_poll.getSocket(i)) != 0)
+                    if (sockreceive(socket) != 0)
                         continue;
                     if (!_rawRequest.empty()) {
-                        if (socksend(this->_poll.getSocket(i)) != 0)
+                        if (socksend(socket) != 0)
                             ; // Handle
                     }
-                    this->_poll.removeSocket(this->_poll.getSocket(i));
+                    this->_poll.removeSocket(socket);
                 }
             }
         }
