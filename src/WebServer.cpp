@@ -100,7 +100,7 @@ void WebServer::run(std::string const &inputFilePath)
     while (true) {
         this->_poll.execute();
         for (size_t i = 0; i < this->_poll.getSize(); ++i) {
-            if (this->_poll.verifyEventReturn(this->_poll.getEventReturn(i))) {
+            if (this->_poll.verifyEventReturn(i)) {
                 if (i < this->_servers.size()) {
                     if (sockaccept(this->_poll.getSocket(i)) != 0)
                         continue;
