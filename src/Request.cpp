@@ -6,15 +6,11 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/23 21:44:28 by lcouto            #+#    #+#             */
-/*   Updated: 2023/04/27 01:41:27 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/04/27 23:46:45 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "Request.hpp"
-
-#define SP				" "
-#define CRLF			"\r\n"
-#define DOUBLE_CRLF		"\r\n\r\n"
 
 Request::Request(void)  : _raw("")
 {

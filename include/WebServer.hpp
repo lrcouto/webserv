@@ -20,6 +20,7 @@
 # include "Server.hpp"
 # include "Location.hpp"
 # include "Request.hpp"
+# include "Response.hpp"
 
 class WebServer {
     private:

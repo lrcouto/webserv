@@ -27,6 +27,7 @@
 #include <stdlib.h>     // Standard C library.
 #include <string.h>     // C-style string functions like strlen and strcpy.
 #include <sys/socket.h> // Socket-related system calls.
+#include <sys/stat.h>   // Information about files and directories.
 #include <sys/types.h>  // System types like pid_t and size_t.
 #include <unistd.h>     // System calls like read, write, and close.
 
@@ -46,5 +47,11 @@
 // LOCAL LIBRARIES
 
 #include "ftstring.hpp" // String manipulation functions.
+
+// HTTP DEFINES
+
+#define SP				" "
+#define CRLF			"\r\n"
+#define DOUBLE_CRLF		"\r\n\r\n"
 
 #endif
