@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/01 01:52:02 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/01 17:20:06 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@ class ResponseTools {
         static std::string  assemblePath(std::string root, std::string requestURI);
         static bool         fileExists(std::string path);
         static std::string  getFileExtension(std::string path);
+        static void         initStatusCodes(std::map<std::string, std::string> &statusCodes);
+        static void         initContentTypes(std::map<std::string, std::string> &contentTypes);
 };
 
 #endif
