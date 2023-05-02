@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseTools.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:33:38 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/02 21:52:43 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/03 21:13:36 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "ResponseTools.hpp"
+#include "ResponseTools.hpp"
 
 std::string ResponseTools::assemblePath(std::string first, std::string second)
 {
-    std::string path = ".";
+    std::string path      = ".";
     std::string delimiter = "/";
 
     first = ftstring::reduce(first, "./\t\v\f\r\n", "/");
@@ -41,7 +41,8 @@ std::string ResponseTools::assemblePath(std::string first, std::string second)
 bool ResponseTools::fileExists(std::string path)
 {
     struct stat buffer;
-    return (stat(path.c_str(), &buffer) == 0);
+
+    return ((stat(path.c_str(), &buffer) == 0) && (!S_ISDIR(buffer.st_mode)));
 }
 
 std::string ResponseTools::getFileExtension(std::string path)
