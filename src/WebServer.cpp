@@ -41,6 +41,10 @@ void WebServer::init(std::string const &inputFilePath)
     for (size_t i = 0; i < this->_servers.size(); ++i) {
         std::vector<std::string> sockinfo = this->_servers[i].getValue("listen");
 
+        if (sockinfo.size() == 0) {
+            sockinfo.push_back("127.0.0.1");
+            sockinfo.push_back("8080");
+        }
         socket = new Socket(sockinfo[1], sockinfo[0]);
         socket->connect(SOMAXCONN);
         this->_poll.insertSocket(socket);
