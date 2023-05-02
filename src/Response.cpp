@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/01 18:07:08 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/02 20:43:52 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,17 +101,24 @@ void Response::assembleBody()
     root         = this->_serverData->getValue("root")[0];
     resourcePath = ResponseTools::assemblePath(root, requestURI);
 
-    std::vector<std::string> indexes
-        = this->_serverData->getValue("index"); // not looking into locations yet.
-    for (size_t i = 0; i < indexes.size(); i++) {
-        resource = resourcePath + indexes[i];
-        if (ResponseTools::fileExists(resource)) {
-            this->_status = "200";
-            break;
-        }
-        this->_status = "404";
-    }
+    // not looking into locations yet.
+    if (ResponseTools::fileExists(resourcePath)) {
+        this->_status = "200";
+        resource      = resourcePath;
+    } else {
 
+        if (resourcePath[resourcePath.size() - 1] != '/')
+            resourcePath += '/';
+        std::vector<std::string> indexes = this->_serverData->getValue("index");
+        for (size_t i = 0; i < indexes.size(); i++) {
+            resource = resourcePath + indexes[i];
+            if (ResponseTools::fileExists(resource)) {
+                this->_status = "200";
+                break;
+            }
+            this->_status = "404";
+        }
+    }
     if (this->_status == "404") {
         this->_type = "html";
         resource    = "./examples/404.html";
