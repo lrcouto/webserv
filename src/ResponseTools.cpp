@@ -6,29 +6,32 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:33:38 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/01 17:22:06 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/02 21:52:43 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "ResponseTools.hpp"
 
-std::string ResponseTools::assemblePath(std::string root, std::string requestURI)
+std::string ResponseTools::assemblePath(std::string first, std::string second)
 {
     std::string path = ".";
     std::string delimiter = "/";
 
-    ftstring::trim(root, "./\t\v\f\r\n");
-    ftstring::trim(requestURI, "/\t\v\f\r\n");
+    first = ftstring::reduce(first, "./\t\v\f\r\n", "/");
+    second = ftstring::reduce(second, "/\t\v\f\r\n", "/");
 
-    if (root != "" && requestURI != "") {
-        path += delimiter + root + delimiter + requestURI;
-    } else if (root != "") {
-        path += delimiter + root;
-    } else if (requestURI != "") {
-        path += delimiter + requestURI;
+    second = removeOverlap(first, second);
+
+    if (first != "" && second != "") {
+        path += delimiter + first + delimiter + second;
+    } else if (first != "") {
+        path += delimiter + first;
+    } else if (second != "") {
+        path += delimiter + second;
     }
 
-    if (path[path.size() - 1] != '/') {
+    std::string extension = getFileExtension(path.substr(1));
+    if (path[path.size() - 1] != '/' && extension.empty()) {
         path += delimiter;
     }
 
@@ -49,6 +52,42 @@ std::string ResponseTools::getFileExtension(std::string path)
     } else {
         return path.substr(period + 1);
     }
+}
+
+bool ResponseTools::endsWith(const std::string& str, const std::string& suffix) {
+    std::string reducedStr = ftstring::reduce(str, "/");
+    std::string reducedSuffix = ftstring::reduce(suffix, "/");
+    if (reducedSuffix.size() > reducedStr.size()) {
+        return false;
+    }
+    return reducedStr.substr(reducedStr.size() - reducedSuffix.size()) == reducedSuffix;
+}
+
+bool ResponseTools::startsWith(const std::string& str, const std::string& prefix) {
+    if (prefix.size() > str.size()) {
+        return false;
+    }
+    return str.substr(0, prefix.size()) == prefix;
+}
+
+std::string ResponseTools::removeOverlap(const std::string& first, const std::string& second) {
+    size_t overlap = second.find(first);
+    if (overlap != std::string::npos) {
+        std::string newPath = second;
+        newPath.erase(overlap, first.size());
+        newPath = ftstring::reduce(newPath, "/\t\v\f\r\n", "/");
+        return newPath;
+    }
+    return second;
+}
+
+bool ResponseTools::isDirectory(std::string path)
+{
+    struct stat buffer;
+    if (stat(path.c_str(), &buffer) == 0) {
+        return S_ISDIR(buffer.st_mode);
+    }
+    return false;
 }
 
 void ResponseTools::initStatusCodes(std::map<std::string, std::string> &statusCodes)

@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/01 17:22:01 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/02 22:19:45 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,10 +88,13 @@ void Response::assembleResponseString(void)
 
 void Response::assembleStatusLine()
 {
-    std::string statusCode, protocol;
+    std::string statusCode, statusMessage, protocol;
     std::map<std::string, std::string>::iterator it = this->_statusCodes.find(this->_status);
     protocol = "HTTP/1.1";
-    this->_statusLine = protocol + SP + it->first + SP + it->second;
+    statusCode = it->first;
+    statusMessage = it->second;
+
+    this->_statusLine = protocol + SP + statusCode + SP + statusMessage;
 }
 
 void Response::assembleHeaders()
@@ -117,20 +120,62 @@ void Response::assembleHeaders()
 void Response::assembleBody()
 {
     std::string resourcePath, requestURI, root, resource;
-    
-    requestURI = this->_request.getRequestURI();
-    root = this->_serverData->getValue("root")[0];
-    resourcePath = ResponseTools::assemblePath(root, requestURI);
+    std::vector<std::string> indexes;
 
-    std::vector<std::string> indexes = this->_serverData->getValue("index");   // not looking into locations yet.
-    for (size_t i = 0; i < indexes.size(); i++) {
-        resource = resourcePath + indexes[i];
-        if (ResponseTools::fileExists(resource)) {
-            this->_status = "200";
-            break ;
+    std::vector<Location> locations = this->_serverData->getLocations();
+    requestURI = this->_request.getRequestURI();
+    if (!locations.empty()) {
+        for (size_t i = 0; i < locations.size(); i++) {
+
+            std::string locationPath = locations[i].getPath();
+            indexes = locations[i].getValue("index");
+            root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0] : locations[i].getValue("root")[0];
+            resourcePath = ResponseTools::assemblePath(root, requestURI);
+            
+            indexes = locations[i].getValue("index");
+            if (!indexes.empty()) {
+                for (size_t i = 0; i < indexes.size(); i++) {
+                    resource = ResponseTools::endsWith(resourcePath, indexes[i]) ? resourcePath : resourcePath + indexes[i];
+                    if (ResponseTools::fileExists(resource)) {
+                        this->_status = "200";
+                        break ;
+                    }
+                }
+            } else {
+                resource = resourcePath;
+                if (ResponseTools::fileExists(resource) && resource.find(locationPath) != std::string::npos) {
+                    this->_status = "200";
+                }
+            }
+            if (this->_status == "200")
+                break ;
         }
+    } 
+    if (this->_status != "200") {
+        indexes = this->_serverData->getValue("index");
+        root = this->_serverData->getValue("root")[0];
+        resourcePath = ResponseTools::assemblePath(root, requestURI);
+
         this->_status = "404";
+        
+        if (!indexes.empty()) {
+            for (size_t i = 0; i < indexes.size(); i++) {
+                resource = ResponseTools::endsWith(resourcePath, indexes[i]) ? resourcePath : resourcePath + indexes[i];
+                if (ResponseTools::fileExists(resource)) {
+                    this->_status = "200";
+                    break ;
+                }
+            }
+        } else {
+            resource = resourcePath;
+            if (ResponseTools::fileExists(resource)) {
+                this->_status = "200";
+            }
+        }
     }
+
+    if (ResponseTools::isDirectory(resource))
+        this->_status = "404";
 
     if (this->_status == "404")
     {
