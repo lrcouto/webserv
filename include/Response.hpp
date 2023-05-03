@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/01 01:36:08 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/01 17:22:06 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,6 @@ class Response {
     private:
         std::map<std::string, std::string>   _statusCodes;
         std::map<std::string, std::string>   _contentTypes;
-        void                                 _initStatusCodes(void);
-        void                                 _initContentTypes(void);
 
         Request                              _request;
         Server                               *_serverData;
