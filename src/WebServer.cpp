@@ -10,98 +10,113 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "WebServer.hpp"
+#include "WebServer.hpp"
 
 WebServer::WebServer(void)
 {
-	std::cout << "Hello, this is your WebServer ready to go!" << std::endl;
-	return ;
+    std::cout << "Hello, this is your WebServer ready to go!" << std::endl;
 }
 
-WebServer::~WebServer(void) 
-{
-	std::cout << "Bye bye!" << std::endl;
-	return ;
-}
+WebServer::~WebServer(void) { std::cout << "Bye bye!" << std::endl; }
 
 WebServer::WebServer(WebServer const &other)
 {
-	std::cout << "WebServer copy constructor called" << std::endl;
-	*this = other;
-	return ;
+    std::cout << "WebServer copy constructor called" << std::endl;
+    *this = other;
 }
 
 WebServer &WebServer::operator=(WebServer const &other)
-{   	
+{
     if (this != &other) {
-		std::cout << "WebServer copy assignment operator called" << std::endl;
-	}
-	return (*this);
+        std::cout << "WebServer copy assignment operator called" << std::endl;
+    }
+    return (*this);
 }
 
-void WebServer::run(const std::string &inputFilePath)
+void WebServer::init(std::string const &inputFilePath)
 {
-    Socket *listener;
-    Socket *client;
-    int ports[3] = {3007, 3008, 3009};
-    std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world! "; // hardcoded test message.
-    std::string rawRequest;
+    Socket *socket;
 
-    this->_serverData = this->_parseConfig.execute(inputFilePath);
+    this->_servers = this->_parseConfig.execute(inputFilePath);
+    for (size_t i = 0; i < this->_servers.size(); ++i) {
+        std::vector<std::string> sockinfo = this->_servers[i].getValue("listen");
 
-    for(int i = 0; i < 3; i++) // hardcoded number of sockets because I have no input file yet.
-    {
-        listener = new Socket(ports[i]);
-        listener->bind(1); // 1 for forcefully releasing port, 0 for not doing that.
-        listener->listen(SOMAXCONN); // add some sort of error handling to this, do not add socket to poll() if binding/listening fails.
-        this->_poll.insertSocket(listener);
+        if (sockinfo.size() == 0) {
+            sockinfo.push_back("127.0.0.1");
+            sockinfo.push_back("8080");
+        }
+        socket = new Socket(sockinfo[1], sockinfo[0]);
+        socket->connect(SOMAXCONN);
+        this->_poll.insertSocket(socket);
     }
+}
 
-    while(true)
-    {
+int WebServer::sockaccept(Socket *listener)
+{
+    Socket *client;
+
+    std::cout << "Accepting connection on fd " << listener->getFd() << std::endl;
+    client = new Socket;
+    client->accept(listener->getFd());
+    if (client->getFd() < 0) {
+        std::cerr << "\e[0;31mError: unable to accept connection\e[0m" << std::endl;
+        return (-1);
+    }
+    this->_poll.insertSocket(client);
+    return (0);
+}
+
+int WebServer::sockreceive(Socket *client)
+{
+    _rawRequest.clear();
+    std::cout << "Receiving request on client fd " << client->getFd() << std::endl;
+    if (client->receive(_rawRequest) < 0) {
+        std::cerr << "\e[0;31mError: unable to receive request on fd " << client->getFd() << "\e[0m"
+                  << std::endl;
+        this->_poll.removeSocket(client);
+        return (-1);
+    }
+    return (0);
+}
+
+int WebServer::socksend(Socket *client)
+{
+    Request request(_rawRequest);
+    request.parse();
+    std::cout << request << std::endl; // Debugging purposes
+
+    Response response(request);
+    // hardcoded to always get the first server data structure for testing purposes
+    response.setServerData(&this->_servers[0]);
+    response.assembleResponseString();
+    if (client->send(response.getResponseString()) <= 0) {
+        // will have to implement parsing the request and building the appropriate response.
+        std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd()
+                  << "\e[0m" << std::endl;
+        return (-1);
+    }
+    return (0);
+}
+
+void WebServer::run(std::string const &inputFilePath)
+{
+    init(inputFilePath);
+    while (true) {
         this->_poll.execute();
-        for(size_t i = 0; i < this->_poll.getSize(); i++)
-        {
-            if (this->_poll.verifyEvenReturn(this->_poll.getEventReturn(i)))
-            {
-                if (i < 3)
-                {
-                    listener = this->_poll.getSocket(i);
-                    std::cout << "Accepting connection to client on fd " << listener->getFd() << std::endl;
-                    client = new Socket; // sockets allocated with new will have to be explicitly deleted.
-                    client->accept(listener->getFd());
-                    if (client->getFd() == -1)
-                    {
-                        std::cerr << "\e[0;31mError: unable to accept connection.\e[0m" << std::endl;
+        for (size_t i = 0; i < this->_poll.getSize(); ++i) {
+            if (this->_poll.verifyEventReturn(i)) {
+                Socket *socket = this->_poll.getSocket(i);
+                if (i < this->_servers.size()) {
+                    if (sockaccept(socket) != 0)
                         continue;
-                    }
-                    this->_poll.insertSocket(client);
-                }
-                else
-                {
-                    client = this->_poll.getSocket(i);
-                    rawRequest.clear();
-                    std::cout << "Receiving request through client fd " << client->getFd() << std::endl;
-                    if (client->receive(rawRequest) < 0)
-                    {
-                        std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd() << "\e[0m" << std::endl;
-                        this->_poll.removeSocket(client);
+                } else {
+                    if (sockreceive(socket) != 0)
                         continue;
+                    if (!_rawRequest.empty()) {
+                        if (socksend(socket) != 0)
+                            ; // Handle
                     }
-                    if (!rawRequest.empty())
-                    {
-                        Request request(rawRequest);
-                        request.parse();
-                        std::cout << request << std::endl;
-                        Response response(request);
-                        response.setServerData(&this->_serverData[0]); // hardcoded to always get the first server data structure for testing purposes
-                        response.assembleResponseString();
-                        if (client->send(response.getResponseString()) <= 0) // will have to implement parsing the request and building the appropriate response.
-                            std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd() << "\e[0m" << std::endl;
-                        request.clear();
-                        response.clear();
-                    }
-                    this->_poll.removeSocket(client);
+                    this->_poll.removeSocket(socket);
                 }
             }
         }
@@ -114,8 +129,8 @@ void WebServer::stop(void)
     this->_poll.clear(); // in the future will also have to clear server data, request data, etc.
 }
 
-std::ostream &operator<<(std::ostream &out, WebServer const &in) 
+std::ostream &operator<<(std::ostream &out, WebServer const &in)
 {
-	(void)in;
-	return (out);
+    (void)in;
+    return (out);
 }

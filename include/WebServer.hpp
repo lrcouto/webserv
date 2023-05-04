@@ -11,35 +11,40 @@
 /* ************************************************************************** */
 
 #ifndef WEBSERVER_HPP
-# define WEBSERVER_HPP
+#define WEBSERVER_HPP
 
-# include "libs.hpp"
-# include "Socket.hpp"
-# include "Poll.hpp"
-# include "ParseConfig.hpp"
-# include "Server.hpp"
-# include "Location.hpp"
-# include "Request.hpp"
-# include "Response.hpp"
+#include "Location.hpp"
+#include "ParseConfig.hpp"
+#include "Poll.hpp"
+#include "Request.hpp"
+#include "Response.hpp"
+#include "Server.hpp"
+#include "Socket.hpp"
+#include "libs.hpp"
 
 class WebServer {
     private:
-        Poll                    _poll;
-        ParseConfig             _parseConfig;
-        std::vector<Server>     _serverData;
+        Poll                _poll;
+        ParseConfig         _parseConfig;
+        std::vector<Server> _servers;
 
-	public:
-		WebServer(void);
+        std::string         _rawRequest;
+
+    public:
+        WebServer(void);
         ~WebServer(void);
-		WebServer(WebServer const &other);
-		WebServer &operator=(WebServer const &other);
+        WebServer(WebServer const &other);
+        WebServer &operator=(WebServer const &other);
 
-		void	run(const std::string &inputFilePath);
-        void    stop(void);
+        void run(std::string const &inputFilePath);
+        void init(std::string const &inputFilePath);
+        void stop(void);
 
+        int sockaccept(Socket *listener);
+        int sockreceive(Socket *client);
+        int socksend(Socket *client);
 };
 
 std::ostream &operator<<(std::ostream &out, WebServer const &in);
-
 
 #endif

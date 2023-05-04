@@ -10,51 +10,44 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "Poll.hpp"
+#include "Poll.hpp"
 
-Poll::Poll(void) 
-{
-	return ;
-}
+Poll::Poll(void) { return; }
 
-Poll::~Poll(void) 
-{
-	return ;
-}
+Poll::~Poll(void) { return; }
 
-void   Poll::insertSocket(Socket *socket)
+void Poll::insertSocket(Socket *socket)
 {
     pollfd pollFdToInsert;
 
     this->_sockets.push_back(socket);
-    pollFdToInsert.fd = socket->getFd();
-    pollFdToInsert.events = POLLIN | POLLPRI | POLLOUT | POLLWRBAND;
+    pollFdToInsert.fd      = socket->getFd();
+    pollFdToInsert.events  = POLLIN | POLLPRI | POLLOUT | POLLWRBAND;
     pollFdToInsert.revents = 0;
     this->_pollfds.push_back(pollFdToInsert);
 
     return;
 }
 
-void   Poll::removeSocket(Socket *socket)
+void Poll::removeSocket(Socket *socket)
 {
-    for (std::vector<pollfd>::reverse_iterator it = _pollfds.rbegin(); it != _pollfds.rend(); ++it) 
-    {
-        if (it->fd == socket->getFd()) 
-        {
-            _pollfds.erase(std::vector<pollfd>::iterator(&(*it)));
+    std::vector<pollfd>::reverse_iterator itpoll;
+    for (itpoll = _pollfds.rbegin(); itpoll != _pollfds.rend(); ++itpoll) {
+        if (itpoll->fd == socket->getFd()) {
+            ::close(itpoll->fd);
+            _pollfds.erase(std::vector<pollfd>::iterator(&(*itpoll)));
             break;
         }
     }
 
-    std::vector<Socket*>::iterator socketIt = std::find(_sockets.begin(), _sockets.end(), socket);
-    if (socketIt != _sockets.end()) 
-    {
-        delete *socketIt;
-        _sockets.erase(socketIt);
+    std::vector<Socket *>::iterator itsock = std::find(_sockets.begin(), _sockets.end(), socket);
+    if (itsock != _sockets.end()) {
+        delete *itsock;
+        _sockets.erase(itsock);
     }
 }
 
-void   Poll::execute(void)
+void Poll::execute(void)
 {
     int retValue = poll(this->_pollfds.data(), this->getSize(), 0);
     if (retValue == -1)
@@ -62,44 +55,38 @@ void   Poll::execute(void)
     return;
 }
 
-bool	Poll::verifyEvenReturn(short revents)
+bool Poll::verifyEventReturn(size_t index)
 {
-	if ((revents & POLLIN) == POLLIN)
-		return (true);
-	if ((revents & POLLPRI) == POLLPRI)
-		return (true);
-	if ((revents & POLLOUT) == POLLOUT)
-		return (true);
-	if ((revents & POLLWRBAND) == POLLWRBAND)
-		return (true);
-	return (false);
+    short revents = this->_pollfds[index].revents;
+
+    if ((revents & POLLIN) == POLLIN)
+        return (true);
+    if ((revents & POLLPRI) == POLLPRI)
+        return (true);
+    if ((revents & POLLOUT) == POLLOUT)
+        return (true);
+    if ((revents & POLLWRBAND) == POLLWRBAND)
+        return (true);
+    return (false);
 }
 
-size_t  Poll::getSize(void) const 
-{
-	return (this->_pollfds.size());
-}
+size_t Poll::getSize(void) const { return (this->_pollfds.size()); }
 
-Socket  *Poll::getSocket(size_t index)
-{
-    return (this->_sockets[index]);
-}
+Socket *Poll::getSocket(size_t index) { return (this->_sockets[index]); }
 
-short   Poll::getEventReturn(size_t index)
-{
-    return (this->_pollfds[index].revents);
-}
+short Poll::getEventReturn(size_t index) { return (this->_pollfds[index].revents); }
 
-void    Poll::clear(void)
+void Poll::clear(void)
 {
-    for (std::vector<pollfd>::reverse_iterator it = _pollfds.rbegin(); it != _pollfds.rend(); ++it)
-    {
-        std::cout << "Closing fd " << it->fd << std::endl;
-        ::close(it->fd);
+    std::vector<pollfd>::reverse_iterator itpoll;
+    for (itpoll = _pollfds.rbegin(); itpoll != _pollfds.rend(); ++itpoll) {
+        std::cout << "Closing fd " << itpoll->fd << std::endl;
+        ::close(itpoll->fd);
     }
     _pollfds.clear();
 
-    for (std::vector<Socket*>::reverse_iterator it = _sockets.rbegin(); it != _sockets.rend(); ++it) 
-        delete *it;
+    std::vector<Socket *>::reverse_iterator itsock;
+    for (itsock = _sockets.rbegin(); itsock != _sockets.rend(); ++itsock)
+        delete *itsock;
     _sockets.clear();
 }
