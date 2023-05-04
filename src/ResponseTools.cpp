@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/01 01:33:38 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/03 21:13:36 by maolivei         ###   ########.fr       */
+/*   Created: Invalid date        by                   #+#    #+#             */
+/*   Updated: 2023/05/03 21:22:27 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ std::string ResponseTools::assemblePath(std::string first, std::string second)
     std::string path      = ".";
     std::string delimiter = "/";
 
-    first = ftstring::reduce(first, "./\t\v\f\r\n", "/");
+    first  = ftstring::reduce(first, "./\t\v\f\r\n", "/");
     second = ftstring::reduce(second, "/\t\v\f\r\n", "/");
 
     second = removeOverlap(first, second);
@@ -41,8 +41,7 @@ std::string ResponseTools::assemblePath(std::string first, std::string second)
 bool ResponseTools::fileExists(std::string path)
 {
     struct stat buffer;
-
-    return ((stat(path.c_str(), &buffer) == 0) && (!S_ISDIR(buffer.st_mode)));
+    return (stat(path.c_str(), &buffer) == 0);
 }
 
 std::string ResponseTools::getFileExtension(std::string path)
@@ -55,8 +54,9 @@ std::string ResponseTools::getFileExtension(std::string path)
     }
 }
 
-bool ResponseTools::endsWith(const std::string& str, const std::string& suffix) {
-    std::string reducedStr = ftstring::reduce(str, "/");
+bool ResponseTools::endsWith(std::string const &str, std::string const &suffix)
+{
+    std::string reducedStr    = ftstring::reduce(str, "/");
     std::string reducedSuffix = ftstring::reduce(suffix, "/");
     if (reducedSuffix.size() > reducedStr.size()) {
         return false;
@@ -64,14 +64,16 @@ bool ResponseTools::endsWith(const std::string& str, const std::string& suffix) 
     return reducedStr.substr(reducedStr.size() - reducedSuffix.size()) == reducedSuffix;
 }
 
-bool ResponseTools::startsWith(const std::string& str, const std::string& prefix) {
+bool ResponseTools::startsWith(std::string const &str, std::string const &prefix)
+{
     if (prefix.size() > str.size()) {
         return false;
     }
     return str.substr(0, prefix.size()) == prefix;
 }
 
-std::string ResponseTools::removeOverlap(const std::string& first, const std::string& second) {
+std::string ResponseTools::removeOverlap(std::string const &first, std::string const &second)
+{
     size_t overlap = second.find(first);
     if (overlap != std::string::npos) {
         std::string newPath = second;
@@ -158,20 +160,20 @@ void ResponseTools::initStatusCodes(std::map<std::string, std::string> &statusCo
 
 void ResponseTools::initContentTypes(std::map<std::string, std::string> &contentTypes)
 {
-    contentTypes["txt"] = "text/plain";
+    contentTypes["txt"]  = "text/plain";
     contentTypes["html"] = "text/html";
-    contentTypes["css"] = "text/css";
-    contentTypes["js"] = "text/javascript";
+    contentTypes["css"]  = "text/css";
+    contentTypes["js"]   = "text/javascript";
     contentTypes["json"] = "application/json";
-    contentTypes["xml"] = "application/xml";
-    contentTypes["pdf"] = "application/pdf";
-    contentTypes["zip"] = "application/zip";
+    contentTypes["xml"]  = "application/xml";
+    contentTypes["pdf"]  = "application/pdf";
+    contentTypes["zip"]  = "application/zip";
     contentTypes["gzip"] = "application/gzip";
-    contentTypes["tar"] = "application/x-tar";
-    contentTypes["png"] = "image/png";
-    contentTypes["jpg"] = "image/jpeg";
+    contentTypes["tar"]  = "application/x-tar";
+    contentTypes["png"]  = "image/png";
+    contentTypes["jpg"]  = "image/jpeg";
     contentTypes["jpeg"] = "image/jpeg";
-    contentTypes["gif"] = "image/gif";
-    contentTypes["svg"] = "image/svg+xml";
-    contentTypes["ico"] = "image/x-icon";
+    contentTypes["gif"]  = "image/gif";
+    contentTypes["svg"]  = "image/svg+xml";
+    contentTypes["ico"]  = "image/x-icon";
 }
