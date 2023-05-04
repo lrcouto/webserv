@@ -37,6 +37,7 @@ SRCS		=	$(DIR_SRCS)/main.cpp \
 				$(DIR_SRCS)/Response.cpp \
 				$(DIR_SRCS)/ResponseTools.cpp \
 				$(DIR_SRCS)/ParametricException.cpp \
+				$(DIR_SRCS)/RequestTools.cpp \
 
 BUILD		=	$(subst $(DIR_SRCS), $(DIR_BUILD), $(SRCS:.cpp=.o))
 

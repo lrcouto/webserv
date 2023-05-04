@@ -3,60 +3,60 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/23 21:44:23 by lcouto            #+#    #+#             */
-/*   Updated: 2023/04/27 01:41:29 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/04 14:58:58 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REQUEST_HPP
-# define REQUEST_HPP
+#define REQUEST_HPP
 
-# include "libs.hpp"
+#include "libs.hpp"
 
 class Request {
     private:
-    std::string                         _raw;
-    std::string                         _method;
-    std::string                         _requestURI;
-    std::string                         _protocol;
-    std::map<std::string, std::string>  _headers;
-    std::string                         _body;
 
-	public:
-		Request(void);
+    public:
+        std::map<std::string, std::string> _headers;
+        std::string                        _method;
+        std::string                        _requestURI;
+        std::string                        _protocol;
+        std::string                        _body;
+        std::string                        _raw;
+        
+        Request(void);
         Request(std::string raw);
         ~Request(void);
-		Request(Request const &other);
-		Request &operator=(Request const &other);
+        Request(Request const &other);
+        Request &operator=(Request const &other);
 
-        void                                setRawRequest(std::string raw);
-        std::string                         getRawRequest(void);
-        std::string                         getMethod(void);
-        std::string                         getRequestURI(void);
-        std::string                         getProtocol(void);
-        std::map<std::string, std::string>  getHeaders(void);
-        std::string                         getBody(void);
+        std::map<std::string, std::string> getHeaders(void);
+        std::string                        getMethod(void);
+        std::string                        getRequestURI(void);
+        std::string                        getProtocol(void);
+        std::string                        getBody(void);
+        std::string                        getRawRequest(void);
 
-        void	parse(void);
-        void	parseRequestLine(std::stringstream &rawStream);
-        void	parseHeaders(std::stringstream &rawStream);
-        void	parseBody(std::stringstream &rawStream);
+        void setRawRequest(std::string raw);
 
-        void    clear(void);
+        void parse(void);
+        void parseRequestLine(std::stringstream &rawStream);
+        void parseHeaders(std::stringstream &rawStream);
+        void parseBody(std::stringstream &rawStream);
 
-        class EmptyRequestError : public std::exception
-		{
-			public:
-				virtual const char* what() const throw()
-				{
-					return ("\e[0;31mError: cannot parse empty request\e[0m");
-				}
-		};
+        void clear(void);
+
+        class EmptyRequestError : public std::exception {
+            public:
+                virtual char const *what() const throw()
+                {
+                    return ("\e[0;31mError: cannot parse empty request\e[0m");
+                }
+        };
 };
 
 std::ostream &operator<<(std::ostream &out, Request &in);
-
 
 #endif
