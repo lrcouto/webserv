@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/04 18:13:10 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/04 20:29:15 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,9 @@ class RequestTools {
         Request     _request;
         std::string _raw;
 
-        std::string::iterator _method_begin;
-        std::string::iterator _uri_begin;
-        std::string::iterator _protocol_begin;
+        std::string::const_iterator _method_begin;
+        std::string::const_iterator _uri_begin;
+        std::string::const_iterator _protocol_begin;
 
     public:
         RequestTools(void);
@@ -60,7 +60,7 @@ class RequestTools {
         RequestTools(RequestTools const &src);
         RequestTools &operator=(RequestTools const &src);
 
-        void parseHeaders(std::string &rawRequest);
+        void parseRequestLine(std::string &rawRequest);
 
     private:
         bool _isControlCharacter(int c);
