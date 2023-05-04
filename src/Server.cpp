@@ -50,6 +50,10 @@ void Server::insertLocation(Location location) { this->_locations.push_back(loca
 
 std::vector<Location> Server::getLocations(void) { return this->_locations; }
 
+int     Server::getFd(void) { return this->_fd; }
+
+void    Server::setFd(int fd) { this->_fd = fd; }
+
 bool Server::_isUniqueDirective(std::string const &directive) const
 {
     char const  *uniqueDirectives[] = {"root", "client_max_body_size", "autoindex", "listen"};

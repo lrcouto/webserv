@@ -21,6 +21,7 @@ class Server {
     private:
         std::map<std::string, std::vector<std::string> > _serverData;
         std::vector<Location>                            _locations;
+        int                                              _fd;
 
     public:
         Server(void);
@@ -31,6 +32,9 @@ class Server {
 
         std::vector<std::string> getValue(std::string key);
         std::vector<Location>    getLocations(void);
+
+        int     getFd(void);
+        void    setFd(int fd);
 
         class DuplicateDirectiveError : public std::exception {
             public:
