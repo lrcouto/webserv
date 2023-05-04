@@ -6,14 +6,11 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/03 22:08:14 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/03 22:17:51 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
-
-std::map<std::string, std::string> Response::_statusCodes  = Response::_initStatusCodes();
-std::map<std::string, std::string> Response::_contentTypes = Response::_initContentTypes();
 
 Response::Response(void)
 {
