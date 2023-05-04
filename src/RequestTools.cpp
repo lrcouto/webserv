@@ -29,10 +29,10 @@ RequestTools &RequestTools::operator=(RequestTools const &src)
     return (*this);
 }
 
-void RequestTools::parseHeaders(std::string &rawRequest)
+void RequestTools::parseRequestLine(std::string &rawRequest)
 {
-    std::string::iterator it    = rawRequest.begin();
-    RequestLineState      state = WSV_REQUEST_START;
+    std::string::const_iterator it    = rawRequest.begin();
+    RequestLineState            state = WSV_REQUEST_START;
 
     while (it != rawRequest.end()) {
 
