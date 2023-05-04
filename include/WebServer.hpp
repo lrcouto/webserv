@@ -39,10 +39,14 @@ class WebServer {
         void run(std::string const &inputFilePath);
         void init(std::string const &inputFilePath);
         void stop(void);
+        void setServerSocketFds(void);
+
+        Server  *getCurrentServer(int fd);
 
         int sockaccept(Socket *listener);
         int sockreceive(Socket *client);
         int socksend(Socket *client);
+
 };
 
 std::ostream &operator<<(std::ostream &out, WebServer const &in);

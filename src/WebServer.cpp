@@ -86,8 +86,7 @@ int WebServer::socksend(Socket *client)
     std::cout << request << std::endl; // Debugging purposes
 
     Response response(request);
-    // hardcoded to always get the first server data structure for testing purposes
-    response.setServerData(&this->_servers[0]);
+    response.setServerData(getCurrentServer(client->getServerFd()));
     response.assembleResponseString();
     if (client->send(response.getResponseString()) <= 0) {
         // will have to implement parsing the request and building the appropriate response.
@@ -98,11 +97,34 @@ int WebServer::socksend(Socket *client)
     return (0);
 }
 
+Server  *WebServer::getCurrentServer(int fd)
+{
+    Server *currentServer;
+
+    for (size_t i = 0; i < this->_servers.size(); i++) {
+        if (this->_servers[i].getFd() == fd)
+            currentServer = &this->_servers[i];
+    }
+    return currentServer;
+}
+
+void WebServer::setServerSocketFds(void)
+{
+    for (size_t i = 0; i < this->_poll.getSize(); i++) {
+        Socket *socket = this->_poll.getSocket(i);
+        for (size_t i = 0; i < this->_servers.size(); i++) {
+            if (socket->getPort() == this->_servers[i].getValue("listen")[1])
+                this->_servers[i].setFd(socket->getFd());
+        }
+    }
+}
+
 void WebServer::run(std::string const &inputFilePath)
 {
     init(inputFilePath);
     while (true) {
         this->_poll.execute();
+        setServerSocketFds();
         for (size_t i = 0; i < this->_poll.getSize(); ++i) {
             if (this->_poll.verifyEventReturn(i)) {
                 Socket *socket = this->_poll.getSocket(i);

@@ -12,7 +12,7 @@
 
 #include "Socket.hpp"
 
-Socket::Socket(std::string port, std::string ip) : _port(port), _ip(ip), _fd(-1) {}
+Socket::Socket(std::string port, std::string ip) : _port(port), _ip(ip), _fd(-1), _serverFd(-1) {}
 
 Socket::Socket(Socket const &other) { *this = other; }
 
@@ -69,6 +69,7 @@ void Socket::accept(int serverFd)
     newFd = ::accept(serverFd, (struct sockaddr *)&clientAddr, &clientAddrLen);
     if (newFd < 0)
         throw AcceptSocketError();
+    _serverFd = serverFd;
     _fd = newFd;
 }
 
@@ -115,3 +116,7 @@ void Socket::close(void)
 int Socket::getFd(void) const { return this->_fd; }
 
 void Socket::setFd(int fd) { this->_fd = fd; }
+
+std::string Socket::getPort(void) const { return this->_port; }
+
+int Socket::getServerFd(void) const { return this->_serverFd; }

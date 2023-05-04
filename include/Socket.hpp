@@ -20,6 +20,7 @@ class Socket {
         std::string _port;
         std::string _ip;
         int         _fd;
+        int         _serverFd;
 
     public:
         Socket(std::string port = "8080", std::string ip = "127.0.0.1");
@@ -27,17 +28,19 @@ class Socket {
         Socket(Socket const &other);
         Socket &operator=(Socket const &other);
 
-        void socket(void);
-        void bind(int optval);
-        void listen(int backlog);
-        void connect(int backlog);
-        void accept(int serverFd);
-        int  send(std::string const response);
-        int  receive(std::string &request);
-        void close();
+        void        socket(void);
+        void        bind(int optval);
+        void        listen(int backlog);
+        void        connect(int backlog);
+        void        accept(int serverFd);
+        int         send(std::string const response);
+        int         receive(std::string &request);
+        void        close();
 
-        int  getFd(void) const;
-        void setFd(int fd);
+        int         getFd(void) const;
+        void        setFd(int fd);
+        std::string getPort(void) const;
+        int         getServerFd(void) const;
 
         class CreateSocketError : public std::exception {
             public:
