@@ -32,7 +32,6 @@
 #include <sys/types.h>  // System types like pid_t and size_t.
 #include <unistd.h>     // System calls like read, write, and close.
 
-
 // C++ LIBRARIES
 
 #include <algorithm> // STL algorithms.
@@ -52,8 +51,12 @@
 
 // HTTP DEFINES
 
-#define SP				" "
-#define CRLF			"\r\n"
-#define DOUBLE_CRLF		"\r\n\r\n"
+#define SP          " "
+#define CRLF        "\r\n"
+#define DOUBLE_CRLF "\r\n\r\n"
+
+#define CR          '\r'
+#define LF          '\n'
+#define WHITESPACE  ' '
 
 #endif

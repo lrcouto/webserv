@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/04 21:36:57 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/04 22:58:55 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,6 @@
 
 #include "Request.hpp"
 #include "libs.hpp"
-
-#define CR         '\r'
-#define LF         '\n'
-#define WHITESPACE ' '
 
 enum RequestLineState {
     WSV_REQUEST_START,
