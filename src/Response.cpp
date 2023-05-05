@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/03 22:17:51 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/05 00:22:43 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,46 +116,23 @@ void Response::assembleBody()
             resourcePath = ResponseTools::assemblePath(root, requestURI);
 
             indexes = locations[i].getValue("index");
-            if (!indexes.empty()) {
-                for (size_t i = 0; i < indexes.size(); i++) {
-                    resource = ResponseTools::endsWith(resourcePath, indexes[i]) ? resourcePath : resourcePath + indexes[i];
-                    if (ResponseTools::fileExists(resource)) {
-                        this->_status = "200";
-                        break ;
-                    }
-                }
-            } else {
-                resource = resourcePath;
-                if (ResponseTools::fileExists(resource) && resource.find(locationPath) != std::string::npos) {
-                    this->_status = "200";
-                }
-            }
-            if (this->_status == "200")
+            resource = findResourceByIndex(indexes, resourcePath);
+            if ((!resource.empty()) && resource.find(locationPath) != std::string::npos)
                 break ;
         }
     }
-    if (this->_status != "200") {
+    if (resource.empty()) {
         indexes = this->_serverData->getValue("index");
         root = this->_serverData->getValue("root")[0];
         resourcePath = ResponseTools::assemblePath(root, requestURI);
 
         this->_status = "404";
 
-        if (!indexes.empty()) {
-            for (size_t i = 0; i < indexes.size(); i++) {
-                resource = ResponseTools::endsWith(resourcePath, indexes[i]) ? resourcePath : resourcePath + indexes[i];
-                if (ResponseTools::fileExists(resource)) {
-                    this->_status = "200";
-                    break ;
-                }
-            }
-        } else {
-            resource = resourcePath;
-            if (ResponseTools::fileExists(resource)) {
-                this->_status = "200";
-            }
-        }
+        resource = findResourceByIndex(indexes, resourcePath);
     }
+
+    if (!resource.empty())
+        this->_status = "200";
 
     if (ResponseTools::isDirectory(resource))
         this->_status = "404";
@@ -180,6 +157,26 @@ void Response::assembleBody()
         this->_status = "204";
 
     this->_body = body;
+}
+
+std::string Response::findResourceByIndex(std::vector<std::string> indexes, std::string resourcePath)
+{
+    std::string resource;
+
+    if (!indexes.empty()) {
+        for (size_t i = 0; i < indexes.size(); i++) {
+            resource = ResponseTools::endsWith(resourcePath, indexes[i]) ? resourcePath : resourcePath + indexes[i];
+                if (ResponseTools::fileExists(resource)) {
+                    return resource;
+            }
+        }
+    } else {
+        resource = resourcePath;
+        if (ResponseTools::fileExists(resource)) {
+            return resource;
+        }
+    }
+    return "";
 }
 
 void Response::clear(void)
