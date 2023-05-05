@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseTools.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:33:38 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/03 22:10:32 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/05 00:42:14 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,12 @@ bool ResponseTools::isDirectory(std::string path)
         return S_ISDIR(buffer.st_mode);
     }
     return false;
+}
+
+bool ResponseTools::isRequestMethodAllowed(std::string method, std::vector<std::string> limitExcept)
+{
+    std::vector<std::string>::const_iterator it = std::find(limitExcept.begin(), limitExcept.end(), method);
+    return it != limitExcept.end();
 }
 
 void ResponseTools::initStatusCodes(std::map<std::string, std::string> &statusCodes)

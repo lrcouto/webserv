@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/05 00:22:43 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/05 00:57:37 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,12 +103,21 @@ void Response::assembleHeaders()
 void Response::assembleBody()
 {
     std::string resourcePath, requestURI, root, resource;
-    std::vector<std::string> indexes;
+    std::vector<std::string> indexes, limitExcept;
 
     std::vector<Location> locations = this->_serverData->getLocations();
     requestURI = this->_request.getRequestURI();
     if (!locations.empty()) {
         for (size_t i = 0; i < locations.size(); i++) {
+
+            limitExcept = locations[i].getValue("limit_except");
+            if (!limitExcept.empty())
+                if (!ResponseTools::isRequestMethodAllowed(this->_request.getMethod(), limitExcept)) {
+                    this->_status = "405";
+                    this->_type = "txt";
+                    this->_body = "Method not Allowed";
+                    return ;
+                }
 
             std::string locationPath = locations[i].getPath();
             indexes = locations[i].getValue("index");
@@ -153,8 +162,11 @@ void Response::assembleBody()
     std::string   body((std::istreambuf_iterator<char>(resourceContent)),
                      std::istreambuf_iterator<char>());
 
-    if (body.length() == 0)
+    if (body.length() == 0) {
         this->_status = "204";
+        this->_type = "txt";
+        this->_body = "No Content";
+    }
 
     this->_body = body;
 }
