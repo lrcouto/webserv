@@ -12,9 +12,9 @@
 
 #include "RequestTools.hpp"
 
-RequestTools::RequestTools(void) {}
+RequestTools::RequestTools(void) : _done_parsing(false) {}
 
-RequestTools::RequestTools(std::string &raw) : _raw(raw) {}
+RequestTools::RequestTools(std::string &raw) : _raw(raw), _done_parsing(false) {}
 
 RequestTools::~RequestTools(void) {}
 
@@ -23,8 +23,9 @@ RequestTools::RequestTools(RequestTools const &src) { *this = src; }
 RequestTools &RequestTools::operator=(RequestTools const &src)
 {
     if (this != &src) {
-        _raw     = src._raw;
-        _request = src._request;
+        _raw          = src._raw;
+        _request      = src._request;
+        _done_parsing = src._done_parsing;
     }
     return (*this);
 }
@@ -72,6 +73,7 @@ void RequestTools::parseRequestLine(std::string &rawRequest)
                 if (!_isControlCharacter(*it))
                     break;
                 throw std::exception(); // TODO: 400 Bad Request
+                break;
 
             case WSV_HTTP_START:
                 if (*it != 'H')
@@ -90,13 +92,7 @@ void RequestTools::parseRequestLine(std::string &rawRequest)
                 }
                 break;
 
-            case WSV_REQUEST_CR:
-                if (*it != CR)
-                    throw std::exception(); // TODO: 400 Bad Request
-                state = WSV_REQUEST_LF;
-                break;
-
-            case WSV_REQUEST_LF:
+            case WSV_REQUEST_LF: // TODO: Do something when parsing finishes
                 if (*it != LF)
                     throw std::exception(); // TODO: 400 Bad Request
                 state = WSV_REQUEST_DONE;
@@ -104,9 +100,97 @@ void RequestTools::parseRequestLine(std::string &rawRequest)
 
             default:
                 throw std::exception(); // TODO: Custom exception
+                break;
+        }
+        ++it;
+        // TODO: Do something if end() is reached and parsing is not complete
+    }
+}
+
+void RequestTools::parseHeaderLine(std::string &rawRequest)
+{
+    std::string::const_iterator it    = rawRequest.begin();
+    HeaderLineState             state = WSV_HEADER_START;
+
+    while (it != rawRequest.end()) {
+
+        switch (state) {
+
+            case WSV_HEADER_START:
+                _header_key_begin = it;
+
+                switch (*it) {
+                    case CR:
+                        state = WSV_HEADER_FINAL_LF;
+                        break;
+                    default:
+                        if (!std::isalnum(*it))
+                            throw std::exception(); // TODO: 400 Bad Request
+                        state = WSV_HEADER_KEY;
+                        break;
+                }
+                break;
+
+            case WSV_HEADER_KEY:
+                if (*it == ':') {
+                    _header_key.clear();
+                    _header_key.insert(_header_key.begin(), _header_key_begin, it);
+                    state = WSV_HEADER_SPACE_BEFORE_VALUE;
+                    break;
+                }
+                if (!std::isalnum(*it) && *it != '-')
+                    throw std::exception(); // TODO: 400 Bad Request
+                break;
+
+            case WSV_HEADER_SPACE_BEFORE_VALUE:
+                switch (*it) {
+                    case WHITESPACE:
+                        break;
+                    case CR:
+                    case LF:
+                        throw std::exception(); // TODO: 400 Bad Request
+                        break;
+                    default:
+                        _header_value_begin = it;
+                        state               = WSV_HEADER_VALUE;
+                        break;
+                }
+                break;
+
+            case WSV_HEADER_VALUE:
+                switch (*it) {
+                    case CR:
+                        _header_value.clear();
+                        _header_value.insert(_header_value.begin(), _header_value_begin, it);
+                        state = WSV_HEADER_LF;
+                        break;
+                    case LF:
+                        throw std::exception(); // TODO: 400 Bad Request
+                        break;
+                }
+                break;
+
+            case WSV_HEADER_LF:
+                if (*it != LF)
+                    throw std::exception(); // TODO: 400 Bad Request
+                _request._headers[_header_key] = _header_value;
+                state                          = WSV_HEADER_START;
+                break;
+
+            case WSV_HEADER_FINAL_LF:
+                if (*it != LF)
+                    throw std::exception(); // TODO: 400 Bad Request
+                _done_parsing = true;
+                state         = WSV_HEADER_DONE;
+                break;
+
+            default:
+                throw std::exception(); // TODO: Custom exception
+                break;
         }
         ++it;
     }
+    // TODO: Do something if end() is reached and parsing is not complete
 }
 
 /******************************************** PRIVATE ********************************************/
