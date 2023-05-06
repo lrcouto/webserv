@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:33:38 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/05 00:42:14 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/06 17:05:42 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,26 @@ bool ResponseTools::isDirectory(std::string path)
         return S_ISDIR(buffer.st_mode);
     }
     return false;
+}
+
+size_t ResponseTools::convertMaxBodySizeToNumber(std::string maxSize)
+{
+    std::string::const_iterator it = maxSize.begin();
+    size_t value = 0;
+    while (it != maxSize.end() && std::isdigit(*it)) {
+        value = value * 10 + (*it - '0');
+        ++it;
+    }
+    if (it == maxSize.end()) {
+        return value;
+    }
+    if (*it == 'm' || *it == 'M') {
+        return value * 1024 * 1024;
+    }
+    if (*it == 'g' || *it == 'G') {
+        return value * 1024 * 1024 * 1024;
+    }
+    return 0;
 }
 
 bool ResponseTools::isRequestMethodAllowed(std::string method, std::vector<std::string> limitExcept)

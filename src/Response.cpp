@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/05 00:57:37 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/06 17:30:53 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,52 +102,69 @@ void Response::assembleHeaders()
 
 void Response::assembleBody()
 {
-    std::string resourcePath, requestURI, root, resource;
-    std::vector<std::string> indexes, limitExcept;
-
     std::vector<Location> locations = this->_serverData->getLocations();
-    requestURI = this->_request.getRequestURI();
+    std::string requestURI = this->_request.getRequestURI();
+    std::vector<std::string> limitExcept;
+
     if (!locations.empty()) {
         for (size_t i = 0; i < locations.size(); i++) {
 
+            std::string locationPath = locations[i].getPath();
             limitExcept = locations[i].getValue("limit_except");
-            if (!limitExcept.empty())
+            if (!limitExcept.empty() && requestURI.find(locationPath) != std::string::npos)
                 if (!ResponseTools::isRequestMethodAllowed(this->_request.getMethod(), limitExcept)) {
                     this->_status = "405";
                     this->_type = "txt";
-                    this->_body = "Method not Allowed";
+                    this->_body = "Method not Allowed\n";
                     return ;
                 }
+        }
+    }
+
+    if (this->_request.getMethod() == "GET") {
+        getResource(requestURI);
+    } else if (this->_request.getMethod() == "POST") {
+        postResource(requestURI);
+    } else if (this->_request.getMethod() == "DELETE") {
+        deleteResource(requestURI);
+    } else {
+        this->_status = "501";
+        this->_type = "txt";
+        this->_body = "Not Implemented\n";
+    }
+}
+
+void Response::getResource(std::string requestURI)
+{
+    std::string resourcePath, root, resource;
+    std::vector<std::string> indexes;
+    
+    std::vector<Location> locations = this->_serverData->getLocations();
+    if (!locations.empty()) {
+        for (size_t i = 0; i < locations.size(); i++) {
 
             std::string locationPath = locations[i].getPath();
+
             indexes = locations[i].getValue("index");
             root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0] : locations[i].getValue("root")[0];
             resourcePath = ResponseTools::assemblePath(root, requestURI);
-
-            indexes = locations[i].getValue("index");
+            
             resource = findResourceByIndex(indexes, resourcePath);
             if ((!resource.empty()) && resource.find(locationPath) != std::string::npos)
                 break ;
         }
     }
+    
     if (resource.empty()) {
         indexes = this->_serverData->getValue("index");
         root = this->_serverData->getValue("root")[0];
         resourcePath = ResponseTools::assemblePath(root, requestURI);
 
-        this->_status = "404";
-
         resource = findResourceByIndex(indexes, resourcePath);
     }
 
-    if (!resource.empty())
-        this->_status = "200";
-
-    if (ResponseTools::isDirectory(resource))
+    if (ResponseTools::isDirectory(resource) || resource.empty()) {
         this->_status = "404";
-
-    if (this->_status == "404")
-    {
         this->_type = "html";
         resource    = "./examples/404.html";
         std::ifstream error404(resource.c_str());
@@ -165,10 +182,69 @@ void Response::assembleBody()
     if (body.length() == 0) {
         this->_status = "204";
         this->_type = "txt";
-        this->_body = "No Content";
+        this->_body = "No Content\n";
     }
 
+    this->_status = "200";
     this->_body = body;
+}
+
+void Response::postResource(std::string requestURI)
+{
+    std::string root, resource;
+
+    std::vector<std::string> maxSizeVector = this->_serverData->getValue("client_max_body_size");
+    if (!maxSizeVector.empty()) {
+        size_t maxSize = ResponseTools::convertMaxBodySizeToNumber(maxSizeVector[0]);
+
+        if (this->_request.getBody().length() > maxSize) {
+            this->_status = "413";
+            this->_type = "txt";
+            this->_body = "Payload Too Large\n";
+        }   
+    }
+
+    std::vector<Location> locations = this->_serverData->getLocations();
+    if (!locations.empty()) {
+        for (size_t i = 0; i < locations.size(); i++) {
+
+            std::string locationPath = locations[i].getPath();
+
+            root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0] : locations[i].getValue("root")[0];
+            resource = ResponseTools::assemblePath(root, requestURI);
+            
+            if ((!resource.empty()) && resource.find(locationPath) != std::string::npos)
+                break ;
+        }
+    }
+    if (resource.empty()) {
+        root = this->_serverData->getValue("root")[0];
+        resource = ResponseTools::assemblePath(root, requestURI);
+    }
+
+    std::ofstream newFile;
+    std::string requestBody = this->_request.getBody();
+
+    newFile.open(resource.c_str(), std::ios::binary);
+
+    if (newFile.fail()) {
+        this->_status = "500";
+        this->_type = "txt";
+        this->_body = "Internal Server Error\n";
+        return;
+    }
+
+    newFile.write(requestBody.c_str(), requestBody.length());
+    newFile.close();
+
+    this->_status = "201";
+    this->_type = "txt";
+    this->_body = "Success\n";
+}
+
+void Response::deleteResource(std::string requestURI)
+{
+    requestURI = "";
 }
 
 std::string Response::findResourceByIndex(std::vector<std::string> indexes, std::string resourcePath)

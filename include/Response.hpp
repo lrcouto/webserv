@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/04 23:55:03 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/06 17:29:29 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,10 @@ class Response {
         void assembleStatusLine(void);
         void assembleHeaders(void);
         void assembleBody(void);
+
+        void getResource(std::string requestURI);
+        void postResource(std::string requestURI);
+        void deleteResource(std::string requestURI);
 
         std::string assemblePath(std::string root, std::string requestURI);
         std::string findResourceByIndex(std::vector<std::string> indexes, std::string resourcePath);
