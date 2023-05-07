@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/06 17:30:53 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/06 21:10:17 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ void Response::assembleHeaders()
         this->_headers.insert(std::make_pair("Content-Length", "0"));
     }
 
-    std::string                                  contentType;
+    std::string contentType;
     std::map<std::string, std::string>::iterator it = this->_contentTypes.find(this->_type);
     if (it->second == "") {
         contentType = "application/octet-stream";
@@ -239,12 +239,54 @@ void Response::postResource(std::string requestURI)
 
     this->_status = "201";
     this->_type = "txt";
-    this->_body = "Success\n";
+    this->_body = "Created Successfully\n";
+    this->_headers.insert(std::make_pair("Location", resource));
 }
 
 void Response::deleteResource(std::string requestURI)
 {
-    requestURI = "";
+    std::string root, resource;
+
+    std::vector<Location> locations = this->_serverData->getLocations();
+    if (!locations.empty()) {
+        for (size_t i = 0; i < locations.size(); i++) {
+
+            std::string locationPath = locations[i].getPath();
+
+            root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0] : locations[i].getValue("root")[0];
+            resource = ResponseTools::assemblePath(root, requestURI);
+            
+            if ((!resource.empty()) && resource.find(locationPath) != std::string::npos)
+                break ;
+        }
+    }
+    if (resource.empty()) {
+        root = this->_serverData->getValue("root")[0];
+        resource = ResponseTools::assemblePath(root, requestURI);
+    }
+
+    if (!ResponseTools::fileExists(resource)) {
+        this->_status = "404";
+        this->_type = "html";
+        resource = "./examples/404.html";
+        std::ifstream error404(resource.c_str());
+        std::string body((std::istreambuf_iterator<char>(error404)), std::istreambuf_iterator<char>());
+        this->_body = body;
+        return;
+    }
+
+    if (ResponseTools::isDirectory(resource)) {
+        this->_status = "403";
+        this->_type = "txt";
+        this->_body = "Forbidden\n";
+        return;
+    }
+
+    std::remove(resource.c_str());
+
+    this->_status = "200";
+    this->_type = "txt";
+    this->_body = "Deleted Successfully\n";
 }
 
 std::string Response::findResourceByIndex(std::vector<std::string> indexes, std::string resourcePath)
