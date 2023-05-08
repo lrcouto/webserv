@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/06 21:10:17 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/08 01:18:15 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,20 +164,14 @@ void Response::getResource(std::string requestURI)
     }
 
     if (ResponseTools::isDirectory(resource) || resource.empty()) {
-        this->_status = "404";
-        this->_type = "html";
-        resource    = "./examples/404.html";
-        std::ifstream error404(resource.c_str());
-        std::string   body((std::istreambuf_iterator<char>(error404)),
-                         std::istreambuf_iterator<char>());
-        this->_body = body;
+        HTTPError("404");
         return;
     }
 
     this->_type = ResponseTools::getFileExtension(resource);
     std::ifstream resourceContent(resource.c_str());
     std::string   body((std::istreambuf_iterator<char>(resourceContent)),
-                     std::istreambuf_iterator<char>());
+        std::istreambuf_iterator<char>());
 
     if (body.length() == 0) {
         this->_status = "204";
@@ -198,9 +192,8 @@ void Response::postResource(std::string requestURI)
         size_t maxSize = ResponseTools::convertMaxBodySizeToNumber(maxSizeVector[0]);
 
         if (this->_request.getBody().length() > maxSize) {
-            this->_status = "413";
-            this->_type = "txt";
-            this->_body = "Payload Too Large\n";
+            HTTPError("413");
+            return ;
         }   
     }
 
@@ -228,9 +221,7 @@ void Response::postResource(std::string requestURI)
     newFile.open(resource.c_str(), std::ios::binary);
 
     if (newFile.fail()) {
-        this->_status = "500";
-        this->_type = "txt";
-        this->_body = "Internal Server Error\n";
+        HTTPError("500");
         return;
     }
 
@@ -265,20 +256,13 @@ void Response::deleteResource(std::string requestURI)
         resource = ResponseTools::assemblePath(root, requestURI);
     }
 
-    if (!ResponseTools::fileExists(resource)) {
-        this->_status = "404";
-        this->_type = "html";
-        resource = "./examples/404.html";
-        std::ifstream error404(resource.c_str());
-        std::string body((std::istreambuf_iterator<char>(error404)), std::istreambuf_iterator<char>());
-        this->_body = body;
+    if (ResponseTools::isDirectory(resource)) {
+        HTTPError("403");
         return;
     }
 
-    if (ResponseTools::isDirectory(resource)) {
-        this->_status = "403";
-        this->_type = "txt";
-        this->_body = "Forbidden\n";
+    if (!ResponseTools::fileExists(resource)) {
+        HTTPError("404");
         return;
     }
 
@@ -308,6 +292,75 @@ std::string Response::findResourceByIndex(std::vector<std::string> indexes, std:
     }
     return "";
 }
+
+void Response::HTTPError(std::string status)
+{
+    std::string errorPagePath;
+    std::string requestURI = this->_request.getRequestURI();
+    std::vector<std::string> errorPages;
+
+    std::vector<Location> locations = this->_serverData->getLocations();
+
+    for (size_t i = 0; i < locations.size(); i++) {
+        errorPages = locations[i].getValue("error_page");
+        std::string locationPath = locations[i].getPath();
+
+        if (!errorPages.empty() && requestURI.find(locationPath) != std::string::npos) {
+            for (size_t j = 0; j < errorPages.size(); j++) {
+                std::string errorPage = errorPages[j];
+                size_t delimiter = errorPage.find(':');
+                std::string errorCode = errorPage.substr(0, delimiter);
+                errorPagePath = errorPage.substr(delimiter + 1);
+
+                if (errorCode == status) {
+                    std::string root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0] : locations[i].getValue("root")[0];
+                    root = ResponseTools::assemblePath(root, locationPath);
+                    errorPagePath = ResponseTools::assemblePath(root, errorPagePath);
+
+                    if (ResponseTools::fileExists(errorPagePath) && !errorPagePath.empty() && errorPagePath.find(locationPath) != std::string::npos) {
+                        setErrorPage(status, errorPagePath);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    std::string root = this->_serverData->getValue("root")[0];
+    errorPages = this->_serverData->getValue("error_page");
+
+    for (size_t i = 0; i < errorPages.size(); ++i) {
+        std::string errorPage = errorPages[i];
+        size_t delimiter = errorPage.find(':');
+        std::string errorCode = errorPage.substr(0, delimiter);
+        errorPagePath = errorPage.substr(delimiter + 1);
+
+        if (errorCode == status) {
+            errorPagePath = ResponseTools::assemblePath(root, errorPagePath);
+
+            if (ResponseTools::fileExists(errorPagePath)) {
+                setErrorPage(status, errorPagePath);
+                return ;
+            }
+        }
+    }
+
+    errorPagePath = "./examples/error/" + status + ".html";
+    if (ResponseTools::fileExists(errorPagePath)) {
+        setErrorPage(status, errorPagePath);
+        return ;
+    }
+}
+
+void Response::setErrorPage(std::string status, std::string path)
+{
+    this->_status = status;
+    this->_type = "html";
+    std::ifstream error(path.c_str());
+    std::string body((std::istreambuf_iterator<char>(error)), std::istreambuf_iterator<char>());
+    this->_body = body;
+}
+
 
 void Response::clear(void)
 {

@@ -26,7 +26,7 @@ void Server::insertServerData(std::pair<std::string, std::vector<std::string> > 
     } else if (_isDirectiveNotAllowed(directive.first)) {
         throw(DirectiveNotAllowedError());
     } else {
-        if (_isDirectiveOnMap(directive.first))
+        if (!_isDirectiveOnMap(directive.first))
             this->_serverData.insert(directive);
         else
             this->_serverData[directive.first].insert(this->_serverData[directive.first].begin(),
