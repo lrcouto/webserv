@@ -86,7 +86,7 @@ ParseDirectives::DirectiveType ParseDirectives::parseErrorPage(std::string const
     std::vector<std::string>::const_iterator it;
     for (it = (tokens.begin() + 1); it != (tokens.end() - 1); ++it) {
         if (std::find(http_codes.begin(), http_codes.end(), *it) != http_codes.end()) {
-            arguments.push_back(*it);
+            arguments.push_back(tokens[1] + ":" + tokens[2]);
         } else {
             throw InvalidArgument(tokens[0], *it);
         }
