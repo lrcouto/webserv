@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/03 22:01:33 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/06 17:29:29 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,12 @@ class Response {
         void assembleHeaders(void);
         void assembleBody(void);
 
+        void getResource(std::string requestURI);
+        void postResource(std::string requestURI);
+        void deleteResource(std::string requestURI);
+
         std::string assemblePath(std::string root, std::string requestURI);
+        std::string findResourceByIndex(std::vector<std::string> indexes, std::string resourcePath);
 
         void clear(void);
 };
