@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/08 01:18:15 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/08 13:26:02 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,9 +113,7 @@ void Response::assembleBody()
             limitExcept = locations[i].getValue("limit_except");
             if (!limitExcept.empty() && requestURI.find(locationPath) != std::string::npos)
                 if (!ResponseTools::isRequestMethodAllowed(this->_request.getMethod(), limitExcept)) {
-                    this->_status = "405";
-                    this->_type = "txt";
-                    this->_body = "Method not Allowed\n";
+                    HTTPError("405");
                     return ;
                 }
         }
@@ -128,9 +126,7 @@ void Response::assembleBody()
     } else if (this->_request.getMethod() == "DELETE") {
         deleteResource(requestURI);
     } else {
-        this->_status = "501";
-        this->_type = "txt";
-        this->_body = "Not Implemented\n";
+        HTTPError("501");
     }
 }
 
