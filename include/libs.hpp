@@ -18,6 +18,7 @@
 #include <arpa/inet.h>  // Functions to convert IP addresses.
 #include <cctype>       // Standard library implementation of C's ctype.
 #include <cstdlib>      // Standard library implementation of C's stdlib.
+#include <dirent.h>     // Directory handling functions.
 #include <errno.h>      // Error codes to indicate system call errors.
 #include <fcntl.h>      // File control operations like fcntl.
 #include <netdb.h>      // Functions to perform DNS lookups and IP address conversions.
