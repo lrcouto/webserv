@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/09 01:07:57 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/09 01:56:17 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,7 +171,8 @@ void Response::getResource(std::string requestURI)
         resource = findResourceByIndex(indexes, resourcePath);
     }
 
-    autoindex = this->_serverData->getValue("autoindex");
+    autoindex = verifyLocationAutoindexOverride(resourcePath);
+
     if (ResponseTools::isDirectory(resourcePath) && !autoindex.empty()) {
         if (autoindex[0] == "on" && resource.empty()) {
             this->_body = ResponseTools::autoindex(resourcePath, this->_serverData->getValue("listen")[1]);
@@ -379,6 +380,21 @@ void Response::setErrorPage(std::string status, std::string path)
     std::ifstream error(path.c_str());
     std::string body((std::istreambuf_iterator<char>(error)), std::istreambuf_iterator<char>());
     this->_body = body;
+}
+
+std::vector<std::string> Response::verifyLocationAutoindexOverride(std::string resourcePath)
+{
+    std::vector<Location> locations = this->_serverData->getLocations();
+    if (!locations.empty()) {
+        for (size_t i = 0; i < locations.size(); i++) {
+            if (resourcePath.find(locations[i].getPath()) != std::string::npos) {
+                std::vector<std::string> autoindex = locations[i].getValue("autoindex");
+                if (!autoindex.empty())
+                    return autoindex;
+            }
+        }
+    }
+    return this->_serverData->getValue("autoindex");
 }
 
 
