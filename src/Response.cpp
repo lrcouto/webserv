@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/08 13:30:59 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/09 01:07:57 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,7 @@ void Response::assembleBody()
 void Response::getResource(std::string requestURI)
 {
     std::string resourcePath, root, resource;
-    std::vector<std::string> indexes;
+    std::vector<std::string> indexes, autoindex;
     
     std::vector<Location> locations = this->_serverData->getLocations();
     if (!locations.empty()) {
@@ -146,6 +146,18 @@ void Response::getResource(std::string requestURI)
             resourcePath = ResponseTools::assemblePath(root, requestURI);
             
             resource = findResourceByIndex(indexes, resourcePath);
+            autoindex = locations[i].getValue("autoindex");
+            if (ResponseTools::isDirectory(resourcePath) && !autoindex.empty() && resourcePath.find(locationPath) != std::string::npos) {
+                if (autoindex[0] == "on" && resource.empty()) {
+                    this->_body = ResponseTools::autoindex(resourcePath, this->_serverData->getValue("listen")[1]);
+                    if (this->_body.empty())
+                        HTTPError("404");
+                    this->_status = "200";
+                    this->_type = "html";
+                    return ;
+                }
+            }
+
             if ((!resource.empty()) && resource.find(locationPath) != std::string::npos)
                 break ;
         }
@@ -159,9 +171,21 @@ void Response::getResource(std::string requestURI)
         resource = findResourceByIndex(indexes, resourcePath);
     }
 
+    autoindex = this->_serverData->getValue("autoindex");
+    if (ResponseTools::isDirectory(resourcePath) && !autoindex.empty()) {
+        if (autoindex[0] == "on" && resource.empty()) {
+            this->_body = ResponseTools::autoindex(resourcePath, this->_serverData->getValue("listen")[1]);
+            if (this->_body.empty())
+                HTTPError("404");
+            this->_status = "200";
+            this->_type = "html";
+            return ;
+        }
+    } 
+    
     if (ResponseTools::isDirectory(resource) || resource.empty()) {
         HTTPError("404");
-        return;
+        return ;
     }
 
     this->_type = ResponseTools::getFileExtension(resource);

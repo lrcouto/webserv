@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:33:38 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/06 17:05:42 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/09 00:48:43 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,32 @@ bool ResponseTools::isRequestMethodAllowed(std::string method, std::vector<std::
 {
     std::vector<std::string>::const_iterator it = std::find(limitExcept.begin(), limitExcept.end(), method);
     return it != limitExcept.end();
+}
+
+std::string ResponseTools::autoindex(std::string path, std::string port)
+{
+    DIR *dir = opendir(path.c_str());
+    if (!dir)
+        return "";
+
+    std::string indexPage = "<!DOCTYPE html>\n\
+                            <html>\n\
+                            <head>\n\
+                            <title>" + path + "</title>\n\
+                            </head>\n\
+                            <body>\n\
+                            <h1>INDEX</h1>\n\
+                            <p>\n";
+
+    for (struct dirent *dirEntry = readdir(dir); dirEntry; dirEntry = readdir(dir)) {
+        std::stringstream ss;
+        ss << "\t\t<p><a href=\"http://localhost" << ":" << port
+        << path.substr(1) + (path[path.size() - 1] != '/' ? "/" : "") + dirEntry->d_name + "\">" + dirEntry->d_name + "</a></p>\n";
+        indexPage += ss.str();
+    }
+    indexPage += "</p>\n</body>\n</html>\n";
+    closedir(dir);
+    return indexPage;
 }
 
 void ResponseTools::initStatusCodes(std::map<std::string, std::string> &statusCodes)
