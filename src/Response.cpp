@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/09 01:56:17 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/09 22:36:02 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,6 +169,8 @@ void Response::getResource(std::string requestURI)
         resourcePath = ResponseTools::assemblePath(root, requestURI);
 
         resource = findResourceByIndex(indexes, resourcePath);
+        if (resource.empty() && ResponseTools::fileExists(resourcePath))
+            resource = resourcePath;
     }
 
     autoindex = verifyLocationAutoindexOverride(resourcePath);
