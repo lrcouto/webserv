@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/04 22:58:55 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/09 20:25:06 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,7 @@ enum RequestLineState {
     WSV_URI,
     WSV_HTTP_START,
     WSV_HTTP,
-    WSV_REQUEST_LF,
-    WSV_REQUEST_DONE,
+    WSV_REQUEST_ALMOST_DONE,
 };
 
 enum HeaderLineState {
@@ -32,9 +31,23 @@ enum HeaderLineState {
     WSV_HEADER_KEY,
     WSV_HEADER_SPACE_BEFORE_VALUE,
     WSV_HEADER_VALUE,
-    WSV_HEADER_LF,
-    WSV_HEADER_FINAL_LF,
-    WSV_HEADER_DONE,
+    WSV_HEADER_ALMOST_DONE,
+    WSV_HEADER_FINAL_ALMOST_DONE,
+};
+
+enum ChunkedState {
+    WSV_CHUNK_START,
+    WSV_CHUNK_SIZE,
+    WSV_CHUNK_EXTENSION,
+    WSV_CHUNK_EXTENSION_ALMOST_DONE,
+    WSV_CHUNK_DATA,
+    WSV_CHUNK_AFTER_DATA,
+    WSV_CHUNK_LAST_EXTENSION,
+    WSV_CHUNK_LAST_EXTENSION_ALMOST_DONE,
+    WSV_CHUNK_TRAILER,
+    WSV_CHUNK_TRAILER_ALMOST_DONE,
+    WSV_CHUNK_TRAILER_HEADER,
+    WSV_CHUNK_TRAILER_HEADER_ALMOST_DONE,
 };
 
 enum ParseExitCode { WSV_OK, WSV_ERROR };
@@ -53,7 +66,9 @@ class RequestTools {
         std::string _header_key;
         std::string _header_value;
 
-        bool _done_parsing;
+        bool        _done_parsing;
+        size_t      _chunk_size;
+        std::string _chunk_data;
 
     public:
         RequestTools(void);
@@ -64,11 +79,13 @@ class RequestTools {
 
         void parseRequestLine(std::string &rawRequest);
         void parseHeaderLine(std::string &rawRequest);
+        void parseChunkedBody(std::string &rawRequest);
 
     private:
-        bool _isControlCharacter(int c);
-        bool _isValidMethod(std::string &method);
-        bool _isValidProtocol(std::string &protocol);
+        bool   _isControlCharacter(int c);
+        bool   _isValidMethod(std::string &method);
+        bool   _isValidProtocol(std::string &protocol);
+        size_t _getHexValue(char c);
 };
 
 #endif /* REQUEST_TOOLS_HPP */
