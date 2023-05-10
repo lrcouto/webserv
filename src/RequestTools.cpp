@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/10 12:56:16 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/10 14:59:21 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,13 @@
 
 RequestTools::RequestTools(void) : _done_parsing(false), _chunk_size(-1) {}
 
-RequestTools::RequestTools(std::string &raw) : _raw(raw), _done_parsing(false), _chunk_size(-1) {}
+RequestTools::RequestTools(std::string &raw) :
+    _raw(raw),
+    _chunk_size(-1),
+    _position(_raw.begin()),
+    _last(_raw.end())
+{
+}
 
 RequestTools::~RequestTools(void) {}
 
@@ -31,13 +37,22 @@ RequestTools &RequestTools::operator=(RequestTools const &src)
     return (*this);
 }
 
-void RequestTools::parseRequestLine(std::string &rawRequest)
+void RequestTools::parseRequestLine(void)
 {
-    std::string::const_iterator it    = rawRequest.begin();
-    RequestLineState            state = WSV_REQUEST_START;
+    enum {
+        WSV_REQUEST_START,
+        WSV_METHOD,
+        WSV_URI_START,
+        WSV_URI,
+        WSV_HTTP_START,
+        WSV_HTTP,
+        WSV_REQUEST_ALMOST_DONE,
+    } state;
 
-    while (it != rawRequest.end()) {
+    state = WSV_REQUEST_START;
 
+    std::string::const_iterator it;
+    for (it = _position; it != _last; ++it) {
         switch (state) {
 
             case WSV_REQUEST_START:
@@ -71,9 +86,8 @@ void RequestTools::parseRequestLine(std::string &rawRequest)
                     state                = WSV_HTTP_START;
                     break;
                 }
-                if (!_isControlCharacter(*it))
-                    break;
-                throw RequestParsingException(BAD_REQUEST);
+                if (_isControlCharacter(*it))
+                    throw RequestParsingException(BAD_REQUEST);
                 break;
 
             case WSV_HTTP_START:
@@ -83,6 +97,7 @@ void RequestTools::parseRequestLine(std::string &rawRequest)
                 state           = WSV_HTTP;
                 break;
 
+            // TODO: 505 HTTP Version Not Supported
             case WSV_HTTP:
                 if (*it == CR) {
                     std::string protocol(_protocol_begin, it);
@@ -96,20 +111,28 @@ void RequestTools::parseRequestLine(std::string &rawRequest)
             case WSV_REQUEST_ALMOST_DONE: // TODO: Do something when parsing finishes
                 if (*it != LF)
                     throw RequestParsingException(BAD_REQUEST);
+                _position = it + 1;
                 return; // TODO: Done
         }
-        ++it;
     }
     throw RequestParsingException(BAD_REQUEST);
 }
 
-void RequestTools::parseHeaderLine(std::string &rawRequest)
+void RequestTools::parseHeaderLines(void)
 {
-    std::string::const_iterator it    = rawRequest.begin();
-    HeaderLineState             state = WSV_HEADER_START;
+    enum {
+        WSV_HEADER_START,
+        WSV_HEADER_KEY,
+        WSV_HEADER_SPACE_BEFORE_VALUE,
+        WSV_HEADER_VALUE,
+        WSV_HEADER_ALMOST_DONE,
+        WSV_HEADER_FINAL_ALMOST_DONE,
+    } state;
 
-    while (it != rawRequest.end()) {
+    state = WSV_HEADER_START;
 
+    std::string::const_iterator it;
+    for (it = _position; it != _last; ++it) {
         switch (state) {
 
             case WSV_HEADER_START:
@@ -176,22 +199,36 @@ void RequestTools::parseHeaderLine(std::string &rawRequest)
                 if (*it != LF)
                     throw RequestParsingException(BAD_REQUEST);
                 _done_parsing = true;
+                _position     = it + 1;
                 return; // TODO: done
         }
-        ++it;
     }
     throw RequestParsingException(BAD_REQUEST);
 }
 
-void RequestTools::parseChunkedBody(std::string &rawRequest)
+void RequestTools::parseChunkedBody(void)
 {
-    std::string::const_iterator it    = rawRequest.begin();
-    ChunkedState                state = WSV_CHUNK_START;
-    size_t                      hex   = (size_t)-1;
-    size_t                      remaining_size, chunk_data_size_at_most;
+    size_t chunk_data_size_at_most, hex = (size_t)-1;
 
-    while (it != rawRequest.end()) {
+    enum {
+        WSV_CHUNK_START,
+        WSV_CHUNK_SIZE,
+        WSV_CHUNK_EXTENSION,
+        WSV_CHUNK_EXTENSION_ALMOST_DONE,
+        WSV_CHUNK_DATA,
+        WSV_CHUNK_AFTER_DATA,
+        WSV_CHUNK_LAST_EXTENSION,
+        WSV_CHUNK_LAST_EXTENSION_ALMOST_DONE,
+        WSV_CHUNK_TRAILER,
+        WSV_CHUNK_TRAILER_ALMOST_DONE,
+        WSV_CHUNK_TRAILER_HEADER,
+        WSV_CHUNK_TRAILER_HEADER_ALMOST_DONE,
+    } state;
 
+    state = WSV_CHUNK_START;
+
+    std::string::const_iterator it;
+    for (it = _position; it != _last; ++it) {
         switch (state) {
 
             case WSV_CHUNK_START:
@@ -274,8 +311,7 @@ void RequestTools::parseChunkedBody(std::string &rawRequest)
                     state = WSV_CHUNK_AFTER_DATA;
                     break;
                 }
-                remaining_size          = rawRequest.end() - it;
-                chunk_data_size_at_most = std::min(_chunk_size, remaining_size);
+                chunk_data_size_at_most = std::min(_chunk_size, (size_t)(_last - it));
                 _chunk_data.insert(_chunk_data.end(), it, (it + chunk_data_size_at_most));
                 _chunk_size -= chunk_data_size_at_most;
                 it += chunk_data_size_at_most - 1;
@@ -310,6 +346,7 @@ void RequestTools::parseChunkedBody(std::string &rawRequest)
                         state = WSV_CHUNK_TRAILER_ALMOST_DONE;
                         break;
                     case LF:
+                        _position = it + 1;
                         return; // TODO: Chunk parsing done;
                     default:
                         state = WSV_CHUNK_TRAILER_HEADER;
@@ -317,9 +354,10 @@ void RequestTools::parseChunkedBody(std::string &rawRequest)
                 break;
 
             case WSV_CHUNK_TRAILER_ALMOST_DONE:
-                if (*it == LF)
-                    return; // TODO: Chunk parsing done
-                throw RequestParsingException(BAD_REQUEST);
+                if (*it != LF)
+                    throw RequestParsingException(BAD_REQUEST);
+                _position = it + 1;
+                return; // TODO: Chunk parsing done
 
             case WSV_CHUNK_TRAILER_HEADER:
                 switch (*it) {
@@ -338,9 +376,21 @@ void RequestTools::parseChunkedBody(std::string &rawRequest)
                 }
                 throw RequestParsingException(BAD_REQUEST);
         }
-        ++it;
     }
     throw RequestParsingException(BAD_REQUEST);
+}
+
+void RequestTools::parseRequest(void)
+{
+    try {
+        parseRequestLine();
+        parseHeaderLines();
+        parseChunkedBody();
+    } catch (RequestParsingException const &e) {
+        std::cerr << e.get_error() << ' ' << e.what() << '\n';
+    } catch (std::exception const &e) {
+        std::cerr << e.what() << '\n';
+    }
 }
 
 /******************************************** PRIVATE ********************************************/
@@ -358,8 +408,10 @@ size_t RequestTools::_getHexValue(char c)
 {
     if (c >= '0' && c <= '9')
         return (c - '0');
-    if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))
+    if (c >= 'a' && c <= 'f')
         return (c - 'a' + 10);
+    if (c >= 'A' && c <= 'F')
+        return (c - 'A' + 10);
     return (-1);
 }
 
