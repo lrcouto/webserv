@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/09 20:25:06 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/10 12:48:47 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,12 @@ enum ChunkedState {
     WSV_CHUNK_TRAILER_HEADER_ALMOST_DONE,
 };
 
-enum ParseExitCode { WSV_OK, WSV_ERROR };
+// enum ParseExitCode { WSV_OK, WSV_ERROR };
+
+enum RequestParsingErrorCode {
+    BAD_REQUEST     = 400,
+    NOT_IMPLEMENTED = 501,
+};
 
 class RequestTools {
     private:
@@ -80,6 +85,16 @@ class RequestTools {
         void parseRequestLine(std::string &rawRequest);
         void parseHeaderLine(std::string &rawRequest);
         void parseChunkedBody(std::string &rawRequest);
+
+        class RequestParsingException : public std::exception {
+            public:
+                RequestParsingException(RequestParsingErrorCode error);
+                char const             *what() const throw();
+                RequestParsingErrorCode get_error() const;
+
+            private:
+                RequestParsingErrorCode _error;
+        };
 
     private:
         bool   _isControlCharacter(int c);

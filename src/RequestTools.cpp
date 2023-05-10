@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/09 21:15:41 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/10 12:56:16 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void RequestTools::parseRequestLine(std::string &rawRequest)
 
             case WSV_REQUEST_START:
                 if (*it < 'A' || *it > 'Z')
-                    throw std::exception(); // TODO: 501 Not Implemented
+                    throw RequestParsingException(NOT_IMPLEMENTED);
                 _method_begin = it;
                 state         = WSV_METHOD;
                 break;
@@ -51,7 +51,7 @@ void RequestTools::parseRequestLine(std::string &rawRequest)
                 if (*it == WHITESPACE) {
                     std::string method(_method_begin, it);
                     if (!_isValidMethod(method))
-                        throw std::exception(); // TODO: 501 Not Implemented
+                        throw RequestParsingException(NOT_IMPLEMENTED);
                     _request._method = method;
                     state            = WSV_URI_START;
                 }
@@ -59,7 +59,7 @@ void RequestTools::parseRequestLine(std::string &rawRequest)
 
             case WSV_URI_START:
                 if (*it != '/')
-                    throw std::exception(); // TODO: 400 Bad Request
+                    throw RequestParsingException(BAD_REQUEST);
                 _uri_begin = it;
                 state      = WSV_URI;
                 break;
@@ -73,12 +73,12 @@ void RequestTools::parseRequestLine(std::string &rawRequest)
                 }
                 if (!_isControlCharacter(*it))
                     break;
-                throw std::exception(); // TODO: 400 Bad Request
+                throw RequestParsingException(BAD_REQUEST);
                 break;
 
             case WSV_HTTP_START:
                 if (*it != 'H')
-                    throw std::exception(); // TODO: 400 Bad Request
+                    throw RequestParsingException(BAD_REQUEST);
                 _protocol_begin = it;
                 state           = WSV_HTTP;
                 break;
@@ -87,7 +87,7 @@ void RequestTools::parseRequestLine(std::string &rawRequest)
                 if (*it == CR) {
                     std::string protocol(_protocol_begin, it);
                     if (!_isValidProtocol(protocol))
-                        throw std::exception(); // TODO: 400 Bad Request
+                        throw RequestParsingException(BAD_REQUEST);
                     _request._protocol = protocol;
                     state              = WSV_REQUEST_ALMOST_DONE;
                 }
@@ -95,13 +95,12 @@ void RequestTools::parseRequestLine(std::string &rawRequest)
 
             case WSV_REQUEST_ALMOST_DONE: // TODO: Do something when parsing finishes
                 if (*it != LF)
-                    throw std::exception(); // TODO: 400 Bad Request
-                return;                     // TODO: Done
+                    throw RequestParsingException(BAD_REQUEST);
+                return; // TODO: Done
         }
         ++it;
     }
-    throw std::exception(); // TODO: 400 Bad Request
-    // TODO: Do something if end() is reached and parsing is not complete
+    throw RequestParsingException(BAD_REQUEST);
 }
 
 void RequestTools::parseHeaderLine(std::string &rawRequest)
@@ -120,7 +119,7 @@ void RequestTools::parseHeaderLine(std::string &rawRequest)
                         break;
                     default:
                         if (!std::isalnum(*it))
-                            throw std::exception(); // TODO: 400 Bad Request
+                            throw RequestParsingException(BAD_REQUEST);
                         _header_key_begin = it;
                         state             = WSV_HEADER_KEY;
                         break;
@@ -135,7 +134,7 @@ void RequestTools::parseHeaderLine(std::string &rawRequest)
                     break;
                 }
                 if (!std::isalnum(*it) && *it != '-')
-                    throw std::exception(); // TODO: 400 Bad Request
+                    throw RequestParsingException(BAD_REQUEST);
                 break;
 
             case WSV_HEADER_SPACE_BEFORE_VALUE:
@@ -144,7 +143,7 @@ void RequestTools::parseHeaderLine(std::string &rawRequest)
                         break;
                     case CR:
                     case LF:
-                        throw std::exception(); // TODO: 400 Bad Request
+                        throw RequestParsingException(BAD_REQUEST);
                         break;
                     default:
                         _header_value_begin = it;
@@ -161,28 +160,27 @@ void RequestTools::parseHeaderLine(std::string &rawRequest)
                         state = WSV_HEADER_ALMOST_DONE;
                         break;
                     case LF:
-                        throw std::exception(); // TODO: 400 Bad Request
+                        throw RequestParsingException(BAD_REQUEST);
                         break;
                 }
                 break;
 
             case WSV_HEADER_ALMOST_DONE:
                 if (*it != LF)
-                    throw std::exception(); // TODO: 400 Bad Request
+                    throw RequestParsingException(BAD_REQUEST);
                 _request._headers[_header_key] = _header_value;
                 state                          = WSV_HEADER_START;
                 break;
 
             case WSV_HEADER_FINAL_ALMOST_DONE:
                 if (*it != LF)
-                    throw std::exception(); // TODO: 400 Bad Request
+                    throw RequestParsingException(BAD_REQUEST);
                 _done_parsing = true;
                 return; // TODO: done
         }
         ++it;
     }
-    throw std::exception(); // TODO: 400 Bad Request
-    // TODO: Do something if end() is reached and parsing is not complete
+    throw RequestParsingException(BAD_REQUEST);
 }
 
 void RequestTools::parseChunkedBody(std::string &rawRequest)
@@ -199,14 +197,14 @@ void RequestTools::parseChunkedBody(std::string &rawRequest)
             case WSV_CHUNK_START:
                 hex = _getHexValue(*it);
                 if (hex == (size_t)-1)
-                    throw std::exception(); // TODO: 400 Bad Request
+                    throw RequestParsingException(BAD_REQUEST);
                 _chunk_size = hex;
                 state       = WSV_CHUNK_SIZE;
                 break;
 
             case WSV_CHUNK_SIZE:
                 if (_chunk_size > (size_t)-1) // TODO: CLIENT MAX BODY SIZE
-                    throw std::exception();   // TODO: 400 Bad Request
+                    throw RequestParsingException(BAD_REQUEST);
 
                 hex = _getHexValue(*it);
                 if (hex != (size_t)-1) {
@@ -228,7 +226,7 @@ void RequestTools::parseChunkedBody(std::string &rawRequest)
                             state = WSV_CHUNK_LAST_EXTENSION;
                             break;
                         default:
-                            throw std::exception(); // TODO: 400 Bad Request
+                            throw RequestParsingException(BAD_REQUEST);
                     }
                     break;
                 }
@@ -249,7 +247,7 @@ void RequestTools::parseChunkedBody(std::string &rawRequest)
                         state = WSV_CHUNK_EXTENSION;
                         break;
                     default:
-                        throw std::exception(); // TODO: 400 Bad Request
+                        throw RequestParsingException(BAD_REQUEST);
                 }
                 break;
 
@@ -265,14 +263,14 @@ void RequestTools::parseChunkedBody(std::string &rawRequest)
 
             case WSV_CHUNK_EXTENSION_ALMOST_DONE:
                 if (*it != LF)
-                    throw std::exception(); // TODO: 400 Bad Request
+                    throw RequestParsingException(BAD_REQUEST);
                 state = WSV_CHUNK_DATA;
                 break;
 
             case WSV_CHUNK_DATA:
                 if (!_chunk_size) {
                     if (*it != CR)
-                        throw std::exception(); // TODO: 400 Bad Request
+                        throw RequestParsingException(BAD_REQUEST);
                     state = WSV_CHUNK_AFTER_DATA;
                     break;
                 }
@@ -285,7 +283,7 @@ void RequestTools::parseChunkedBody(std::string &rawRequest)
 
             case WSV_CHUNK_AFTER_DATA:
                 if (*it != LF)
-                    throw std::exception(); // TODO: 400 Bad Request
+                    throw RequestParsingException(BAD_REQUEST);
                 state = WSV_CHUNK_START;
                 break;
 
@@ -304,7 +302,7 @@ void RequestTools::parseChunkedBody(std::string &rawRequest)
                     state = WSV_CHUNK_TRAILER;
                     break;
                 }
-                throw std::exception(); // TODO: 400 Bad Request
+                throw RequestParsingException(BAD_REQUEST);
 
             case WSV_CHUNK_TRAILER:
                 switch (*it) {
@@ -320,8 +318,8 @@ void RequestTools::parseChunkedBody(std::string &rawRequest)
 
             case WSV_CHUNK_TRAILER_ALMOST_DONE:
                 if (*it == LF)
-                    return;             // TODO: Chunk parsing done
-                throw std::exception(); // TODO: 400 Bad Request
+                    return; // TODO: Chunk parsing done
+                throw RequestParsingException(BAD_REQUEST);
 
             case WSV_CHUNK_TRAILER_HEADER:
                 switch (*it) {
@@ -338,11 +336,11 @@ void RequestTools::parseChunkedBody(std::string &rawRequest)
                     state = WSV_CHUNK_TRAILER;
                     break;
                 }
-                throw std::exception(); // TODO: 400 Bad Request
+                throw RequestParsingException(BAD_REQUEST);
         }
         ++it;
     }
-    throw std::exception(); // TODO: 400 Bad Request
+    throw RequestParsingException(BAD_REQUEST);
 }
 
 /******************************************** PRIVATE ********************************************/
@@ -364,3 +362,24 @@ size_t RequestTools::_getHexValue(char c)
         return (c - 'a' + 10);
     return (-1);
 }
+
+/************************************ REQUEST PARSING EXCEPTION ***********************************/
+
+RequestTools::RequestParsingException::RequestParsingException(RequestParsingErrorCode error) :
+    _error(error)
+{
+}
+
+char const *RequestTools::RequestParsingException::what() const throw()
+{
+    static std::map<int, std::string> codes;
+
+    if (codes.empty()) {
+        codes[BAD_REQUEST]     = "Bad Request";
+        codes[NOT_IMPLEMENTED] = "Not Implemented";
+    }
+
+    return (codes[_error].c_str());
+}
+
+RequestParsingErrorCode RequestTools::RequestParsingException::get_error() const { return _error; }
