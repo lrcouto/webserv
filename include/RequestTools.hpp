@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/10 13:35:03 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/10 16:08:54 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,9 @@
 #include "libs.hpp"
 
 enum RequestParsingErrorCode {
-    BAD_REQUEST     = 400,
-    NOT_IMPLEMENTED = 501,
+    BAD_REQUEST                = 400,
+    NOT_IMPLEMENTED            = 501,
+    HTTP_VERSION_NOT_SUPPORTED = 505,
 };
 
 class RequestTools {
@@ -32,6 +33,9 @@ class RequestTools {
         bool        _done_parsing;
         size_t      _chunk_size;
         std::string _chunk_data;
+
+        size_t _http_major;
+        size_t _http_minor;
 
         std::string::const_iterator _position;
         std::string::const_iterator _last;

@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/10 14:59:21 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/10 16:27:44 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@ RequestTools::RequestTools(void) : _done_parsing(false), _chunk_size(-1) {}
 RequestTools::RequestTools(std::string &raw) :
     _raw(raw),
     _chunk_size(-1),
+    _http_major(-1),
+    _http_minor(-1),
     _position(_raw.begin()),
     _last(_raw.end())
 {
@@ -45,7 +47,14 @@ void RequestTools::parseRequestLine(void)
         WSV_URI_START,
         WSV_URI,
         WSV_HTTP_START,
-        WSV_HTTP,
+        WSV_HTTP_H,
+        WSV_HTTP_HT,
+        WSV_HTTP_HTT,
+        WSV_HTTP_HTTP,
+        WSV_FIRST_MAJOR_DIGIT,
+        WSV_MAJOR_DIGIT,
+        WSV_FIRST_MINOR_DIGIT,
+        WSV_MINOR_DIGIT,
         WSV_REQUEST_ALMOST_DONE,
     } state;
 
@@ -94,25 +103,82 @@ void RequestTools::parseRequestLine(void)
                 if (*it != 'H')
                     throw RequestParsingException(BAD_REQUEST);
                 _protocol_begin = it;
-                state           = WSV_HTTP;
+                state           = WSV_HTTP_H;
                 break;
 
-            // TODO: 505 HTTP Version Not Supported
-            case WSV_HTTP:
+            case WSV_HTTP_H:
+                if (*it != 'T')
+                    throw RequestParsingException(BAD_REQUEST);
+                state = WSV_HTTP_HT;
+                break;
+
+            case WSV_HTTP_HT:
+                if (*it != 'T')
+                    throw RequestParsingException(BAD_REQUEST);
+                state = WSV_HTTP_HTT;
+                break;
+
+            case WSV_HTTP_HTT:
+                if (*it != 'P')
+                    throw RequestParsingException(BAD_REQUEST);
+                state = WSV_HTTP_HTTP;
+                break;
+
+            case WSV_HTTP_HTTP:
+                if (*it != '/')
+                    throw RequestParsingException(BAD_REQUEST);
+                state = WSV_FIRST_MAJOR_DIGIT;
+                break;
+
+            case WSV_FIRST_MAJOR_DIGIT:
+                if (*it < '1' || *it > '9')
+                    throw RequestParsingException(BAD_REQUEST);
+                _http_major = *it - '0';
+                if (_http_major > 1)
+                    throw RequestParsingException(HTTP_VERSION_NOT_SUPPORTED);
+                state = WSV_MAJOR_DIGIT;
+                break;
+
+            case WSV_MAJOR_DIGIT:
+                if (*it == '.') {
+                    state = WSV_FIRST_MINOR_DIGIT;
+                    break;
+                }
+                if (*it < '0' || *it > '9')
+                    throw RequestParsingException(BAD_REQUEST);
+                _http_major = (_http_major * 10) + (*it - '0');
+                if (_http_major > 1)
+                    throw RequestParsingException(HTTP_VERSION_NOT_SUPPORTED);
+                break;
+
+            case WSV_FIRST_MINOR_DIGIT:
+                if (*it < '0' || *it > '9')
+                    throw RequestParsingException(BAD_REQUEST);
+                _http_minor = *it - '0';
+                if (_http_minor > 1)
+                    throw RequestParsingException(HTTP_VERSION_NOT_SUPPORTED);
+                state = WSV_MINOR_DIGIT;
+                break;
+
+            case WSV_MINOR_DIGIT:
                 if (*it == CR) {
                     std::string protocol(_protocol_begin, it);
-                    if (!_isValidProtocol(protocol))
-                        throw RequestParsingException(BAD_REQUEST);
                     _request._protocol = protocol;
                     state              = WSV_REQUEST_ALMOST_DONE;
+                    break;
                 }
+                if (*it < '0' || *it > '9')
+                    throw RequestParsingException(BAD_REQUEST);
+                _http_minor = (_http_minor * 10) + (*it - '0');
+                if (_http_minor > 1)
+                    throw RequestParsingException(HTTP_VERSION_NOT_SUPPORTED);
                 break;
 
-            case WSV_REQUEST_ALMOST_DONE: // TODO: Do something when parsing finishes
+            case WSV_REQUEST_ALMOST_DONE:
                 if (*it != LF)
                     throw RequestParsingException(BAD_REQUEST);
                 _position = it + 1;
-                return; // TODO: Done
+                return;
         }
     }
     throw RequestParsingException(BAD_REQUEST);
@@ -200,7 +266,7 @@ void RequestTools::parseHeaderLines(void)
                     throw RequestParsingException(BAD_REQUEST);
                 _done_parsing = true;
                 _position     = it + 1;
-                return; // TODO: done
+                return;
         }
     }
     throw RequestParsingException(BAD_REQUEST);
@@ -347,7 +413,7 @@ void RequestTools::parseChunkedBody(void)
                         break;
                     case LF:
                         _position = it + 1;
-                        return; // TODO: Chunk parsing done;
+                        return;
                     default:
                         state = WSV_CHUNK_TRAILER_HEADER;
                 }
@@ -357,7 +423,7 @@ void RequestTools::parseChunkedBody(void)
                 if (*it != LF)
                     throw RequestParsingException(BAD_REQUEST);
                 _position = it + 1;
-                return; // TODO: Chunk parsing done
+                return;
 
             case WSV_CHUNK_TRAILER_HEADER:
                 switch (*it) {
@@ -427,8 +493,9 @@ char const *RequestTools::RequestParsingException::what() const throw()
     static std::map<int, std::string> codes;
 
     if (codes.empty()) {
-        codes[BAD_REQUEST]     = "Bad Request";
-        codes[NOT_IMPLEMENTED] = "Not Implemented";
+        codes[BAD_REQUEST]                = "Bad Request";
+        codes[NOT_IMPLEMENTED]            = "Not Implemented";
+        codes[HTTP_VERSION_NOT_SUPPORTED] = "HTTP Version Not Supported";
     }
 
     return (codes[_error].c_str());
