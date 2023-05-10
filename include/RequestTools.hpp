@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/10 12:48:47 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/10 12:59:42 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,6 @@ enum ChunkedState {
     WSV_CHUNK_TRAILER_HEADER,
     WSV_CHUNK_TRAILER_HEADER_ALMOST_DONE,
 };
-
-// enum ParseExitCode { WSV_OK, WSV_ERROR };
 
 enum RequestParsingErrorCode {
     BAD_REQUEST     = 400,
