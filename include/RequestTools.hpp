@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/10 16:08:54 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/10 17:58:45 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,15 @@ class RequestTools {
         std::string _header_key;
         std::string _header_value;
 
-        bool        _done_parsing;
+        size_t      _max_body_size;
         size_t      _chunk_size;
         std::string _chunk_data;
 
         size_t _http_major;
         size_t _http_minor;
+
+        bool _has_body;
+        bool _has_chunked_body;
 
         std::string::const_iterator _position;
         std::string::const_iterator _last;
@@ -73,6 +76,7 @@ class RequestTools {
         bool   _isValidMethod(std::string &method);
         bool   _isValidProtocol(std::string &protocol);
         size_t _getHexValue(char c);
+        void   _headerFieldNormalizedInsert(std::string &key, std::string &value);
 };
 
 #endif /* REQUEST_TOOLS_HPP */

@@ -6,16 +6,18 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/10 16:27:44 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/10 17:58:55 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "RequestTools.hpp"
 
-RequestTools::RequestTools(void) : _done_parsing(false), _chunk_size(-1) {}
+RequestTools::RequestTools(void) : _chunk_size(-1) {}
 
 RequestTools::RequestTools(std::string &raw) :
+    _request(Request(raw)),
     _raw(raw),
+    _max_body_size(-1),
     _chunk_size(-1),
     _http_major(-1),
     _http_minor(-1),
@@ -31,10 +33,9 @@ RequestTools::RequestTools(RequestTools const &src) { *this = src; }
 RequestTools &RequestTools::operator=(RequestTools const &src)
 {
     if (this != &src) {
-        _raw          = src._raw;
-        _request      = src._request;
-        _done_parsing = src._done_parsing;
-        _chunk_size   = src._chunk_size;
+        _raw        = src._raw;
+        _request    = src._request;
+        _chunk_size = src._chunk_size;
     }
     return (*this);
 }
@@ -240,12 +241,18 @@ void RequestTools::parseHeaderLines(void)
                         break;
                 }
                 break;
-
             case WSV_HEADER_VALUE:
                 switch (*it) {
                     case CR:
                         _header_value.clear();
                         _header_value.insert(_header_value.begin(), _header_value_begin, it);
+                        if (ftstring::striequals(_header_key, "content-length"))
+                            _has_body = true;
+                        else if (ftstring::striequals(_header_key, "transfer-encoding")) {
+                            _has_body = true;
+                            if (ftstring::striequals(_header_value, "chunked"))
+                                _has_chunked_body = true;
+                        }
                         state = WSV_HEADER_ALMOST_DONE;
                         break;
                     case LF:
@@ -257,15 +264,14 @@ void RequestTools::parseHeaderLines(void)
             case WSV_HEADER_ALMOST_DONE:
                 if (*it != LF)
                     throw RequestParsingException(BAD_REQUEST);
-                _request._headers[_header_key] = _header_value;
-                state                          = WSV_HEADER_START;
+                _headerFieldNormalizedInsert(_header_key, _header_value);
+                state = WSV_HEADER_START;
                 break;
 
             case WSV_HEADER_FINAL_ALMOST_DONE:
                 if (*it != LF)
                     throw RequestParsingException(BAD_REQUEST);
-                _done_parsing = true;
-                _position     = it + 1;
+                _position = it + 1;
                 return;
         }
     }
@@ -451,7 +457,16 @@ void RequestTools::parseRequest(void)
     try {
         parseRequestLine();
         parseHeaderLines();
-        parseChunkedBody();
+
+        if (_has_chunked_body) {
+            parseChunkedBody();
+            _request._body = _chunk_data;
+        } else if (_has_body) {
+            ; /* TODO:  parseRegularBody();
+                        _request._body = _body_data; */
+        }
+
+        std::cout << "\n\n" << _request << "\n\n"; // TODO: Debugging, remove later
     } catch (RequestParsingException const &e) {
         std::cerr << e.get_error() << ' ' << e.what() << '\n';
     } catch (std::exception const &e) {
@@ -479,6 +494,19 @@ size_t RequestTools::_getHexValue(char c)
     if (c >= 'A' && c <= 'F')
         return (c - 'A' + 10);
     return (-1);
+}
+
+void RequestTools::_headerFieldNormalizedInsert(std::string &key, std::string &value)
+{
+    // normalize key and value to lowercase
+    std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+    std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+
+    std::map<std::string, std::string>::iterator it = _request._headers.find(key);
+    if (it != _request._headers.end())
+        it->second += ", " + value;
+    else
+        _request._headers[key] = value;
 }
 
 /************************************ REQUEST PARSING EXCEPTION ***********************************/
