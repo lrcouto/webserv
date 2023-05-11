@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/10 17:58:45 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 11:56:24 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,12 @@
 #define REQUEST_TOOLS_HPP
 
 #include "Request.hpp"
+#include "Server.hpp"
 #include "libs.hpp"
 
 enum RequestParsingErrorCode {
     BAD_REQUEST                = 400,
+    ENTITY_TOO_LARGE           = 413,
     NOT_IMPLEMENTED            = 501,
     HTTP_VERSION_NOT_SUPPORTED = 505,
 };
@@ -25,6 +27,7 @@ enum RequestParsingErrorCode {
 class RequestTools {
     private:
         Request     _request;
+        Server     *_server;
         std::string _raw;
 
         std::string _header_key;
@@ -33,12 +36,14 @@ class RequestTools {
         size_t      _max_body_size;
         size_t      _chunk_size;
         std::string _chunk_data;
+        std::string _body_data;
 
         size_t _http_major;
         size_t _http_minor;
 
         bool _has_body;
         bool _has_chunked_body;
+        bool _ignore_content_length;
 
         std::string::const_iterator _position;
         std::string::const_iterator _last;
@@ -51,7 +56,7 @@ class RequestTools {
 
     public:
         RequestTools(void);
-        RequestTools(std::string &raw);
+        RequestTools(std::string &raw, Server *server);
         ~RequestTools(void);
         RequestTools(RequestTools const &src);
         RequestTools &operator=(RequestTools const &src);
@@ -59,6 +64,7 @@ class RequestTools {
         void parseRequestLine(void);
         void parseHeaderLines(void);
         void parseChunkedBody(void);
+        void parseRegularBody(void);
         void parseRequest(void);
 
         class RequestParsingException : public std::exception {
