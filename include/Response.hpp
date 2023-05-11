@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/09 01:47:02 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/11 00:20:09 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ class Response {
         void deleteResource(std::string requestURI);
         void HTTPError(std::string status);
         void setErrorPage(std::string status, std::string path);
+        void validateServerName(void);
 
         std::vector<std::string> verifyLocationAutoindexOverride(std::string resourcePath);
 

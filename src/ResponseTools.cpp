@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:33:38 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/09 00:48:43 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/11 00:57:57 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,6 +141,19 @@ std::string ResponseTools::autoindex(std::string path, std::string port)
     indexPage += "</p>\n</body>\n</html>\n";
     closedir(dir);
     return indexPage;
+}
+
+std::string ResponseTools::getCurrentDate(void)
+{
+    time_t now;
+    std::tm *local_time;
+    char buffer[64];
+
+    now = std::time(NULL);
+    local_time = std::localtime(&now);
+    std::strftime(buffer, 64, "%a, %d %b %Y %T %Z", local_time);
+
+    return buffer;
 }
 
 void ResponseTools::initStatusCodes(std::map<std::string, std::string> &statusCodes)

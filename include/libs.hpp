@@ -37,6 +37,7 @@
 
 #include <algorithm> // STL algorithms.
 #include <csignal>   // Signal handling.
+#include <ctime>     // Time and date functions.
 #include <fstream>   // File stream.
 #include <iostream>  // Standard input/output operations.
 #include <map>       // Map container class.

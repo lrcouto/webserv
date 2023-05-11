@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/09 00:03:17 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/11 00:49:00 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,8 @@ class ResponseTools {
         static bool         isDirectory(std::string path);
         static bool         isRequestMethodAllowed(std::string method, std::vector<std::string> limitExcept);
         static size_t       convertMaxBodySizeToNumber(std::string maxSize);
-        static std::string  autoindex(std::string path, std::string port); 
+        static std::string  autoindex(std::string path, std::string port);
+        static std::string  getCurrentDate(void);
         static void         initStatusCodes(std::map<std::string, std::string> &statusCodes);
         static void         initContentTypes(std::map<std::string, std::string> &contentTypes);
 };
