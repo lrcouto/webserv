@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/11 18:03:20 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 19:00:15 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,9 +42,18 @@ RequestTools::RequestTools(RequestTools const &src) { *this = src; }
 RequestTools &RequestTools::operator=(RequestTools const &src)
 {
     if (this != &src) {
-        _raw        = src._raw;
-        _request    = src._request;
-        _chunk_size = src._chunk_size;
+        _request               = src._request;
+        _server                = src._server;
+        _raw                   = src._raw;
+        _max_body_size         = src._max_body_size;
+        _chunk_size            = src._chunk_size;
+        _http_major            = src._http_major;
+        _http_minor            = src._http_minor;
+        _has_body              = src._has_body;
+        _has_chunked_body      = src._has_chunked_body;
+        _ignore_content_length = src._ignore_content_length;
+        _position              = src._position;
+        _last                  = src._last;
     }
     return (*this);
 }
