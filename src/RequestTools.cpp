@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/11 19:25:49 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 20:45:16 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,8 @@ void RequestTools::parseRequest(void)
         }
     } catch (RequestParsingException const &e) {
         std::cerr << e.get_error() << ' ' << e.what() << '\n';
+        _request.hasError  = true;
+        _request.errorCode = e.get_error();
     } catch (std::exception const &e) {
         std::cerr << e.what() << '\n';
     }
@@ -558,14 +560,11 @@ void RequestTools::_headerFieldNormalizedInsert(std::string &key, std::string &v
 
 /************************************ REQUEST PARSING EXCEPTION ***********************************/
 
-RequestTools::RequestParsingException::RequestParsingException(RequestParsingErrorCode error) :
-    _error(error)
-{
-}
+RequestTools::RequestParsingException::RequestParsingException(char const *error) : _error(error) {}
 
 char const *RequestTools::RequestParsingException::what() const throw()
 {
-    static std::map<int, std::string> codes;
+    static std::map<std::string, std::string> codes;
 
     if (codes.empty()) {
         codes[BAD_REQUEST]                = "Bad Request";
@@ -577,4 +576,4 @@ char const *RequestTools::RequestParsingException::what() const throw()
     return (codes[_error].c_str());
 }
 
-RequestParsingErrorCode RequestTools::RequestParsingException::get_error() const { return _error; }
+char const *RequestTools::RequestParsingException::get_error() const { return (_error); }

@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/11 19:25:55 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 20:17:26 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,10 @@
 #include "Server.hpp"
 #include "libs.hpp"
 
-enum RequestParsingErrorCode {
-    BAD_REQUEST                = 400,
-    ENTITY_TOO_LARGE           = 413,
-    NOT_IMPLEMENTED            = 501,
-    HTTP_VERSION_NOT_SUPPORTED = 505,
-};
+#define BAD_REQUEST                "400"
+#define ENTITY_TOO_LARGE           "413"
+#define NOT_IMPLEMENTED            "501"
+#define HTTP_VERSION_NOT_SUPPORTED "505"
 
 class RequestTools {
     private:
@@ -66,12 +64,12 @@ class RequestTools {
 
         class RequestParsingException : public std::exception {
             public:
-                RequestParsingException(RequestParsingErrorCode error);
-                char const             *what() const throw();
-                RequestParsingErrorCode get_error() const;
+                RequestParsingException(char const *error);
+                char const *what() const throw();
+                char const *get_error(void) const;
 
             private:
-                RequestParsingErrorCode _error;
+                char const *_error;
         };
 
     private:
