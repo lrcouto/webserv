@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/09 22:36:02 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/11 01:01:51 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,9 +53,13 @@ void Response::setRequest(Request request) { this->_request = request; }
 
 void Response::assembleResponseString(void)
 {
+    if (!this->_serverData->getValue("server_name").empty())
+        validateServerName();
+
     std::string responseString, headersString;
 
-    assembleBody();
+    if (this->_status.empty())
+        assembleBody();
     assembleHeaders();
     assembleStatusLine();
 
@@ -98,6 +102,9 @@ void Response::assembleHeaders()
         contentType = it->second;
     }
     this->_headers.insert(std::make_pair("Content-Type", contentType));
+
+    this->_headers.insert(std::make_pair("Date", ResponseTools::getCurrentDate()));
+    this->_headers.insert(std::make_pair("Server", "Webserv-42SP"));
 }
 
 void Response::assembleBody()
@@ -397,6 +404,24 @@ std::vector<std::string> Response::verifyLocationAutoindexOverride(std::string r
         }
     }
     return this->_serverData->getValue("autoindex");
+}
+
+void Response::validateServerName(void)
+{
+    std::vector<std::string> serverNames = this->_serverData->getValue("server_name");
+    std::map<std::string, std::string> headers = this->_request.getHeaders();
+    std::string host, name;
+    int pos;
+
+    host = headers.find("Host")->second;
+    pos = host.find(':');
+    name = host.substr(0, pos);
+
+    for (size_t i = 0; i < serverNames.size(); i++) {
+        if (serverNames[i] == name)
+            return;
+    }
+    HTTPError("404");
 }
 
 
