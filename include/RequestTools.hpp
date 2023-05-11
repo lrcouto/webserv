@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/11 11:56:24 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 12:19:32 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,10 +61,6 @@ class RequestTools {
         RequestTools(RequestTools const &src);
         RequestTools &operator=(RequestTools const &src);
 
-        void parseRequestLine(void);
-        void parseHeaderLines(void);
-        void parseChunkedBody(void);
-        void parseRegularBody(void);
         void parseRequest(void);
 
         class RequestParsingException : public std::exception {
@@ -78,6 +74,11 @@ class RequestTools {
         };
 
     private:
+        void _parseRequestLine(void);
+        void _parseHeaderLines(void);
+        void _parseChunkedBody(void);
+        void _parseRegularBody(void);
+
         bool   _isControlCharacter(int c);
         bool   _isValidMethod(std::string &method);
         bool   _isValidProtocol(std::string &protocol);

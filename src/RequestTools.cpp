@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/11 12:15:36 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 18:03:20 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,40 @@ RequestTools &RequestTools::operator=(RequestTools const &src)
     return (*this);
 }
 
-void RequestTools::parseRequestLine(void)
+void RequestTools::parseRequest(void)
+{
+    try {
+        _parseRequestLine();
+        _parseHeaderLines();
+
+        if (_has_body) {
+            std::map<std::string, std::string>::const_iterator it;
+            it = _request._headers.find("transfer-encoding");
+            if (it != _request._headers.end()) {
+                std::string              te_values = ftstring::reduce(it->second, ", ");
+                std::vector<std::string> te_split  = ftstring::split(te_values, ' ');
+                if (te_split.back() == "chunked")
+                    _has_chunked_body = true;
+            }
+        }
+
+        if (_has_chunked_body) {
+            _parseChunkedBody();
+            _request._body = _chunk_data;
+        } else if (_has_body) {
+            _parseRegularBody();
+            _request._body = _body_data;
+        }
+    } catch (RequestParsingException const &e) {
+        std::cerr << e.get_error() << ' ' << e.what() << '\n';
+    } catch (std::exception const &e) {
+        std::cerr << e.what() << '\n';
+    }
+}
+
+/******************************************** PRIVATE ********************************************/
+
+void RequestTools::_parseRequestLine(void)
 {
     enum {
         WSV_REQUEST_START,
@@ -194,7 +227,7 @@ void RequestTools::parseRequestLine(void)
     throw RequestParsingException(BAD_REQUEST);
 }
 
-void RequestTools::parseHeaderLines(void)
+void RequestTools::_parseHeaderLines(void)
 {
     enum {
         WSV_HEADER_START,
@@ -256,6 +289,8 @@ void RequestTools::parseHeaderLines(void)
                         _header_value.clear();
                         _header_value.insert(_header_value.begin(), _header_value_begin, it);
                         if (ftstring::striequals(_header_key, "content-length")) {
+                            if (!ftstring::is_positive_integer(_header_value))
+                                throw RequestParsingException(BAD_REQUEST);
                             _has_body = true;
                         } else if (ftstring::striequals(_header_key, "transfer-encoding")) {
                             _has_body              = true;
@@ -286,10 +321,8 @@ void RequestTools::parseHeaderLines(void)
     throw RequestParsingException(BAD_REQUEST);
 }
 
-void RequestTools::parseRegularBody(void)
+void RequestTools::_parseRegularBody(void)
 {
-    _body_data.assign(_position, _last);
-
     if (!_ignore_content_length) {
         std::map<std::string, std::string>::const_iterator it;
 
@@ -298,15 +331,16 @@ void RequestTools::parseRegularBody(void)
             size_t content_length = ftstring::strtoi(it->second);
             if (content_length > _max_body_size)
                 throw RequestParsingException(ENTITY_TOO_LARGE);
-            if (_body_data.size() > content_length)
+            if ((size_t)(_last - _position) > content_length)
                 throw RequestParsingException(ENTITY_TOO_LARGE);
         }
     }
-    if (_body_data.size() > _max_body_size)
+    if ((size_t)(_last - _position) > _max_body_size)
         throw RequestParsingException(ENTITY_TOO_LARGE);
+    _body_data.assign(_position, _last);
 }
 
-void RequestTools::parseChunkedBody(void)
+void RequestTools::_parseChunkedBody(void)
 {
     size_t chunk_data_size_at_most, hex = (size_t)-1;
 
@@ -479,39 +513,6 @@ void RequestTools::parseChunkedBody(void)
     }
     throw RequestParsingException(BAD_REQUEST);
 }
-
-void RequestTools::parseRequest(void)
-{
-    try {
-        parseRequestLine();
-        parseHeaderLines();
-
-        if (_has_body) {
-            std::map<std::string, std::string>::const_iterator it;
-            it = _request._headers.find("transfer-encoding");
-            if (it != _request._headers.end()) {
-                std::string              te_values = ftstring::reduce(it->second, ", ");
-                std::vector<std::string> te_split  = ftstring::split(te_values, ' ');
-                if (te_split.back() == "chunked")
-                    _has_chunked_body = true;
-            }
-        }
-
-        if (_has_chunked_body) {
-            parseChunkedBody();
-            _request._body = _chunk_data;
-        } else if (_has_body) {
-            parseRegularBody();
-            _request._body = _body_data;
-        }
-    } catch (RequestParsingException const &e) {
-        std::cerr << e.get_error() << ' ' << e.what() << '\n';
-    } catch (std::exception const &e) {
-        std::cerr << e.what() << '\n';
-    }
-}
-
-/******************************************** PRIVATE ********************************************/
 
 bool RequestTools::_isControlCharacter(int c) { return ((c >= 0 && c < 32) || c == 127); }
 
