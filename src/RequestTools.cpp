@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/10 17:58:55 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 11:57:37 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,25 @@
 
 RequestTools::RequestTools(void) : _chunk_size(-1) {}
 
-RequestTools::RequestTools(std::string &raw) :
+RequestTools::RequestTools(std::string &raw, Server *server) :
     _request(Request(raw)),
+    _server(server),
     _raw(raw),
     _max_body_size(-1),
     _chunk_size(-1),
     _http_major(-1),
     _http_minor(-1),
+    _has_body(false),
+    _has_chunked_body(false),
+    _ignore_content_length(false),
     _position(_raw.begin()),
     _last(_raw.end())
 {
+    std::vector<std::string> max_body_size_vec;
+
+    max_body_size_vec = _server->getValue("client_max_body_size");
+    if (!max_body_size_vec.empty())
+        _max_body_size = ftstring::strtoi(max_body_size_vec[0]);
 }
 
 RequestTools::~RequestTools(void) {}
@@ -246,12 +255,11 @@ void RequestTools::parseHeaderLines(void)
                     case CR:
                         _header_value.clear();
                         _header_value.insert(_header_value.begin(), _header_value_begin, it);
-                        if (ftstring::striequals(_header_key, "content-length"))
+                        if (ftstring::striequals(_header_key, "content-length")) {
                             _has_body = true;
-                        else if (ftstring::striequals(_header_key, "transfer-encoding")) {
-                            _has_body = true;
-                            if (ftstring::striequals(_header_value, "chunked"))
-                                _has_chunked_body = true;
+                        } else if (ftstring::striequals(_header_key, "transfer-encoding")) {
+                            _has_body              = true;
+                            _ignore_content_length = true;
                         }
                         state = WSV_HEADER_ALMOST_DONE;
                         break;
@@ -276,6 +284,26 @@ void RequestTools::parseHeaderLines(void)
         }
     }
     throw RequestParsingException(BAD_REQUEST);
+}
+
+void RequestTools::parseRegularBody(void)
+{
+    _body_data.assign(_position, _last);
+
+    if (!_ignore_content_length) {
+        std::map<std::string, std::string>::const_iterator it;
+
+        it = _request._headers.find("content-length");
+        if (it != _request._headers.end()) {
+            size_t content_length = ftstring::strtoi(it->second);
+            if (content_length > _max_body_size)
+                throw RequestParsingException(ENTITY_TOO_LARGE);
+            if (_body_data.size() > content_length)
+                throw RequestParsingException(ENTITY_TOO_LARGE);
+        }
+    }
+    if (_body_data.size() > _max_body_size)
+        throw RequestParsingException(ENTITY_TOO_LARGE);
 }
 
 void RequestTools::parseChunkedBody(void)
@@ -312,8 +340,8 @@ void RequestTools::parseChunkedBody(void)
                 break;
 
             case WSV_CHUNK_SIZE:
-                if (_chunk_size > (size_t)-1) // TODO: CLIENT MAX BODY SIZE
-                    throw RequestParsingException(BAD_REQUEST);
+                if (_chunk_size > _max_body_size)
+                    throw RequestParsingException(ENTITY_TOO_LARGE);
 
                 hex = _getHexValue(*it);
                 if (hex != (size_t)-1) {
@@ -340,8 +368,8 @@ void RequestTools::parseChunkedBody(void)
                     break;
                 }
 
-                // TODO: Chunk size summed up surpasses client max body size
-                // if (read_body_bytes > client_max_body_size) [...]
+                if ((_chunk_data.size() + _chunk_size) > _max_body_size)
+                    throw RequestParsingException(ENTITY_TOO_LARGE);
 
                 switch (*it) {
                     case CR:
@@ -458,12 +486,23 @@ void RequestTools::parseRequest(void)
         parseRequestLine();
         parseHeaderLines();
 
+        if (_has_body) {
+            std::map<std::string, std::string>::const_iterator it;
+            it = _request._headers.find("transfer-encoding");
+            if (it != _request._headers.end()) {
+                std::string              te_values = ftstring::reduce(it->second, ", ");
+                std::vector<std::string> te_split  = ftstring::split(te_values, ' ');
+                if (te_split.back() == "chunked")
+                    _has_chunked_body = true;
+            }
+        }
+
         if (_has_chunked_body) {
             parseChunkedBody();
             _request._body = _chunk_data;
         } else if (_has_body) {
-            ; /* TODO:  parseRegularBody();
-                        _request._body = _body_data; */
+            parseRegularBody();
+            _request._body = _body_data;
         }
 
         std::cout << "\n\n" << _request << "\n\n"; // TODO: Debugging, remove later
@@ -522,6 +561,7 @@ char const *RequestTools::RequestParsingException::what() const throw()
 
     if (codes.empty()) {
         codes[BAD_REQUEST]                = "Bad Request";
+        codes[ENTITY_TOO_LARGE]           = "Entity Too Large";
         codes[NOT_IMPLEMENTED]            = "Not Implemented";
         codes[HTTP_VERSION_NOT_SUPPORTED] = "HTTP Version Not Supported";
     }
