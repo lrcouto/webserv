@@ -6,13 +6,11 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/11 19:00:15 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 19:25:49 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "RequestTools.hpp"
-
-RequestTools::RequestTools(void) : _chunk_size(-1) {}
 
 RequestTools::RequestTools(std::string &raw, Server *server) :
     _request(Request(raw)),
@@ -88,6 +86,8 @@ void RequestTools::parseRequest(void)
         std::cerr << e.what() << '\n';
     }
 }
+
+Request RequestTools::getRequest(void) const { return (_request); }
 
 /******************************************** PRIVATE ********************************************/
 

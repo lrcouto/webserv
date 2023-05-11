@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/23 21:44:23 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/04 14:58:58 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 19:12:40 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ class Request {
         std::string                        _protocol;
         std::string                        _body;
         std::string                        _raw;
-        
+
         Request(void);
         Request(std::string raw);
         ~Request(void);

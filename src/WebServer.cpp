@@ -81,8 +81,11 @@ int WebServer::sockreceive(Socket *client)
 
 int WebServer::socksend(Socket *client)
 {
-    Request request(_rawRequest);
-    request.parse();
+    RequestTools parser(_rawRequest, getCurrentServer(client->getServerFd()));
+    Request request;
+
+    parser.parseRequest();
+    request = parser.getRequest();
     std::cout << request << std::endl; // Debugging purposes
 
     Response response(request);
