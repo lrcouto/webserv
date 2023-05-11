@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/11 11:57:37 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 12:15:36 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -504,8 +504,6 @@ void RequestTools::parseRequest(void)
             parseRegularBody();
             _request._body = _body_data;
         }
-
-        std::cout << "\n\n" << _request << "\n\n"; // TODO: Debugging, remove later
     } catch (RequestParsingException const &e) {
         std::cerr << e.get_error() << ' ' << e.what() << '\n';
     } catch (std::exception const &e) {
