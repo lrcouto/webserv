@@ -85,15 +85,14 @@ int WebServer::socksend(Socket *client)
     Request      request;
 
     parser.parseRequest();
-    request = parser.getRequest();
-
-    Response response(request);
+    request = parser.buildRequest();
 
     std::cout << request << std::endl; // Debugging purposes
 
+    Response response(request);
     response.setServerData(getCurrentServer(client->getServerFd()));
-    if (request.hasError)
-        response.HTTPError(request.errorCode);
+    if (request.hasError())
+        response.HTTPError(request.getErrorCode());
     response.assembleResponseString();
     if (client->send(response.getResponseString()) <= 0) {
         std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd()

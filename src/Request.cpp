@@ -6,144 +6,69 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/23 21:44:28 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/11 20:32:50 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 21:59:44 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "Request.hpp"
+#include "Request.hpp"
 
-Request::Request(void)  : _raw("")
+Request::Request(void) : _hasError(false) {}
+
+Request::Request(std::map<std::string, std::string> headers,
+                 std::string                        method,
+                 std::string                        requestURI,
+                 std::string                        protocol,
+                 std::string                        body,
+                 std::string                        raw,
+                 std::string                        errorCode,
+                 bool                               hasError) :
+    _headers(headers),
+    _method(method),
+    _requestURI(requestURI),
+    _protocol(protocol),
+    _body(body),
+    _raw(raw),
+    _hasError(hasError),
+    _errorCode(errorCode)
 {
-	return ;
 }
 
-Request::Request(std::string raw) : _raw(raw)
-{
-	return ;
-}
+Request::~Request(void) {}
 
-Request::~Request(void)
-{
-	clear();
-	return ;
-}
-
-Request::Request(Request const &other)
-{
-	*this = other;
-	return ;
-}
+Request::Request(Request const &other) { *this = other; }
 
 Request &Request::operator=(Request const &other)
 {
     if (this != &other) {
-        this->_raw = other._raw;
-		this->_method = other._method;
-		this->_requestURI = other._requestURI;
-		this->_protocol = other._protocol;
-		this->_headers = other._headers;
-		this->_body = other._body;
-        this->hasError = other.hasError;
-        this->errorCode = other.errorCode;
+        this->_raw        = other._raw;
+        this->_method     = other._method;
+        this->_requestURI = other._requestURI;
+        this->_protocol   = other._protocol;
+        this->_headers    = other._headers;
+        this->_body       = other._body;
+        this->_hasError   = other._hasError;
+        this->_errorCode  = other._errorCode;
     }
     return *this;
 }
 
-void    Request::setRawRequest(std::string raw)
-{
-	this->_raw = raw;
-}
+std::string const &Request::getRawRequest(void) const { return this->_raw; }
 
-std::string	Request::getRawRequest(void)
-{
-	return this->_raw;
-}
+std::string const &Request::getMethod(void) const { return this->_method; }
 
-std::string	Request::getMethod(void)
-{
-	return this->_method;
-}
+std::string const &Request::getRequestURI(void) const { return this->_requestURI; }
 
-std::string	Request::getRequestURI(void)
-{
-	return this->_requestURI;
-}
+std::string const &Request::getProtocol(void) const { return this->_protocol; }
 
-std::string	Request::getProtocol(void)
-{
-	return this->_protocol;
-}
+std::string const &Request::getBody(void) const { return this->_body; }
 
-std::map<std::string, std::string>	Request::getHeaders(void)
-{
-	return this->_headers;
-}
+std::string const &Request::getErrorCode(void) const { return this->_errorCode; }
 
-std::string	Request::getBody(void)
-{
-	return this->_body;
-}
+std::map<std::string, std::string> const &Request::getHeaders(void) const { return this->_headers; }
 
-void	Request::parse(void)
-{
-	if (this->_raw.empty())
-		throw (EmptyRequestError());
+void Request::setError(std::string const &errorCode) { this->_errorCode = errorCode; }
 
-	std::stringstream rawStream;
-	rawStream << this->_raw;
-
-	parseRequestLine(rawStream);
-	parseHeaders(rawStream);
-	parseBody(rawStream);
-}
-
-void	Request::parseRequestLine(std::stringstream &rawStream)
-{
-	std::string	requestLine;
-	std::getline(rawStream, requestLine, '\r');
-
-	std::stringstream requestStream(requestLine);
-
-	requestStream >> this->_method;
-	requestStream >> this->_requestURI;
-	requestStream >> this->_protocol;
-}
-
-void	Request::parseHeaders(std::stringstream &rawStream)
-{
-	size_t headerEndPosition = rawStream.str().find(DOUBLE_CRLF);
-	std::string headerChunk = rawStream.str().substr(0, headerEndPosition);
-
-	std::stringstream headers(headerChunk);
-	std::string line;
-
-	while (std::getline(headers, line, '\r')) {
-		std::string::size_type pos = line.find(':');
-        if (pos != std::string::npos) {
-            std::string key = ftstring::trim(line.substr(0, pos), " \f\n\r\t\v");
-            std::string value = ftstring::trim(line.substr(pos + 1), " \f\n\r\t\v");
-            this->_headers[key] = value;
-		}
-	}
-}
-
-void	Request::parseBody(std::stringstream &rawStream)
-{
-	size_t headerEndPosition = rawStream.str().find(DOUBLE_CRLF);
-	std::string bodyChunk = ftstring::trim(rawStream.str().substr(headerEndPosition + 4), " \f\n\r\t\v");
-
-	this->_body = bodyChunk;
-}
-
-void    Request::clear(void)
-{
-	this->_raw.clear();
-	this->_method.clear();
-	this->_requestURI.clear();
-	this->_protocol.clear();
-	this->_headers.clear();
-	this->_body.clear();
-}
+bool Request::hasError(void) const { return this->_hasError; }
 
 std::ostream &operator<<(std::ostream &out, Request &in)
 {
@@ -152,7 +77,7 @@ std::ostream &operator<<(std::ostream &out, Request &in)
     out << "\e[1;32mRequest URI\e[0m: " << in.getRequestURI() << std::endl;
     out << "\e[1;32mProtocol\e[0m: " << in.getProtocol() << std::endl;
     out << "\e[1;32mHeaders:\e[0m" << std::endl;
-    std::map<std::string, std::string> headers = in.getHeaders();
+    std::map<std::string, std::string>                 headers = in.getHeaders();
     std::map<std::string, std::string>::const_iterator it;
     for (it = headers.begin(); it != headers.end(); ++it) {
         out << it->first << ": " << it->second << std::endl;

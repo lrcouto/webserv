@@ -6,14 +6,13 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/11 20:45:16 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 21:58:30 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "RequestTools.hpp"
 
 RequestTools::RequestTools(std::string &raw, Server *server) :
-    _request(Request(raw)),
     _server(server),
     _raw(raw),
     _max_body_size(-1),
@@ -40,7 +39,6 @@ RequestTools::RequestTools(RequestTools const &src) { *this = src; }
 RequestTools &RequestTools::operator=(RequestTools const &src)
 {
     if (this != &src) {
-        _request               = src._request;
         _server                = src._server;
         _raw                   = src._raw;
         _max_body_size         = src._max_body_size;
@@ -64,8 +62,8 @@ void RequestTools::parseRequest(void)
 
         if (_has_body) {
             std::map<std::string, std::string>::const_iterator it;
-            it = _request._headers.find("transfer-encoding");
-            if (it != _request._headers.end()) {
+            it = _headers.find("transfer-encoding");
+            if (it != _headers.end()) {
                 std::string              te_values = ftstring::reduce(it->second, ", ");
                 std::vector<std::string> te_split  = ftstring::split(te_values, ' ');
                 if (te_split.back() == "chunked")
@@ -75,21 +73,24 @@ void RequestTools::parseRequest(void)
 
         if (_has_chunked_body) {
             _parseChunkedBody();
-            _request._body = _chunk_data;
+            _body = _chunk_data;
         } else if (_has_body) {
             _parseRegularBody();
-            _request._body = _body_data;
+            _body = _body_data;
         }
     } catch (RequestParsingException const &e) {
         std::cerr << e.get_error() << ' ' << e.what() << '\n';
-        _request.hasError  = true;
-        _request.errorCode = e.get_error();
+        _hasError  = true;
+        _errorCode = e.get_error();
     } catch (std::exception const &e) {
         std::cerr << e.what() << '\n';
     }
 }
 
-Request RequestTools::getRequest(void) const { return (_request); }
+Request RequestTools::buildRequest(void) const
+{
+    return (Request(_headers, _method, _uri, _protocol, _body, _raw, _errorCode, _hasError));
+}
 
 /******************************************** PRIVATE ********************************************/
 
@@ -127,11 +128,10 @@ void RequestTools::_parseRequestLine(void)
 
             case WSV_METHOD:
                 if (*it == WHITESPACE) {
-                    std::string method(_method_begin, it);
-                    if (!_isValidMethod(method))
+                    _method.assign(_method_begin, it);
+                    if (!_isValidMethod(_method))
                         throw RequestParsingException(NOT_IMPLEMENTED);
-                    _request._method = method;
-                    state            = WSV_URI_START;
+                    state = WSV_URI_START;
                 }
                 break;
 
@@ -144,9 +144,8 @@ void RequestTools::_parseRequestLine(void)
 
             case WSV_URI:
                 if (*it == WHITESPACE) {
-                    std::string uri(_uri_begin, it);
-                    _request._requestURI = uri;
-                    state                = WSV_HTTP_START;
+                    _uri.assign(_uri_begin, it);
+                    state = WSV_HTTP_START;
                     break;
                 }
                 if (_isControlCharacter(*it))
@@ -216,9 +215,8 @@ void RequestTools::_parseRequestLine(void)
 
             case WSV_MINOR_DIGIT:
                 if (*it == CR) {
-                    std::string protocol(_protocol_begin, it);
-                    _request._protocol = protocol;
-                    state              = WSV_REQUEST_ALMOST_DONE;
+                    _protocol.assign(_protocol_begin, it);
+                    state = WSV_REQUEST_ALMOST_DONE;
                     break;
                 }
                 if (*it < '0' || *it > '9')
@@ -337,8 +335,8 @@ void RequestTools::_parseRegularBody(void)
     if (!_ignore_content_length) {
         std::map<std::string, std::string>::const_iterator it;
 
-        it = _request._headers.find("content-length");
-        if (it != _request._headers.end()) {
+        it = _headers.find("content-length");
+        if (it != _headers.end()) {
             size_t content_length = ftstring::strtoi(it->second);
             if (content_length > _max_body_size)
                 throw RequestParsingException(ENTITY_TOO_LARGE);
@@ -551,11 +549,11 @@ void RequestTools::_headerFieldNormalizedInsert(std::string &key, std::string &v
     std::transform(key.begin(), key.end(), key.begin(), ::tolower);
     std::transform(value.begin(), value.end(), value.begin(), ::tolower);
 
-    std::map<std::string, std::string>::iterator it = _request._headers.find(key);
-    if (it != _request._headers.end())
+    std::map<std::string, std::string>::iterator it = _headers.find(key);
+    if (it != _headers.end())
         it->second += ", " + value;
     else
-        _request._headers[key] = value;
+        _headers[key] = value;
 }
 
 /************************************ REQUEST PARSING EXCEPTION ***********************************/
