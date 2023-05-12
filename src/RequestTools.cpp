@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/11 21:58:30 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/12 14:43:16 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -269,8 +269,7 @@ void RequestTools::_parseHeaderLines(void)
 
             case WSV_HEADER_KEY:
                 if (*it == ':') {
-                    _header_key.clear();
-                    _header_key.insert(_header_key.begin(), _header_key_begin, it);
+                    _header_key.assign(_header_key_begin, it);
                     state = WSV_HEADER_SPACE_BEFORE_VALUE;
                     break;
                 }
@@ -295,8 +294,7 @@ void RequestTools::_parseHeaderLines(void)
             case WSV_HEADER_VALUE:
                 switch (*it) {
                     case CR:
-                        _header_value.clear();
-                        _header_value.insert(_header_value.begin(), _header_value_begin, it);
+                        _header_value.assign(_header_value_begin, it);
                         if (ftstring::striequals(_header_key, "content-length")) {
                             if (!ftstring::is_positive_integer(_header_value))
                                 throw RequestParsingException(BAD_REQUEST);
@@ -477,11 +475,10 @@ void RequestTools::_parseChunkedBody(void)
                 break;
 
             case WSV_CHUNK_LAST_EXTENSION_ALMOST_DONE:
-                if (*it == LF) {
-                    state = WSV_CHUNK_TRAILER;
-                    break;
-                }
-                throw RequestParsingException(BAD_REQUEST);
+                if (*it != LF)
+                    throw RequestParsingException(BAD_REQUEST);
+                state = WSV_CHUNK_TRAILER;
+                break;
 
             case WSV_CHUNK_TRAILER:
                 switch (*it) {
@@ -513,11 +510,10 @@ void RequestTools::_parseChunkedBody(void)
                 break;
 
             case WSV_CHUNK_TRAILER_HEADER_ALMOST_DONE:
-                if (*it == LF) {
-                    state = WSV_CHUNK_TRAILER;
-                    break;
-                }
-                throw RequestParsingException(BAD_REQUEST);
+                if (*it != LF)
+                    throw RequestParsingException(BAD_REQUEST);
+                state = WSV_CHUNK_TRAILER;
+                break;
         }
     }
     throw RequestParsingException(BAD_REQUEST);
@@ -545,11 +541,13 @@ size_t RequestTools::_getHexValue(char c)
 
 void RequestTools::_headerFieldNormalizedInsert(std::string &key, std::string &value)
 {
+    std::map<std::string, std::string>::iterator it;
+
     // normalize key and value to lowercase
     std::transform(key.begin(), key.end(), key.begin(), ::tolower);
     std::transform(value.begin(), value.end(), value.begin(), ::tolower);
 
-    std::map<std::string, std::string>::iterator it = _headers.find(key);
+    it = _headers.find(key);
     if (it != _headers.end())
         it->second += ", " + value;
     else
