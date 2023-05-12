@@ -17,6 +17,7 @@
 #include "ParseConfig.hpp"
 #include "Poll.hpp"
 #include "Request.hpp"
+#include "RequestTools.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
 #include "Socket.hpp"
@@ -28,7 +29,7 @@ class WebServer {
         ParseConfig         _parseConfig;
         std::vector<Server> _servers;
 
-        std::string         _rawRequest;
+        std::string _rawRequest;
 
     public:
         WebServer(void);
@@ -41,12 +42,11 @@ class WebServer {
         void stop(void);
         void setServerSocketFds(void);
 
-        Server  *getCurrentServer(int fd);
+        Server *getCurrentServer(int fd);
 
         int sockaccept(Socket *listener);
         int sockreceive(Socket *client);
         int socksend(Socket *client);
-
 };
 
 std::ostream &operator<<(std::ostream &out, WebServer const &in);

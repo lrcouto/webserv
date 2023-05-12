@@ -81,15 +81,21 @@ int WebServer::sockreceive(Socket *client)
 
 int WebServer::socksend(Socket *client)
 {
-    Request request(_rawRequest);
-    request.parse();
-    std::cout << request << std::endl; // Debugging purposes
+    RequestTools parser(_rawRequest, getCurrentServer(client->getServerFd()));
+    Request      request;
+
+    parser.parseRequest();
+    request = parser.getRequest();
 
     Response response(request);
+
+    std::cout << request << std::endl; // Debugging purposes
+
     response.setServerData(getCurrentServer(client->getServerFd()));
+    if (request.hasError)
+        response.HTTPError(request.errorCode);
     response.assembleResponseString();
     if (client->send(response.getResponseString()) <= 0) {
-        // will have to implement parsing the request and building the appropriate response.
         std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd()
                   << "\e[0m" << std::endl;
         return (-1);
@@ -97,7 +103,7 @@ int WebServer::socksend(Socket *client)
     return (0);
 }
 
-Server  *WebServer::getCurrentServer(int fd)
+Server *WebServer::getCurrentServer(int fd)
 {
     Server *currentServer;
 

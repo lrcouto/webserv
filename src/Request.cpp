@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/23 21:44:28 by lcouto            #+#    #+#             */
-/*   Updated: 2023/04/27 23:46:45 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/11 20:32:50 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,13 @@ Request::Request(std::string raw) : _raw(raw)
 	return ;
 }
 
-Request::~Request(void) 
+Request::~Request(void)
 {
 	clear();
 	return ;
 }
 
-Request::Request(Request const &other) 
+Request::Request(Request const &other)
 {
 	*this = other;
 	return ;
@@ -43,6 +43,8 @@ Request &Request::operator=(Request const &other)
 		this->_protocol = other._protocol;
 		this->_headers = other._headers;
 		this->_body = other._body;
+        this->hasError = other.hasError;
+        this->errorCode = other.errorCode;
     }
     return *this;
 }
@@ -86,7 +88,7 @@ void	Request::parse(void)
 {
 	if (this->_raw.empty())
 		throw (EmptyRequestError());
-	
+
 	std::stringstream rawStream;
 	rawStream << this->_raw;
 
@@ -143,7 +145,7 @@ void    Request::clear(void)
 	this->_body.clear();
 }
 
-std::ostream &operator<<(std::ostream &out, Request &in) 
+std::ostream &operator<<(std::ostream &out, Request &in)
 {
     out << "\n\e[1;32mRaw Request:\e[0m" << std::endl << in.getRawRequest() << std::endl;
     out << "\e[1;32mMethod: \e[0m" << in.getMethod() << std::endl;

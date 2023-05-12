@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/11 01:01:51 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/11 19:16:57 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,7 @@ void Response::getResource(std::string requestURI)
     std::string resourcePath, root, resource;
     std::vector<std::string> indexes, autoindex, redirect;
     bool redirected = false;
-    
+
     std::vector<Location> locations = this->_serverData->getLocations();
     if (!locations.empty()) {
         for (size_t i = 0; i < locations.size(); i++) {
@@ -152,7 +152,7 @@ void Response::getResource(std::string requestURI)
             indexes = locations[i].getValue("index");
             root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0] : locations[i].getValue("root")[0];
             resourcePath = ResponseTools::assemblePath(root, requestURI);
-            
+
             resource = findResourceByIndex(indexes, resourcePath);
             autoindex = locations[i].getValue("autoindex");
             if (ResponseTools::isDirectory(resourcePath) && !autoindex.empty() && resourcePath.find(locationPath) != std::string::npos) {
@@ -170,7 +170,7 @@ void Response::getResource(std::string requestURI)
                 break ;
         }
     }
-    
+
     if (resource.empty()) {
         indexes = this->_serverData->getValue("index");
         redirect = this->_serverData->getValue("redirect");
@@ -194,8 +194,8 @@ void Response::getResource(std::string requestURI)
             this->_type = "html";
             return ;
         }
-    } 
-    
+    }
+
     if (ResponseTools::isDirectory(resource) || resource.empty()) {
         HTTPError("404");
         return ;
@@ -228,7 +228,7 @@ void Response::postResource(std::string requestURI)
         if (this->_request.getBody().length() > maxSize) {
             HTTPError("413");
             return ;
-        }   
+        }
     }
 
     std::vector<Location> locations = this->_serverData->getLocations();
@@ -239,7 +239,7 @@ void Response::postResource(std::string requestURI)
 
             root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0] : locations[i].getValue("root")[0];
             resource = ResponseTools::assemblePath(root, requestURI);
-            
+
             if ((!resource.empty()) && resource.find(locationPath) != std::string::npos) {
                 break ;
             } else {
@@ -285,7 +285,7 @@ void Response::deleteResource(std::string requestURI)
 
             root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0] : locations[i].getValue("root")[0];
             resource = ResponseTools::assemblePath(root, requestURI);
-            
+
             if ((!resource.empty()) && resource.find(locationPath) != std::string::npos) {
                 break ;
             } else {
@@ -426,7 +426,7 @@ void Response::validateServerName(void)
     std::string host, name;
     int pos;
 
-    host = headers.find("Host")->second;
+    host = headers.find("host")->second;
     pos = host.find(':');
     name = host.substr(0, pos);
 

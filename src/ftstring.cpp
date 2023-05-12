@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ftstring.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/20 18:37:02 by maolivei          #+#    #+#             */
-/*   Updated: 2023/04/27 22:56:49 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/10 16:42:13 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,18 @@ int strtoi(std::string const &str)
     size_t n;
     std::istringstream(str) >> n;
     return (n);
+}
+
+bool striequals(std::string const &s1, std::string const &s2)
+{
+    size_t const s1_size = s1.size();
+
+    if (s2.size() != s1_size)
+        return (false);
+    for (size_t i = 0; i < s1_size; ++i)
+        if (std::toupper(s1[i]) != std::toupper(s2[i]))
+            return (false);
+    return (true);
 }
 
 } /* ftstring */
