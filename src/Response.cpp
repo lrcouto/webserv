@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/11 19:16:57 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 22:00:03 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -440,7 +440,6 @@ void Response::validateServerName(void)
 
 void Response::clear(void)
 {
-    this->_request.clear();
     this->_responseString.clear();
     this->_statusLine.clear();
     this->_headers.clear();

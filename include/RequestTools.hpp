@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/11 20:17:26 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/11 21:59:24 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@
 
 class RequestTools {
     private:
-        Request     _request;
         Server     *_server;
         std::string _raw;
 
@@ -52,6 +51,15 @@ class RequestTools {
         std::string::const_iterator _header_key_begin;
         std::string::const_iterator _header_value_begin;
 
+        std::map<std::string, std::string> _headers;
+        std::string                        _method;
+        std::string                        _uri;
+        std::string                        _protocol;
+        std::string                        _body;
+
+        bool        _hasError;
+        std::string _errorCode;
+
     public:
         RequestTools(std::string &raw, Server *server);
         ~RequestTools(void);
@@ -60,7 +68,7 @@ class RequestTools {
 
         void parseRequest(void);
 
-        Request getRequest(void) const;
+        Request buildRequest(void) const;
 
         class RequestParsingException : public std::exception {
             public:
