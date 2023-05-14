@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/11 22:00:03 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/14 17:32:49 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,7 @@ void Response::assembleHeaders()
 
     this->_headers.insert(std::make_pair("Date", ResponseTools::getCurrentDate()));
     this->_headers.insert(std::make_pair("Server", "Webserv-42SP"));
+    this->_headers.insert(std::make_pair("Set-Cookie", "session_id= "+ this->_serverData->getSessionId() + "; path=/"));
 }
 
 void Response::assembleBody()
