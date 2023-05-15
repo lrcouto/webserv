@@ -19,9 +19,12 @@
 
 class Server {
     private:
-        std::map<std::string, std::vector<std::string> > _serverData;
-        std::vector<Location>                            _locations;
-        int                                              _fd;
+        std::map<std::string, std::vector<std::string> >    _serverData;
+        std::vector<Location>                               _locations;
+        int                                                 _fd;
+
+        std::string                                         _sessionId;
+        std::map<std::string, std::string>                  _sessionData;
 
     public:
         Server(void);
@@ -35,6 +38,12 @@ class Server {
 
         int     getFd(void);
         void    setFd(int fd);
+
+        void generateSessionId(void);
+        std::string getSessionId(void);
+        std::string getSessionData(std::string key);
+        void insertSessionData(std::string data);
+        void endSession(void);
 
         class DuplicateDirectiveError : public std::exception {
             public:
@@ -57,6 +66,7 @@ class Server {
         bool _isUniqueDirective(std::string const &directive) const;
         bool _isDirectiveNotAllowed(std::string const &directive) const;
         bool _isDirectiveOnMap(std::string const &directive) const;
+        std::string base64Encode(const std::string &unencodedString);
 };
 
 #endif

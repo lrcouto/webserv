@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestTools.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/11 21:59:24 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/15 00:39:36 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ class RequestTools {
 
         std::string::const_iterator _method_begin;
         std::string::const_iterator _uri_begin;
+        std::string::const_iterator _query_string_begin;
         std::string::const_iterator _protocol_begin;
         std::string::const_iterator _header_key_begin;
         std::string::const_iterator _header_value_begin;
@@ -54,6 +55,7 @@ class RequestTools {
         std::map<std::string, std::string> _headers;
         std::string                        _method;
         std::string                        _uri;
+        std::string                        _query_string;
         std::string                        _protocol;
         std::string                        _body;
 

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Cookie Test</title>
+</head>
+<body>
+	<h1>Cookie Test</h1>
+	<p>Click the button below to test the cookie:</p>
+	<button onclick="testCookie()">Test Cookie</button>
+	<p id="result"></p>
+
+	<script>
+		function testCookie() {
+			// Send a GET request to set the cookie
+			fetch('http://localhost:3007/session/testcookie.html?session=start')
+			.then(() => {
+				// Send a GET request to check the cookie
+				fetch('http://localhost:3007/session/testcookie.html?session=check')
+				.then(response => {
+					if (response.ok) {
+						// Cookie is set correctly
+						document.getElementById('result').innerHTML = 'Cookie set correctly!';
+					} else {
+						// Cookie is not set correctly
+						document.getElementById('result').innerHTML = 'Cookie not set correctly.';
+					}
+				})
+			})
+		}
+        </script>
+</body>
+</html>
