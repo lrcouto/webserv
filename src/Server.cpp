@@ -137,3 +137,25 @@ std::string Server::base64Encode(const std::string &unencodedString)
 
     return encodedString;
 }
+
+std::string Server::getSessionData(std::string key)
+{
+    std::string                                     value;
+    std::map<std::string, std::string>::iterator    it;
+
+    it = this->_sessionData.find(key);
+    if (it != _sessionData.end())
+        value = it->second;
+    return value;
+}
+
+void Server::insertSessionData(std::string data)
+{
+    size_t pos = data.find('=');
+    this->_sessionData.insert(std::make_pair(data.substr(0, pos), data.substr(pos + 1)));
+}
+
+void Server::endSession(void)
+{
+    this->_sessionId.clear();
+}

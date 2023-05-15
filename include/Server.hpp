@@ -41,6 +41,9 @@ class Server {
 
         void generateSessionId(void);
         std::string getSessionId(void);
+        std::string getSessionData(std::string key);
+        void insertSessionData(std::string data);
+        void endSession(void);
 
         class DuplicateDirectiveError : public std::exception {
             public:

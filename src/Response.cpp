@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/14 17:32:49 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/15 02:39:45 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,6 @@ void Response::assembleHeaders()
 
     this->_headers.insert(std::make_pair("Date", ResponseTools::getCurrentDate()));
     this->_headers.insert(std::make_pair("Server", "Webserv-42SP"));
-    this->_headers.insert(std::make_pair("Set-Cookie", "session_id= "+ this->_serverData->getSessionId() + "; path=/"));
 }
 
 void Response::assembleBody()
@@ -200,6 +199,11 @@ void Response::getResource(std::string requestURI)
     if (ResponseTools::isDirectory(resource) || resource.empty()) {
         HTTPError("404");
         return ;
+    }
+
+    if (this->_request.getQueryString().find("session") != std::string::npos) {
+        if (sessionHandler(resource))
+            return;
     }
 
     this->_type = ResponseTools::getFileExtension(resource);
@@ -438,6 +442,58 @@ void Response::validateServerName(void)
     HTTPError("404");
 }
 
+bool Response::sessionHandler(std::string resource)
+{
+    std::vector<std::string> parameters = ftstring::split(this->_request.getQueryString(), '&');
+    std::string dataToRetrieve;
+    
+    for (size_t i = 0; i < parameters.size(); i++) {
+        size_t pos = parameters[i].find('=');
+        if (pos == std::string::npos || pos == 0 || pos == parameters[i].size() - 1) {
+            return false;
+        }
+        if (parameters[i].substr(0, pos) == "retrieve")
+            dataToRetrieve = parameters[i].substr(pos + 1);
+        else
+            this->_serverData->insertSessionData(parameters[i]);
+    }
+
+    std::string sessionStatus = this->_serverData->getSessionData("session");
+
+    if (sessionStatus == "start") {
+        if (this->_serverData->getSessionId().empty()) {
+            this->_serverData->generateSessionId();
+            this->_headers.insert(std::make_pair("Set-Cookie", "session_id= "+ this->_serverData->getSessionId() + "; path=/"));
+        }
+    } else if (sessionStatus == "check") {
+        if (this->_request.getHeaders().find("cookie")->second != this->_serverData->getSessionId()) {
+            HTTPError("403");
+            return true;
+        }
+    } else if (sessionStatus == "stop") {
+        this->_serverData->endSession();
+        std::map<std::string, std::string>::iterator it = this->_headers.find("Set-Cookie");
+        this->_headers.erase(it);
+    } else {
+        return false;
+    }
+
+    if (!dataToRetrieve.empty()) {
+        this->_type = "txt";
+        this->_status = "200";
+        this->_body = this->_serverData->getSessionData(dataToRetrieve);
+        return true;
+    }
+
+    this->_type = ResponseTools::getFileExtension(resource);
+    std::ifstream resourceContent(resource.c_str());
+    std::string   body((std::istreambuf_iterator<char>(resourceContent)),
+        std::istreambuf_iterator<char>());
+    this->_status = "200";
+    this->_body = body;
+
+    return true;
+}
 
 void Response::clear(void)
 {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestTools.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/12 14:43:16 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/15 00:46:31 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ void RequestTools::parseRequest(void)
 
 Request RequestTools::buildRequest(void) const
 {
-    return (Request(_headers, _method, _uri, _protocol, _body, _raw, _errorCode, _hasError));
+    return (Request(_headers, _method, _uri, _query_string, _protocol, _body, _raw, _errorCode, _hasError));
 }
 
 /******************************************** PRIVATE ********************************************/
@@ -101,6 +101,8 @@ void RequestTools::_parseRequestLine(void)
         WSV_METHOD,
         WSV_URI_START,
         WSV_URI,
+        WSV_QUERY_STRING_START,
+        WSV_QUERY_STRING,
         WSV_HTTP_START,
         WSV_HTTP_H,
         WSV_HTTP_HT,
@@ -143,8 +145,28 @@ void RequestTools::_parseRequestLine(void)
                 break;
 
             case WSV_URI:
+                if (*it == '?') {
+                    _uri.assign(_uri_begin, it);
+                    state = WSV_QUERY_STRING_START;
+                    break;
+                }
                 if (*it == WHITESPACE) {
                     _uri.assign(_uri_begin, it);
+                    state = WSV_HTTP_START;
+                    break;
+                }
+                if (_isControlCharacter(*it))
+                    throw RequestParsingException(BAD_REQUEST);
+                break;
+            
+            case WSV_QUERY_STRING_START:
+                _query_string_begin = it;
+                state               = WSV_QUERY_STRING;
+                break;
+
+            case WSV_QUERY_STRING:
+                if (*it == WHITESPACE) {
+                    _query_string.assign(_query_string_begin, it);
                     state = WSV_HTTP_START;
                     break;
                 }
@@ -545,7 +567,8 @@ void RequestTools::_headerFieldNormalizedInsert(std::string &key, std::string &v
 
     // normalize key and value to lowercase
     std::transform(key.begin(), key.end(), key.begin(), ::tolower);
-    std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+    if (key != "cookie")
+        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
 
     it = _headers.find(key);
     if (it != _headers.end())

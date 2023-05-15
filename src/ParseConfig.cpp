@@ -155,7 +155,6 @@ void ParseConfig::processServer(std::string serverBlock)
             server.insertServerData(it->second(line));
         }
     }
-    server.generateSessionId();
     this->_serverData.push_back(server);
 }
 
