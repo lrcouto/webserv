@@ -30,6 +30,7 @@
 #include <sys/socket.h> // Socket-related system calls.
 #include <sys/stat.h>   // Information about files and directories.
 #include <sys/types.h>  // System types like pid_t and size_t.
+#include <sys/wait.h>   // Child process handling, wait, waitpid.
 #include <unistd.h>     // System calls like read, write, and close.
 
 // C++ LIBRARIES
@@ -55,8 +56,8 @@
 #define CRLF        "\r\n"
 #define DOUBLE_CRLF "\r\n\r\n"
 
-#define CR          '\r'
-#define LF          '\n'
-#define WHITESPACE  ' '
+#define CR         '\r'
+#define LF         '\n'
+#define WHITESPACE ' '
 
 #endif
