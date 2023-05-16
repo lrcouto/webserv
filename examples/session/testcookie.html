@@ -11,22 +11,26 @@
 
 	<script>
 		function testCookie() {
-			// Send a GET request to set the cookie
-			fetch('http://localhost:3007/session/testcookie.html?session=start')
-			.then(() => {
-				// Send a GET request to check the cookie
-				fetch('http://localhost:3007/session/testcookie.html?session=check')
-				.then(response => {
-					if (response.ok) {
-						// Cookie is set correctly
-						document.getElementById('result').innerHTML = 'Cookie set correctly!';
-					} else {
-						// Cookie is not set correctly
-						document.getElementById('result').innerHTML = 'Cookie not set correctly.';
-					}
-				})
-			})
+		  // Send a GET request to set the cookie
+		  fetch('http://localhost:3007/session/testcookie.html?session=start')
+		    .then(() => {
+		      // Send a GET request to check the cookie
+		      return fetch('http://localhost:3007/session/testcookie.html?session=check');
+		    })
+		    .then(response => {
+		      if (response.ok) {
+		        // Get the cookie value from the response headers
+		        const cookieValue = document.cookie
+  				.split('; ')
+  				.find(row => row.startsWith('session_id='))
+		        // Cookie is set correctly
+		        document.getElementById('result').innerHTML = `Cookie set correctly! The cookie value is: ${cookieValue}`;
+		      } else {
+		        // Cookie is not set correctly
+		        document.getElementById('result').innerHTML = 'Cookie not set correctly.';
+		      }
+		    })
 		}
-        </script>
+    </script>
 </body>
 </html>
