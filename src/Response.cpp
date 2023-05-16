@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/15 02:39:45 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/16 02:03:07 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,8 @@ void Response::assembleHeaders()
 
     this->_headers.insert(std::make_pair("Date", ResponseTools::getCurrentDate()));
     this->_headers.insert(std::make_pair("Server", "Webserv-42SP"));
+    if (!this->_serverData->getSessionId().empty())
+        this->_headers.insert(std::make_pair("Set-Cookie", "session_id= "+ this->_serverData->getSessionId() + "; path=/; Domain=localhost; SameSite=Lax"));
 }
 
 void Response::assembleBody()
@@ -463,10 +465,21 @@ bool Response::sessionHandler(std::string resource)
     if (sessionStatus == "start") {
         if (this->_serverData->getSessionId().empty()) {
             this->_serverData->generateSessionId();
-            this->_headers.insert(std::make_pair("Set-Cookie", "session_id= "+ this->_serverData->getSessionId() + "; path=/"));
         }
     } else if (sessionStatus == "check") {
-        if (this->_request.getHeaders().find("cookie")->second != this->_serverData->getSessionId()) {
+        std::string cookieHeader = ftstring::reduce(this->_request.getHeaders().find("cookie")->second, " \f\n\r\t\v");
+        std::vector<std::string> cookies = ftstring::split(cookieHeader, ' ');
+        std::string sessionId;
+
+        for (size_t i = 0; i < cookies.size(); i++) {
+            if (cookies[i].find("session_id") != std::string::npos) {
+                size_t pos = cookies[i].find('=');
+                sessionId = cookies[i].substr(pos + 1);
+                break;
+            }
+        }
+
+        if (sessionId != this->_serverData->getSessionId()) {
             HTTPError("403");
             return true;
         }

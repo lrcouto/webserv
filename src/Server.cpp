@@ -152,7 +152,13 @@ std::string Server::getSessionData(std::string key)
 void Server::insertSessionData(std::string data)
 {
     size_t pos = data.find('=');
-    this->_sessionData.insert(std::make_pair(data.substr(0, pos), data.substr(pos + 1)));
+    std::pair<std::string, std::string> sessionData = std::make_pair(data.substr(0, pos), data.substr(pos + 1));
+
+    if (this->_sessionData.find(sessionData.first) != this->_sessionData.end()) {
+        this->_sessionData[sessionData.first] = sessionData.second;
+    } else {
+        this->_sessionData.insert(sessionData);
+    }
 }
 
 void Server::endSession(void)
