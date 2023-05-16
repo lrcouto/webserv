@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/14 23:54:37 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/16 19:53:16 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@
 
 class Response {
     private:
-        std::map<std::string, std::string>   _statusCodes;
-        std::map<std::string, std::string>   _contentTypes;
+        std::map<std::string, std::string> _statusCodes;
+        std::map<std::string, std::string> _contentTypes;
 
         Request     _request;
         Server     *_serverData;
@@ -57,7 +57,9 @@ class Response {
         void setErrorPage(std::string status, std::string path);
         void validateServerName(void);
         bool sessionHandler(std::string resource);
+        void runCgi(std::string &binaryPath, std::string &resource);
 
+        std::string              resolveBinaryPath(std::string &binaryPath);
         std::vector<std::string> verifyLocationAutoindexOverride(std::string resourcePath);
 
         std::string assemblePath(std::string root, std::string requestURI);
