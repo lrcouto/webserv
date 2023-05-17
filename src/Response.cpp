@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/16 20:06:18 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/17 19:44:02 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,71 +142,20 @@ void Response::assembleBody()
     }
 }
 
-std::string Response::resolveBinaryPath(std::string &binaryPath)
+void Response::handleCGI(std::string &binaryPath, std::string &resource)
 {
-    std::vector<std::string>                 splitPath;
-    std::vector<std::string>::const_iterator it;
-    std::string                              binary;
+    CGI cgi(_request, binaryPath, resource);
 
-    if (binaryPath.find_first_of('/') != std::string::npos)
-        return (binaryPath);
-    splitPath = ftstring::split(std::getenv("PATH"), ':');
-    for (it = splitPath.begin(); it != splitPath.end(); ++it) {
-        binary.assign((*it) + "/" + binaryPath);
-        if (access(binary.c_str(), X_OK) == 0)
-            break;
+    try {
+        cgi.execute();
+        this->_body   = cgi.getOutput();
+        this->_type   = "html";
+        this->_status = "200";
+        // this->_status = redirected ? "301" : "200";
+    } catch (std::exception const &e) {
+        std::cerr << e.what() << '\n';
+        HTTPError("500");
     }
-    return (binary);
-}
-
-void Response::runCgi(std::string &binaryPath, std::string &resource)
-{
-    int   fd[2];
-    pid_t pid;
-
-    if (pipe(fd) < 0) {
-        perror("cgi pipe");
-        throw std::exception();
-    }
-    pid = fork();
-    if (pid < 0) {
-        perror("cgi fork");
-        throw std::exception();
-    }
-    if (pid == 0) {
-        int devnull = open("/dev/null", O_RDONLY);
-
-        if (devnull < 0) {
-            perror("cgi open");
-            exit(1);
-        }
-        dup2(devnull, STDIN_FILENO);
-        dup2(fd[1], STDOUT_FILENO);
-        close(fd[0]);
-        close(fd[1]);
-        close(devnull);
-
-        std::string bin    = resolveBinaryPath(binaryPath);
-        char       *argv[] = {(char *)bin.c_str(), (char *)resource.c_str(), NULL};
-        char       *envp[] = {NULL};
-
-        execve(bin.c_str(), argv, envp);
-    }
-    close(fd[1]);
-    waitpid(pid, 0, 0);
-
-    int const bufsize = 1024;
-    char      buf[bufsize + 1];
-    int       ret;
-    while ((ret = read(fd[0], buf, bufsize)) > 0) {
-        buf[ret] = '\0';
-        std::string str(buf);
-        std::cout << str;
-        this->_body += str;
-    }
-    std::cout << std::endl;
-
-    close(fd[0]);
 }
 
 void Response::getResource(std::string requestURI)
@@ -289,8 +238,7 @@ void Response::getResource(std::string requestURI)
         for (size_t i = 0; i < cgi.size() - 1; i += 2) {
             // ignore starting dot
             if (this->_type == cgi[i].substr(1)) {
-                runCgi(cgi[i + 1], resource);
-                this->_type = "html";
+                handleCGI(cgi[i + 1], resource);
                 break;
             }
         }
@@ -309,7 +257,6 @@ void Response::getResource(std::string requestURI)
         }
         this->_body = body;
     }
-    this->_status = redirected ? "301" : "200";
 }
 
 void Response::postResource(std::string requestURI)
@@ -350,6 +297,18 @@ void Response::postResource(std::string requestURI)
                   : this->_serverData->getValue("redirect")[0];
         redirected = this->_serverData->getValue("redirect").empty() ? false : true;
         resource   = ResponseTools::assemblePath(root, requestURI);
+    }
+
+    this->_type                  = ResponseTools::getFileExtension(resource);
+    std::vector<std::string> cgi = _serverData->getValue("cgi");
+    if (!cgi.empty()) {
+        for (size_t i = 0; i < cgi.size() - 1; i += 2) {
+            // ignore starting dot
+            if (this->_type == cgi[i].substr(1)) {
+                handleCGI(cgi[i + 1], resource);
+                return;
+            }
+        }
     }
 
     std::ofstream newFile;
