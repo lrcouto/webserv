@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/17 19:44:02 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/18 18:57:25 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ void Response::assembleHeaders()
 
     std::string                                  contentType;
     std::map<std::string, std::string>::iterator it = this->_contentTypes.find(this->_type);
-    if (it->second == "") {
+    if (it == this->_contentTypes.end()) {
         contentType = "application/octet-stream";
     } else {
         contentType = it->second;
@@ -257,6 +257,7 @@ void Response::getResource(std::string requestURI)
         }
         this->_body = body;
     }
+    this->_status = redirected ? "301" : "200";
 }
 
 void Response::postResource(std::string requestURI)
