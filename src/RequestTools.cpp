@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestTools.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/15 00:46:31 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/18 18:35:45 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,8 @@ RequestTools::RequestTools(std::string &raw, Server *server) :
     _has_chunked_body(false),
     _ignore_content_length(false),
     _position(_raw.begin()),
-    _last(_raw.end())
+    _last(_raw.end()),
+    _hasError(false)
 {
     std::vector<std::string> max_body_size_vec;
 
@@ -158,7 +159,7 @@ void RequestTools::_parseRequestLine(void)
                 if (_isControlCharacter(*it))
                     throw RequestParsingException(BAD_REQUEST);
                 break;
-            
+
             case WSV_QUERY_STRING_START:
                 _query_string_begin = it;
                 state               = WSV_QUERY_STRING;
