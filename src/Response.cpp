@@ -6,20 +6,20 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/18 18:57:25 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/18 19:05:15 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
-Response::Response(void)
+Response::Response(void) : _redirected(false)
 {
     ResponseTools::initStatusCodes(this->_statusCodes);
     ResponseTools::initContentTypes(this->_contentTypes);
     return;
 }
 
-Response::Response(Request request) : _request(request)
+Response::Response(Request request) : _request(request), _redirected(false)
 {
     ResponseTools::initStatusCodes(this->_statusCodes);
     ResponseTools::initContentTypes(this->_contentTypes);
@@ -150,8 +150,7 @@ void Response::handleCGI(std::string &binaryPath, std::string &resource)
         cgi.execute();
         this->_body   = cgi.getOutput();
         this->_type   = "html";
-        this->_status = "200";
-        // this->_status = redirected ? "301" : "200";
+        this->_status = _redirected ? "301" : "200";
     } catch (std::exception const &e) {
         std::cerr << e.what() << '\n';
         HTTPError("500");
@@ -162,7 +161,6 @@ void Response::getResource(std::string requestURI)
 {
     std::string              resourcePath, root, resource;
     std::vector<std::string> indexes, autoindex, redirect;
-    bool                     redirected = false;
 
     std::vector<Location> locations = this->_serverData->getLocations();
     if (!locations.empty()) {
@@ -200,7 +198,7 @@ void Response::getResource(std::string requestURI)
         redirect     = this->_serverData->getValue("redirect");
         root         = redirect.empty() ? this->_serverData->getValue("root")[0]
                                         : this->_serverData->getValue("redirect")[0];
-        redirected   = redirect.empty() ? false : true;
+        _redirected  = redirect.empty() ? false : true;
         resourcePath = ResponseTools::assemblePath(root, requestURI);
 
         resource = findResourceByIndex(indexes, resourcePath);
@@ -216,7 +214,7 @@ void Response::getResource(std::string requestURI)
                 = ResponseTools::autoindex(resourcePath, this->_serverData->getValue("listen")[1]);
             if (this->_body.empty())
                 HTTPError("404");
-            this->_status = redirected ? "301" : "200";
+            this->_status = _redirected ? "301" : "200";
             this->_type   = "html";
             return;
         }
@@ -257,13 +255,12 @@ void Response::getResource(std::string requestURI)
         }
         this->_body = body;
     }
-    this->_status = redirected ? "301" : "200";
+    this->_status = _redirected ? "301" : "200";
 }
 
 void Response::postResource(std::string requestURI)
 {
     std::string root, resource;
-    bool        redirected = false;
 
     std::vector<std::string> maxSizeVector = this->_serverData->getValue("client_max_body_size");
     if (!maxSizeVector.empty()) {
@@ -293,11 +290,11 @@ void Response::postResource(std::string requestURI)
         }
     }
     if (resource.empty()) {
-        root       = this->_serverData->getValue("redirect").empty()
-                  ? this->_serverData->getValue("root")[0]
-                  : this->_serverData->getValue("redirect")[0];
-        redirected = this->_serverData->getValue("redirect").empty() ? false : true;
-        resource   = ResponseTools::assemblePath(root, requestURI);
+        root        = this->_serverData->getValue("redirect").empty()
+                   ? this->_serverData->getValue("root")[0]
+                   : this->_serverData->getValue("redirect")[0];
+        _redirected = this->_serverData->getValue("redirect").empty() ? false : true;
+        resource    = ResponseTools::assemblePath(root, requestURI);
     }
 
     this->_type                  = ResponseTools::getFileExtension(resource);
@@ -325,16 +322,15 @@ void Response::postResource(std::string requestURI)
     newFile.write(requestBody.c_str(), requestBody.length());
     newFile.close();
 
-    this->_status = redirected ? "301" : "201";
+    this->_status = _redirected ? "301" : "201";
     this->_type   = "txt";
-    this->_body   = redirected ? "Created in Redirected Location\n" : "Created Successfully\n";
+    this->_body   = _redirected ? "Created in Redirected Location\n" : "Created Successfully\n";
     this->_headers.insert(std::make_pair("Location", resource));
 }
 
 void Response::deleteResource(std::string requestURI)
 {
     std::string root, resource;
-    bool        redirected = false;
 
     std::vector<Location> locations = this->_serverData->getLocations();
     if (!locations.empty()) {
@@ -354,11 +350,11 @@ void Response::deleteResource(std::string requestURI)
         }
     }
     if (resource.empty()) {
-        root       = this->_serverData->getValue("redirect").empty()
-                  ? this->_serverData->getValue("root")[0]
-                  : this->_serverData->getValue("redirect")[0];
-        redirected = this->_serverData->getValue("redirect").empty() ? false : true;
-        resource   = ResponseTools::assemblePath(root, requestURI);
+        root        = this->_serverData->getValue("redirect").empty()
+                   ? this->_serverData->getValue("root")[0]
+                   : this->_serverData->getValue("redirect")[0];
+        _redirected = this->_serverData->getValue("redirect").empty() ? false : true;
+        resource    = ResponseTools::assemblePath(root, requestURI);
     }
 
     if (ResponseTools::isDirectory(resource)) {
@@ -373,9 +369,9 @@ void Response::deleteResource(std::string requestURI)
 
     std::remove(resource.c_str());
 
-    this->_status = redirected ? "301" : "200";
+    this->_status = _redirected ? "301" : "200";
     this->_type   = "txt";
-    this->_body   = redirected ? "Deleted in Redirected Location\n" : "Deleted Successfully\n";
+    this->_body   = _redirected ? "Deleted in Redirected Location\n" : "Deleted Successfully\n";
 }
 
 std::string Response::findResourceByIndex(std::vector<std::string> indexes,

@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/17 18:49:46 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/18 19:01:10 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class Response {
         std::string _status;
         std::string _type;
         std::string _responseString;
+        bool        _redirected;
 
         std::string                        _statusLine;
         std::map<std::string, std::string> _headers;
