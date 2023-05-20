@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/17 16:57:16 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/17 19:51:06 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/20 02:41:14 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,11 @@ CGI &CGI::operator=(CGI const &rhs)
 
 void CGI::execute(void)
 {
+    std::vector<std::string> environment = _formatEnvironment();
+    for (size_t i = 0; i < environment.size(); i++)
+    {
+        std::cout << environment[i] << std::endl;
+    }
     pipe_or_throw(_pipedes);
     if (_request.getMethod() == "POST")
         write(_pipedes[1], _request.getBody().c_str(), _request.getBody().length());
@@ -87,15 +92,58 @@ std::string const &CGI::getOutput(void) const { return _output; }
 
 void CGI::_childRoutine(void)
 {
+    std::vector<std::string> environment = _formatEnvironment();
     std::string const path   = _resolveBinaryPath();
     char const       *argv[] = {path.c_str(), _resource.c_str(), NULL};
-    char const       *envp[] = {NULL};
+    char const       *envp[] = {
+        environment[0].c_str(),
+        environment[1].c_str(),
+        environment[2].c_str(),
+        environment[3].c_str(),
+        environment[4].c_str(),
+        environment[5].c_str(),
+        environment[6].c_str(),
+        environment[7].c_str(),
+        environment[8].c_str(),
+        environment[9].c_str(),
+        NULL};
 
     dup_or_throw(_pipedes[0], STDIN_FILENO);
     close_or_throw(_pipedes[0]);
     dup_or_throw(_pipedes[1], STDOUT_FILENO);
     close_or_throw(_pipedes[1]);
     exec_or_throw(argv[0], argv, envp);
+}
+
+std::vector<std::string> CGI::_formatEnvironment(void)
+{
+    std::vector<std::string> envpVector;
+    std::map<std::string, std::string> headers = this->_request.getHeaders();
+
+    std::ifstream resourceContent(this->_resource.c_str());
+    std::string   body((std::istreambuf_iterator<char>(resourceContent)), std::istreambuf_iterator<char>());
+    std::stringstream ss;
+    ss << body.length();
+
+    envpVector.resize(10);
+    
+    envpVector[0] = "REQUEST_METHOD=" + this->_request.getMethod();
+    envpVector[1] = "QUERY_STRING=" + this->_request.getQueryString();
+    envpVector[2] = "CONTENT_TYPE=text/html";
+    envpVector[3] = "CONTENT_LENGTH=" + ss.str();
+
+    if (headers.count("cookie") > 0) {
+        envpVector[4] = "HTTP_COOKIE=" + headers["cookie"];
+    }
+    if (headers.count("user-agent") > 0) {
+        envpVector[5] = "HTTP_USER_AGENT=" + headers["user-agent"];
+    }
+    envpVector[6] = "DOCUMENT_ROOT=/examples"; // hardcoded, fix later
+    envpVector[7] = "SCRIPT_FILENAME=" + this->_resource.substr(1);
+    envpVector[8] = "SCRIPT_NAME=" + this->_resource.substr(this->_resource.find_last_of('/') + 1);
+    envpVector[9] = "REDIRECT_STATUS=200";
+
+    return envpVector;
 }
 
 void CGI::_parentRoutine(void)
