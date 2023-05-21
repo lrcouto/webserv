@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/17 16:57:16 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/20 01:18:33 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/20 22:47:08 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,13 @@ class CGI {
         std::string _binary;
         std::string _resource;
         std::string _output;
+        std::string _root;
         int         _pipedes[2];
         pid_t       _pid;
 
     public:
         CGI(void);
-        CGI(Request &request, std::string &binary, std::string &resource);
+        CGI(Request &request, std::string &binary, std::string &resource, std::string &root);
         CGI(CGI const &src);
         ~CGI(void);
         CGI &operator=(CGI const &rhs);

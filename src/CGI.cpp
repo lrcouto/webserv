@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/17 16:57:16 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/20 02:41:14 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/20 22:47:10 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,11 @@ static void exec_or_throw(char const *path, char const **argv, char const **envp
 
 CGI::CGI(void) {}
 
-CGI::CGI(Request &request, std::string &binary, std::string &resource) :
+CGI::CGI(Request &request, std::string &binary, std::string &resource, std::string &root) :
     _request(request),
     _binary(binary),
-    _resource(resource)
+    _resource(resource),
+    _root(root)
 {
 }
 
@@ -106,6 +107,7 @@ void CGI::_childRoutine(void)
         environment[7].c_str(),
         environment[8].c_str(),
         environment[9].c_str(),
+        environment[10].c_str(),
         NULL};
 
     dup_or_throw(_pipedes[0], STDIN_FILENO);
@@ -125,7 +127,7 @@ std::vector<std::string> CGI::_formatEnvironment(void)
     std::stringstream ss;
     ss << body.length();
 
-    envpVector.resize(10);
+    envpVector.resize(11);
     
     envpVector[0] = "REQUEST_METHOD=" + this->_request.getMethod();
     envpVector[1] = "QUERY_STRING=" + this->_request.getQueryString();
@@ -138,10 +140,11 @@ std::vector<std::string> CGI::_formatEnvironment(void)
     if (headers.count("user-agent") > 0) {
         envpVector[5] = "HTTP_USER_AGENT=" + headers["user-agent"];
     }
-    envpVector[6] = "DOCUMENT_ROOT=/examples"; // hardcoded, fix later
+    envpVector[6] = "DOCUMENT_ROOT=" + this->_root;
     envpVector[7] = "SCRIPT_FILENAME=" + this->_resource.substr(1);
     envpVector[8] = "SCRIPT_NAME=" + this->_resource.substr(this->_resource.find_last_of('/') + 1);
     envpVector[9] = "REDIRECT_STATUS=200";
+    envpVector[10] = "REQUEST_BODY=" + this->_request.getBody();
 
     return envpVector;
 }

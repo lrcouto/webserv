@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/18 19:01:10 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/20 22:47:13 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class Response {
         std::string _status;
         std::string _type;
         std::string _responseString;
+        std::string _root;
         bool        _redirected;
 
         std::string                        _statusLine;
@@ -44,6 +45,7 @@ class Response {
         Response &operator=(Response const &other);
 
         std::string getResponseString(void);
+        std::string getRoot(void);
         void        setServerData(Server *serverData);
         void        setRequest(Request request);
 
