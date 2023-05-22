@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Método POST</title>
+  <style>
+    * {
+      overflow: hidden;
+      margin: 0;
+    }
+
+    body {
+      background: #000;
+    }
+
+    .content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: justify;
+      color: #fff;
+      font-family: "Lucida Console", monospace;
+      position: relative;
+      z-index: 1;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 50px;
+      border-radius: 15px;
+    }
+
+    .text-box {
+      flex: 1;
+      margin-right: 20px;
+    }
+
+    .image {
+      flex: 1;
+      text-align: center;
+      max-width: 40vw;
+      max-height: 80vh;
+      margin: 0 auto;
+    }
+
+    .image img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    p {
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: rgb(0, 104, 136);
+      color: #fff;
+      font-size: 20px;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+
+    .button:hover {
+      background-color: rgb(0, 186, 188);
+    }
+  </style>
+  <script>
+    window.addEventListener("DOMContentLoaded", function() {
+      var form = document.querySelector("form");
+
+      form.addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Perform any necessary validation or processing here
+
+        // Get the form data
+        var formData = new FormData(form);
+
+        // Send the POST request using fetch
+        fetch("http://localhost:3008/methods/image.jpg", {
+          method: "POST",
+          body: formData
+        })
+        .then(function(response) {
+          // Redirect the user to the desired page after the request is complete
+          window.location.href = "http://localhost:3008/methods/post.html";
+        })
+        .catch(function(error) {
+          console.log("Error:", error);
+          // Handle any error that occurred during the request
+        });
+      });
+    });
+  </script>
+</head>
+<body>
+  <div class="content">
+    <div class="text-box">
+      <h1>Método POST</h1>
+      <p>
+        O método POST permite que o usuário envie uma entidade (feita de bytes, não um fantasma) para
+        o endereço desejado, causando uma mudança de estado ou efeitos colaterais no servidor.
+      </p>
+      <p>
+        Neste caso, você pode escolher uma imagem com o formato .jpg para enviar para o Webserv,
+        que substituirá a que está nessa página.
+      </p>
+      <p>
+        <br>
+        <a href="http://localhost:3008/methods/post.html" class="button">POST! 📬</a>
+      </p>
+      <br>
+      <form action="http://localhost:3008/methods/image.jpg" method="POST" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/jpeg">
+        <input type="submit" value="Upload Image" class="button">
+      </form>
+    </div>
+    <div class="image">
+      <img src="image.jpg" alt="Image">
+    </div>
+  </div>
+</body>
+</html>

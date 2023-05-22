@@ -84,6 +84,7 @@ int WebServer::socksend(Socket *client)
     RequestTools parser(_rawRequest, getCurrentServer(client->getServerFd()));
     Request      request;
 
+
     parser.parseRequest();
     request = parser.buildRequest();
 

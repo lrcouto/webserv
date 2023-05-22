@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/15 00:39:36 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/22 13:59:57 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class RequestTools {
 
         bool _has_body;
         bool _has_chunked_body;
+        bool _has_multipart_data;
         bool _ignore_content_length;
 
         std::string::const_iterator _position;
@@ -86,6 +87,7 @@ class RequestTools {
         void _parseRequestLine(void);
         void _parseHeaderLines(void);
         void _parseChunkedBody(void);
+        void _parseMultipartData(void);
         void _parseRegularBody(void);
 
         bool   _isControlCharacter(int c);
