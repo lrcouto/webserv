@@ -73,10 +73,15 @@ def print_table():
     print("</table>")
 
     reset_link_body = "game_state=---------&move="
+    print("<br>")
+    print("<div class='button-container'>")
     print("<form method='GET'>")
     print("<input type='hidden' name='game_state' value='---------'>")
     print("<input type='submit' value='Reset Game'>")
     print("</form>")
+
+    print("<a href='http://localhost:3007/' class='return-home'>Return Home</a>")
+    print("</div>")
 
     if winner:
         print("<p>Winner: {}</p>".format(winner))
@@ -85,6 +90,8 @@ print("<html>")
 print("<head>")
 print("<title>Tic-Tac-Toe</title>")
 print("<style>")
+print(".button-container { display: flex; flex-direction: row; gap: 5vw; }")
+print(".button-container form {  margin-right: 3vw; }")
 print("table { border-collapse: collapse; }")
 print("td { width: 100px; height: 100px; text-align: center; border: 1px solid black; }")
 print("</style>")

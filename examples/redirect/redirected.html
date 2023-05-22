@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Redirected!</title>
+  <style>
+    * {
+      overflow: hidden;
+      margin: 0;
+    }
+
+    body {
+      background: #000;
+    }
+
+    .content {
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: justify;
+      color: #fff;
+      font-family: "Lucida Console", monospace;
+      position: relative;
+      z-index: 1;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    p {
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: rgb(0, 104, 136);
+      color: #fff;
+      font-size: 20px;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+
+    .button:hover {
+      background-color: rgb(0, 186, 188);
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <h1>Redirected!</h1>
+    <p>
+      Opa, você deve ter percebido que a última resposta do servidor veio com o status 301, e não 200.
+      Isso significa que o recurso que foi pedido pelo cliente foi permanentemente movido para outro
+      endereço, e o Webserv te redirecionou para esse novo local.
+    </p>
+    <p>
+      Repare também que estamos agora conectados através da porta <b>3008</b> ao invés da <b>3007</b>, e ambas
+      são acessíveis simultâneamente.
+    </p>
+      Fique à vontade para tirar qualquer dúvida sobre estes pontos, e vamos seguir para a próxima página.
+    <p>
+      <br>
+      <a href="http://localhost:3008/methods" class="button">👉👉👉</a>
+    </p>
+  </div>
+</body>
+</html>

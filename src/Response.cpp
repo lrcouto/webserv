@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/20 23:11:01 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/22 02:25:09 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -391,11 +391,10 @@ std::string Response::findResourceByIndex(std::vector<std::string> indexes,
                 return resource;
             }
         }
-    } else {
-        resource = resourcePath;
-        if (ResponseTools::fileExists(resource)) {
-            return resource;
-        }
+    }
+    resource = resourcePath;
+    if (ResponseTools::fileExists(resource)) {
+        return resource;
     }
     return "";
 }
