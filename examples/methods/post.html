@@ -60,6 +60,7 @@
     .button {
       display: inline-block;
       padding: 10px 20px;
+      margin-top: 10px;
       background-color: rgb(0, 104, 136);
       color: #fff;
       font-size: 20px;
@@ -76,25 +77,19 @@
       var form = document.querySelector("form");
 
       form.addEventListener("submit", function(event) {
-        event.preventDefault(); // Prevent the default form submission
+        event.preventDefault();
 
-        // Perform any necessary validation or processing here
-
-        // Get the form data
         var formData = new FormData(form);
 
-        // Send the POST request using fetch
         fetch("http://localhost:3008/methods/image.jpg", {
           method: "POST",
           body: formData
         })
         .then(function(response) {
-          // Redirect the user to the desired page after the request is complete
           window.location.href = "http://localhost:3008/methods/post.html";
         })
         .catch(function(error) {
           console.log("Error:", error);
-          // Handle any error that occurred during the request
         });
       });
     });
@@ -112,15 +107,15 @@
         Neste caso, você pode escolher uma imagem com o formato .jpg para enviar para o Webserv,
         que substituirá a que está nessa página.
       </p>
-      <p>
-        <br>
-        <a href="http://localhost:3008/methods/post.html" class="button">POST! 📬</a>
-      </p>
       <br>
       <form action="http://localhost:3008/methods/image.jpg" method="POST" enctype="multipart/form-data">
         <input type="file" name="image" accept="image/jpeg">
-        <input type="submit" value="Upload Image" class="button">
+        <input type="submit" value="Enviar 🖼️" class="button">
       </form>
+      <p>
+        <br>
+        <a href="http://localhost:3008/methods/delete.html" class="button">Próxima página! ➡️</a>
+      </p>
     </div>
     <div class="image">
       <img src="image.jpg" alt="Image">

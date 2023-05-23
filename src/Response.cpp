@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/22 02:25:09 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/22 21:15:24 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ void Response::assembleHeaders()
     this->_headers.insert(std::make_pair("Server", "Webserv-42SP"));
 
     if (!this->_serverData->getSessionId().empty()) {
-        std::string cookieData = "session_id= " + this->_serverData->getSessionId() + "; path=/; Domain=localhost; SameSite=Lax; game_state=----X----";
+        std::string cookieData = "session_id= " + this->_serverData->getSessionId() + "; path=/; Domain=localhost; SameSite=Lax;";
         this->_headers.insert(std::make_pair("Set-Cookie", cookieData));
     }
 }
