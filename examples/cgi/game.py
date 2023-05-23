@@ -80,7 +80,7 @@ def print_table():
     print("<input type='submit' value='Reset Game'>")
     print("</form>")
 
-    print("<a href='http://localhost:3007/' class='return-home'>Return Home</a>")
+    print("<a href='http://localhost:3007/cgi/what_is_cgi.html' class='return-home'>Return</a>")
     print("</div>")
 
     if winner:
