@@ -12,12 +12,9 @@
 
 #include "WebServer.hpp"
 
-WebServer::WebServer(void)
-{
-    log.info() << "Hello, this is your WebServer ready to go!" << log.end();
-}
+WebServer::WebServer(void) {}
 
-WebServer::~WebServer(void) { log.info() << "Bye bye!" << log.end(); }
+WebServer::~WebServer(void) {}
 
 WebServer::WebServer(WebServer const &other)
 {
@@ -55,13 +52,13 @@ int WebServer::sockaccept(Socket *listener)
 {
     Socket *client;
 
-    log.info() << "Accepting connection on socket file descriptor " << listener->getFd()
-               << log.end();
+    Logger::info << "Accepting connection on socket file descriptor " << listener->getFd()
+                 << Logger::endl;
     client = new Socket;
     client->accept(listener->getFd());
     if (client->getFd() < 0) {
-        log.error() << "Unable to accept connection on socket file descriptor " << listener->getFd()
-                    << log.end();
+        Logger::error << "Unable to accept connection on socket file descriptor "
+                      << listener->getFd() << Logger::endl;
         return (-1);
     }
     this->_poll.insertSocket(client);
@@ -71,10 +68,11 @@ int WebServer::sockaccept(Socket *listener)
 int WebServer::sockreceive(Socket *client)
 {
     _rawRequest.clear();
-    log.info() << "Receiving request on client file descriptor " << client->getFd() << log.end();
+    Logger::info << "Receiving request on client file descriptor " << client->getFd()
+                 << Logger::endl;
     if (client->receive(_rawRequest) < 0) {
-        log.error() << "Unable to receive request on socket file descriptor " << client->getFd()
-                    << log.end();
+        Logger::error << "Unable to receive request on socket file descriptor " << client->getFd()
+                      << Logger::endl;
         this->_poll.removeSocket(client);
         return (-1);
     }
@@ -97,8 +95,8 @@ int WebServer::socksend(Socket *client)
         response.HTTPError(request.getErrorCode());
     response.assembleResponseString();
     if (client->send(response.getResponseString()) <= 0) {
-        log.info() << "Unable to read request data on file descriptor " << client->getFd()
-                   << log.end();
+        Logger::info << "Unable to read request data on file descriptor " << client->getFd()
+                     << Logger::endl;
         return (-1);
     }
     return (0);
@@ -129,6 +127,7 @@ void WebServer::setServerSocketFds(void)
 void WebServer::run(std::string const &inputFilePath)
 {
     init(inputFilePath);
+    Logger::info << "Hello, this is your WebServer ready to go!" << Logger::endl;
     while (true) {
         this->_poll.execute();
         setServerSocketFds();
@@ -154,8 +153,9 @@ void WebServer::run(std::string const &inputFilePath)
 
 void WebServer::stop(void)
 {
-    log.info() << "Stopping Webserver" << log.end();
+    Logger::info << "Stopping Webserver" << Logger::endl;
     this->_poll.clear(); // in the future will also have to clear server data, request data, etc.
+    Logger::info << "Bye bye!" << Logger::endl;
 }
 
 std::ostream &operator<<(std::ostream &out, WebServer const &in)

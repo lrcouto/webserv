@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/23 23:11:14 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/24 02:03:19 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,12 +80,12 @@ void RequestTools::parseRequest(void)
             _body = _body_data;
         }
     } catch (RequestParsingException const &e) {
-        log.error() << "Exception caught while parsing request: " << e.get_error() << ' '
-                    << e.what() << log.end();
+        Logger::error << "Exception caught while parsing request: " << e.get_error() << ' '
+                      << e.what() << Logger::endl;
         _hasError  = true;
         _errorCode = e.get_error();
     } catch (std::exception const &e) {
-        log.error() << "Exception caught while parsing request: " << e.what() << log.end();
+        Logger::error << "Exception caught while parsing request: " << e.what() << Logger::endl;
     }
 }
 

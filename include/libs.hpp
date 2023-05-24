@@ -61,8 +61,4 @@
 #define LF         '\n'
 #define WHITESPACE ' '
 
-// GLOBAL VARIABLES
-
-extern Logger log;
-
 #endif
