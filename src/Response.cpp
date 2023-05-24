@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/24 02:03:19 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/24 11:55:57 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,8 @@ Response &Response::operator=(Response const &other)
 }
 
 std::string Response::getResponseString(void) { return this->_responseString; }
+
+std::string Response::getRoot(void) { return this->_root; }
 
 void Response::setServerData(Server *serverData) { this->_serverData = serverData; }
 
@@ -105,10 +107,11 @@ void Response::assembleHeaders()
 
     this->_headers.insert(std::make_pair("Date", ResponseTools::getCurrentDate()));
     this->_headers.insert(std::make_pair("Server", "Webserv-42SP"));
-    if (!this->_serverData->getSessionId().empty())
-        this->_headers.insert(std::make_pair("Set-Cookie",
-                                             "session_id= " + this->_serverData->getSessionId()
-                                                 + "; path=/; Domain=localhost; SameSite=Lax"));
+
+    if (!this->_serverData->getSessionId().empty()) {
+        std::string cookieData = "session_id= " + this->_serverData->getSessionId() + "; path=/; Domain=localhost; SameSite=Lax;";
+        this->_headers.insert(std::make_pair("Set-Cookie", cookieData));
+    }
 }
 
 void Response::assembleBody()
@@ -144,7 +147,7 @@ void Response::assembleBody()
 
 void Response::handleCGI(std::string &binaryPath, std::string &resource)
 {
-    CGI cgi(_request, binaryPath, resource);
+    CGI cgi(_request, binaryPath, resource, this->_root);
 
     try {
         cgi.execute();
@@ -159,7 +162,7 @@ void Response::handleCGI(std::string &binaryPath, std::string &resource)
 
 void Response::getResource(std::string requestURI)
 {
-    std::string              resourcePath, root, resource;
+    std::string              resourcePath, resource;
     std::vector<std::string> indexes, autoindex, redirect;
 
     std::vector<Location> locations = this->_serverData->getLocations();
@@ -169,9 +172,9 @@ void Response::getResource(std::string requestURI)
             std::string locationPath = locations[i].getPath();
 
             indexes = locations[i].getValue("index");
-            root    = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0]
+            this->_root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0]
                                                             : locations[i].getValue("root")[0];
-            resourcePath = ResponseTools::assemblePath(root, requestURI);
+            resourcePath = ResponseTools::assemblePath(this->_root, requestURI);
 
             resource  = findResourceByIndex(indexes, resourcePath);
             autoindex = locations[i].getValue("autoindex");
@@ -196,10 +199,10 @@ void Response::getResource(std::string requestURI)
     if (resource.empty()) {
         indexes      = this->_serverData->getValue("index");
         redirect     = this->_serverData->getValue("redirect");
-        root         = redirect.empty() ? this->_serverData->getValue("root")[0]
+        this->_root  = redirect.empty() ? this->_serverData->getValue("root")[0]
                                         : this->_serverData->getValue("redirect")[0];
         _redirected  = redirect.empty() ? false : true;
-        resourcePath = ResponseTools::assemblePath(root, requestURI);
+        resourcePath = ResponseTools::assemblePath(this->_root, requestURI);
 
         resource = findResourceByIndex(indexes, resourcePath);
         if (resource.empty() && ResponseTools::fileExists(resourcePath))
@@ -260,7 +263,7 @@ void Response::getResource(std::string requestURI)
 
 void Response::postResource(std::string requestURI)
 {
-    std::string root, resource;
+    std::string resource;
 
     std::vector<std::string> maxSizeVector = this->_serverData->getValue("client_max_body_size");
     if (!maxSizeVector.empty()) {
@@ -278,9 +281,9 @@ void Response::postResource(std::string requestURI)
 
             std::string locationPath = locations[i].getPath();
 
-            root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0]
+            this->_root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0]
                                                          : locations[i].getValue("root")[0];
-            resource = ResponseTools::assemblePath(root, requestURI);
+            resource = ResponseTools::assemblePath(this->_root, requestURI);
 
             if ((!resource.empty()) && resource.find(locationPath) != std::string::npos) {
                 break;
@@ -290,11 +293,11 @@ void Response::postResource(std::string requestURI)
         }
     }
     if (resource.empty()) {
-        root        = this->_serverData->getValue("redirect").empty()
+        this->_root = this->_serverData->getValue("redirect").empty()
                    ? this->_serverData->getValue("root")[0]
                    : this->_serverData->getValue("redirect")[0];
         _redirected = this->_serverData->getValue("redirect").empty() ? false : true;
-        resource    = ResponseTools::assemblePath(root, requestURI);
+        resource    = ResponseTools::assemblePath(this->_root, requestURI);
     }
 
     this->_type                  = ResponseTools::getFileExtension(resource);
@@ -330,7 +333,7 @@ void Response::postResource(std::string requestURI)
 
 void Response::deleteResource(std::string requestURI)
 {
-    std::string root, resource;
+    std::string resource;
 
     std::vector<Location> locations = this->_serverData->getLocations();
     if (!locations.empty()) {
@@ -338,9 +341,9 @@ void Response::deleteResource(std::string requestURI)
 
             std::string locationPath = locations[i].getPath();
 
-            root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0]
+            this->_root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0]
                                                          : locations[i].getValue("root")[0];
-            resource = ResponseTools::assemblePath(root, requestURI);
+            resource = ResponseTools::assemblePath(this->_root, requestURI);
 
             if ((!resource.empty()) && resource.find(locationPath) != std::string::npos) {
                 break;
@@ -350,11 +353,11 @@ void Response::deleteResource(std::string requestURI)
         }
     }
     if (resource.empty()) {
-        root        = this->_serverData->getValue("redirect").empty()
+        this->_root = this->_serverData->getValue("redirect").empty()
                    ? this->_serverData->getValue("root")[0]
                    : this->_serverData->getValue("redirect")[0];
         _redirected = this->_serverData->getValue("redirect").empty() ? false : true;
-        resource    = ResponseTools::assemblePath(root, requestURI);
+        resource    = ResponseTools::assemblePath(this->_root, requestURI);
     }
 
     if (ResponseTools::isDirectory(resource)) {
@@ -388,11 +391,10 @@ std::string Response::findResourceByIndex(std::vector<std::string> indexes,
                 return resource;
             }
         }
-    } else {
-        resource = resourcePath;
-        if (ResponseTools::fileExists(resource)) {
-            return resource;
-        }
+    }
+    resource = resourcePath;
+    if (ResponseTools::fileExists(resource)) {
+        return resource;
     }
     return "";
 }
@@ -417,11 +419,11 @@ void Response::HTTPError(std::string status)
                 errorPagePath         = errorPage.substr(delimiter + 1);
 
                 if (errorCode == status) {
-                    std::string root = locations[i].getValue("root").empty()
+                   this->_root = locations[i].getValue("root").empty()
                         ? this->_serverData->getValue("root")[0]
                         : locations[i].getValue("root")[0];
-                    root             = ResponseTools::assemblePath(root, locationPath);
-                    errorPagePath    = ResponseTools::assemblePath(root, errorPagePath);
+                    this->_root      = ResponseTools::assemblePath(this->_root, locationPath);
+                    errorPagePath    = ResponseTools::assemblePath(this->_root, errorPagePath);
 
                     if (ResponseTools::fileExists(errorPagePath) && !errorPagePath.empty()
                         && errorPagePath.find(locationPath) != std::string::npos) {
@@ -433,8 +435,8 @@ void Response::HTTPError(std::string status)
         }
     }
 
-    std::string root = this->_serverData->getValue("root")[0];
-    errorPages       = this->_serverData->getValue("error_page");
+    this->_root = this->_serverData->getValue("root")[0];
+    errorPages  = this->_serverData->getValue("error_page");
 
     for (size_t i = 0; i < errorPages.size(); ++i) {
         std::string errorPage = errorPages[i];
@@ -443,7 +445,7 @@ void Response::HTTPError(std::string status)
         errorPagePath         = errorPage.substr(delimiter + 1);
 
         if (errorCode == status) {
-            errorPagePath = ResponseTools::assemblePath(root, errorPagePath);
+            errorPagePath = ResponseTools::assemblePath(this->_root, errorPagePath);
 
             if (ResponseTools::fileExists(errorPagePath)) {
                 setErrorPage(status, errorPagePath);
