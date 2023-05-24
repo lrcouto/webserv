@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/16 19:53:16 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/20 22:47:13 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef RESPONSE_HPP
 #define RESPONSE_HPP
 
+#include "CGI.hpp"
 #include "Location.hpp"
 #include "Request.hpp"
 #include "ResponseTools.hpp"
@@ -29,6 +30,8 @@ class Response {
         std::string _status;
         std::string _type;
         std::string _responseString;
+        std::string _root;
+        bool        _redirected;
 
         std::string                        _statusLine;
         std::map<std::string, std::string> _headers;
@@ -42,6 +45,7 @@ class Response {
         Response &operator=(Response const &other);
 
         std::string getResponseString(void);
+        std::string getRoot(void);
         void        setServerData(Server *serverData);
         void        setRequest(Request request);
 
@@ -57,9 +61,8 @@ class Response {
         void setErrorPage(std::string status, std::string path);
         void validateServerName(void);
         bool sessionHandler(std::string resource);
-        void runCgi(std::string &binaryPath, std::string &resource);
+        void handleCGI(std::string &binaryPath, std::string &resource);
 
-        std::string              resolveBinaryPath(std::string &binaryPath);
         std::vector<std::string> verifyLocationAutoindexOverride(std::string resourcePath);
 
         std::string assemblePath(std::string root, std::string requestURI);

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Método DELETE</title>
+  <style>
+    * {
+      overflow: hidden;
+      margin: 0;
+    }
+
+    body {
+      background: #000;
+    }
+
+    .content {
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: justify;
+      color: #fff;
+      font-family: "Lucida Console", monospace;
+      position: relative;
+      z-index: 1;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    p {
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: rgb(0, 104, 136);
+      color: #fff;
+      font-size: 20px;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+
+    .button:hover {
+      background-color: rgb(0, 186, 188);
+    }
+  </style>
+  <script>
+    function deleteImage() {
+      fetch('http://localhost:3008/methods/image.jpg', {
+        method: 'DELETE'
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log('Image deleted successfully.');
+        } else {
+          console.error('Failed to delete image.');
+        }
+      })
+      .catch(error => {
+        console.error('Network error:', error);
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="content">
+    <h1>Método DELETE</h1>
+    <p>
+      O terceiro método HTTP disponível no Webserv é o DELETE, usado para remover uma entidade
+      do servidor. No entanto, você pode notar que no arquivo de configuração usado para subir o
+      servidor, existe uma diretiva <i>limit_except</i> associada a este diretório, que permite
+      que sejam usados apenas os métodos GET e POST dentro dele.
+    </p>
+    <p>
+      O que acontece se tentarmos deletar uma entidade contida no diretório <i>methods</i>?
+      Clique no botão abaixo para enviar uma requisição DELETE para o endereço da imagem do
+      upload da página anterior.
+    </p>
+    <br>
+    <div class="button-container">
+      <button onclick="deleteImage()" class="button">Deletar Imagem</button>
+      <a href="http://localhost:3009/methods/really_delete.html" class="button">Próxima página! ➡️</a>
+    </div>
+  </div>
+</body>
+</html>

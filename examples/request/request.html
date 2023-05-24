@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Como você chegou nesta página?</title>
+  <style>
+    * {
+      overflow: hidden;
+      margin: 0;
+    }
+
+    body {
+      background: #000;
+    }
+
+    .content {
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: justify;
+      color: #fff;
+      font-family: "Lucida Console", monospace;
+      position: relative;
+      z-index: 1;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    p {
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: rgb(0, 104, 136);
+      color: #fff;
+      font-size: 20px;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+
+    .button:hover {
+      background-color: rgb(0, 186, 188);
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <h1>Como você chegou nesta página?</h1>
+    <p>
+      Quando você clicou no botão na página anterior, o seu browser enviou uma mensagem para o nosso servidor,
+      formatada seguindo um padrão específico chamado de Hypertext Transfer Protocol - o tal do <b>HTTP</b>.
+    </p>
+    <p>
+      Através deste protocolo, o cliente (seu browser) envia uma mensagem ao servidor (nosso Webserv), 
+      pedindo para que seja entregue um recurso específico: esta página!
+    </p>
+    <p>
+      Agora, abra a janela de desenvolvedor do seu browser, apertando <b>F12</b>, e selecione a aba <b>Rede</b>, ou <b>Network</b> caso seu browser esteja em inglês.
+      Em seguida, aperte o botão abaixo para prosseguir.
+    </p>
+    <p>
+      <a href="http://localhost:3007/request/status_codes.html" class="button">Prosseguir!</a>
+    </p>
+  </div>
+</body>
+</html>

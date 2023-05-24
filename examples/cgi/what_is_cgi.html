@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CGIs</title>
+  <style>
+    * {
+      overflow: hidden;
+      margin: 0;
+    }
+
+    body {
+      background: #000;
+    }
+
+    .content {
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: justify;
+      color: #fff;
+      font-family: "Lucida Console", monospace;
+      position: relative;
+      z-index: 1;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    p {
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: rgb(0, 104, 136);
+      color: #fff;
+      font-size: 20px;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+
+    .button:hover {
+      background-color: rgb(0, 186, 188);
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <h1>CGIs</h1>
+    <p>
+      Repare que agora estamos nos conectando ao Webserv por outra porta, a <b>3009</b>. A 
+      configuração do servidor para essa porta tem o mesmo caminho <i>/methods</i>, porém sem
+      a diretiva <i>limit_except</i> restringindo métodos HTTP.
+    </p>
+    <p>
+      Tente novamente deletar a imagem na pasta <i>methods</i>.
+    </p>
+    <br>
+    <div class="button-container">
+      <a href="http://localhost:3007/cgi/game.py" class="button">Python 🐍</a>
+      <a href="http://localhost:3009/autoindex/what_is_autoindex.html" class="button">PHP 📝</a>
+      <a href="http://localhost:3009/autoindex/what_is_autoindex.html" class="button">Ok, vamos continuar!</a>
+    </div>
+  </div>
+</body>
+</html>
