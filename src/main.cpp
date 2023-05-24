@@ -18,6 +18,7 @@ WebServer webserver;
 
 void interrupt(int sig)
 {
+    log.end();
     log.warning() << "Received signal " << (sig + 128) << log.end();
     webserver.stop();
     exit(0);
