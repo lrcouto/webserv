@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/17 16:57:16 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/17 19:38:55 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/23 21:33:11 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,4 +42,4 @@ class CGI {
         std::string _resolveBinaryPath(void);
 };
 
-#endif /* CGI_H */
+#endif /* CGI_HPP */
