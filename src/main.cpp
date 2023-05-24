@@ -10,12 +10,12 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "libs.hpp"
-# include "WebServer.hpp"
+#include "WebServer.hpp"
+#include "libs.hpp"
 
 WebServer webserver;
 
-void    interrupt(int sig)
+void interrupt(int sig)
 {
     std::cout << std::endl << "Signal " << sig << " called." << std::endl;
     webserver.stop();
@@ -24,13 +24,10 @@ void    interrupt(int sig)
 
 int main(int argc, char **argv)
 {
-    if (argc < 2)
-    {
-        std::cerr << "\e[0;31mError: webserv requires a config file.\e[0m" << std::endl;
-        return 1;
-    }
-    else if (argc == 2)
-    {
+    if (argc < 2) {
+        log.error("webserv requires a configuration file");
+        return (1);
+    } else if (argc == 2) {
         struct sigaction interruptHandler;
         interruptHandler.sa_handler = interrupt;
         sigemptyset(&interruptHandler.sa_mask);
@@ -38,11 +35,9 @@ int main(int argc, char **argv)
         sigaction(SIGINT, &interruptHandler, 0);
 
         webserver.run(argv[1]);
+    } else {
+        log.error("too many arguments");
+        return (1);
     }
-    else
-    {
-        std::cerr << "\e[0;31mError: too many arguments.\e[0m" << std::endl;
-        return 1; 
-    }
-    return 0;
+    return (0);
 }

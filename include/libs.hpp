@@ -48,6 +48,7 @@
 
 // LOCAL LIBRARIES
 
+#include "Logger.hpp"   // Server information logging.
 #include "ftstring.hpp" // String manipulation functions.
 
 // HTTP DEFINES
@@ -59,5 +60,9 @@
 #define CR         '\r'
 #define LF         '\n'
 #define WHITESPACE ' '
+
+// GLOBAL VARIABLES
+
+static Logger log;
 
 #endif
