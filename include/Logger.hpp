@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 21:17:14 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/23 22:29:30 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/24 00:38:08 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,19 +41,21 @@ class Logger {
     private:
         static std::string _colors[MAX_LEVEL];
         static std::string _levels[MAX_LEVEL];
+        std::ostream      &_stdout;
 
     public:
         Logger(void);
         ~Logger(void);
 
-        void debug(std::string const &message);
-        void info(std::string const &message);
-        void warning(std::string const &message);
-        void error(std::string const &message);
+        std::ostream &debug(void);
+        std::ostream &info(void);
+        std::ostream &warning(void);
+        std::ostream &error(void);
+        std::string   end(void);
 
     private:
-        void        _print(std::string const &message, LogLevel level);
-        std::string _timestamp(void);
+        std::ostream &_print(LogLevel level);
+        std::string   _timestamp(void);
 };
 
 #endif /* LOGGER_HPP */

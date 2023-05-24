@@ -63,6 +63,6 @@
 
 // GLOBAL VARIABLES
 
-static Logger log;
+extern Logger log;
 
 #endif

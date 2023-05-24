@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/18 19:05:15 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/23 23:10:58 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,7 @@ void Response::handleCGI(std::string &binaryPath, std::string &resource)
         this->_type   = "html";
         this->_status = _redirected ? "301" : "200";
     } catch (std::exception const &e) {
-        std::cerr << e.what() << '\n';
+        log.error() << "Exception caught while handling CGI: " << e.what() << log.end();
         HTTPError("500");
     }
 }

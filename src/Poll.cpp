@@ -80,7 +80,7 @@ void Poll::clear(void)
 {
     std::vector<pollfd>::reverse_iterator itpoll;
     for (itpoll = _pollfds.rbegin(); itpoll != _pollfds.rend(); ++itpoll) {
-        std::cout << "Closing fd " << itpoll->fd << std::endl;
+        log.info() << "Closing socket file descriptor " << itpoll->fd << log.end();
         ::close(itpoll->fd);
     }
     _pollfds.clear();

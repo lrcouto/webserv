@@ -13,11 +13,12 @@
 #include "WebServer.hpp"
 #include "libs.hpp"
 
+Logger    log;
 WebServer webserver;
 
 void interrupt(int sig)
 {
-    std::cout << std::endl << "Signal " << sig << " called." << std::endl;
+    log.warning() << "Received signal " << (sig + 128) << log.end();
     webserver.stop();
     exit(0);
 }
@@ -25,7 +26,7 @@ void interrupt(int sig)
 int main(int argc, char **argv)
 {
     if (argc < 2) {
-        log.error("webserv requires a configuration file");
+        log.error() << "WebServ requires a configuration file" << log.end();
         return (1);
     } else if (argc == 2) {
         struct sigaction interruptHandler;
@@ -36,7 +37,7 @@ int main(int argc, char **argv)
 
         webserver.run(argv[1]);
     } else {
-        log.error("too many arguments");
+        log.error() << "WebServ received too many arguments" << log.end();
         return (1);
     }
     return (0);

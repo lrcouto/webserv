@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/18 18:35:45 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/23 23:11:14 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,17 +80,19 @@ void RequestTools::parseRequest(void)
             _body = _body_data;
         }
     } catch (RequestParsingException const &e) {
-        std::cerr << e.get_error() << ' ' << e.what() << '\n';
+        log.error() << "Exception caught while parsing request: " << e.get_error() << ' '
+                    << e.what() << log.end();
         _hasError  = true;
         _errorCode = e.get_error();
     } catch (std::exception const &e) {
-        std::cerr << e.what() << '\n';
+        log.error() << "Exception caught while parsing request: " << e.what() << log.end();
     }
 }
 
 Request RequestTools::buildRequest(void) const
 {
-    return (Request(_headers, _method, _uri, _query_string, _protocol, _body, _raw, _errorCode, _hasError));
+    return (Request(
+        _headers, _method, _uri, _query_string, _protocol, _body, _raw, _errorCode, _hasError));
 }
 
 /******************************************** PRIVATE ********************************************/
