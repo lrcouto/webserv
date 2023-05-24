@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestTools.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/18 18:35:45 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/22 19:13:56 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ RequestTools::RequestTools(std::string &raw, Server *server) :
     _http_minor(-1),
     _has_body(false),
     _has_chunked_body(false),
+    _has_multipart_data(false),
     _ignore_content_length(false),
     _position(_raw.begin()),
     _last(_raw.end()),
@@ -48,6 +49,7 @@ RequestTools &RequestTools::operator=(RequestTools const &src)
         _http_minor            = src._http_minor;
         _has_body              = src._has_body;
         _has_chunked_body      = src._has_chunked_body;
+        _has_multipart_data    = src._has_multipart_data;
         _ignore_content_length = src._ignore_content_length;
         _position              = src._position;
         _last                  = src._last;
@@ -70,11 +72,17 @@ void RequestTools::parseRequest(void)
                 if (te_split.back() == "chunked")
                     _has_chunked_body = true;
             }
+            it = _headers.find("content-type");
+            if (it->second.find("multipart/form-data") != std::string::npos)
+                _has_multipart_data = true;
         }
 
         if (_has_chunked_body) {
             _parseChunkedBody();
             _body = _chunk_data;
+        } else if (_has_multipart_data) {
+            _parseMultipartData();
+            _body = _body_data;
         } else if (_has_body) {
             _parseRegularBody();
             _body = _body_data;
@@ -540,6 +548,44 @@ void RequestTools::_parseChunkedBody(void)
         }
     }
     throw RequestParsingException(BAD_REQUEST);
+}
+
+void RequestTools::_parseMultipartData()
+{
+    if (!_ignore_content_length) {
+        std::map<std::string, std::string>::const_iterator it;
+
+        it = _headers.find("content-length");
+        if (it != _headers.end()) {
+            size_t content_length = ftstring::strtoi(it->second);
+            if (content_length > _max_body_size)
+                throw RequestParsingException(ENTITY_TOO_LARGE);
+            if ((size_t)(_last - _position) > content_length)
+                throw RequestParsingException(ENTITY_TOO_LARGE);
+        }
+    }
+    if ((size_t)(_last - _position) > _max_body_size)
+        throw RequestParsingException(ENTITY_TOO_LARGE);
+
+    std::string data(_position, _last);
+    std::string content_type = _headers["content-type"];
+    std::string boundary;
+
+    size_t pos = content_type.find("boundary=");
+    if (pos != std::string::npos) {
+        boundary = content_type.substr(pos + 9);
+    } else {
+        throw RequestParsingException(BAD_REQUEST);
+    }
+    
+    size_t start = data.find("\r\n\r\n") + 4;
+    size_t end = data.rfind("\r\n--" + boundary + "--");
+
+    if (start != std::string::npos && end != std::string::npos) {
+        _body_data = data.substr(start, end - start);
+    } else {
+        throw RequestParsingException(BAD_REQUEST);
+    }
 }
 
 bool RequestTools::_isControlCharacter(int c) { return ((c >= 0 && c < 32) || c == 127); }

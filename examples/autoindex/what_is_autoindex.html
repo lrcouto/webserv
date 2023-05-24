@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>O tal do autoindex</title>
+  <style>
+    * {
+      overflow: hidden;
+      margin: 0;
+    }
+
+    body {
+      background: #000;
+    }
+
+    .content {
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: justify;
+      color: #fff;
+      font-family: "Lucida Console", monospace;
+      position: relative;
+      z-index: 1;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    p {
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: rgb(0, 104, 136);
+      color: #fff;
+      font-size: 20px;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+
+    .button:hover {
+      background-color: rgb(0, 186, 188);
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <h1>O tal do autoindex</h1>
+    <p>
+      O nosso Webserv tem a possibilidade de gerar um <b>autoindex</b> - uma página que
+      contém uma listagem automática de todos os arquivos que existem em um diretório. É
+      como se fosse o comando <i>ls</i> do Unix, em forma de página HTML.
+    </p>
+    <p>
+      Essa opção pode ser ativada ou desativada para cada locação específica dentro do arquivo
+      de configuração do servidor. Por padrão, ela vem desativada, afinal você nem sempre vai
+      querer que seu usuário fique fuçando nos arquivos do seu servidor. Mas para fins educacionais,
+      você pode dar uma olhadinha.
+    </p>
+    <p>
+      <a href="http://localhost:3009/autoindex/" class="button">O que será que tem aqui?</a>
+    </p>
+  </div>
+</body>
+</html>

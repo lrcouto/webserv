@@ -88,8 +88,8 @@ int Socket::send(std::string const response)
 
 int Socket::receive(std::string &request)
 {
-    int const BUFFER_SIZE = 30000;
-    char      buffer[BUFFER_SIZE];
+    int const BUFFER_SIZE = 4096;
+    char      buffer[BUFFER_SIZE + 1];
     int       bytesRead, totalBytes = 0;
 
     while ((bytesRead = recv(_fd, buffer, BUFFER_SIZE, 0)) > 0) {
@@ -98,9 +98,28 @@ int Socket::receive(std::string &request)
             sleep(2);
             continue;
         }
+        buffer[bytesRead] = '\0';
         totalBytes += bytesRead;
-        if (request.find("\r\n\r\n") != std::string::npos)
+        if (request.find("multipart/form-data") != std::string::npos) {
+            std::string boundary;
+            size_t contentTypePos = request.find("Content-Type: ");
+
+            if (contentTypePos != std::string::npos) {
+                size_t lineEndPos = request.find("\r\n", contentTypePos);
+                if (lineEndPos != std::string::npos) {
+                    std::string contentTypeLine = request.substr(contentTypePos, lineEndPos - contentTypePos);
+                    size_t boundaryPos = contentTypeLine.find("boundary=");
+                    if (boundaryPos != std::string::npos) {
+                        boundary = contentTypeLine.substr(boundaryPos + 9);
+                    }
+                }
+            }
+            std::string terminatingBoundary = "\r\n--" + boundary + "--";
+            if (request.find(terminatingBoundary) != std::string::npos)
+                break;
+        } else if (request.find("\r\n\r\n") != std::string::npos) {
             break;
+        }
     }
     return (bytesRead == -1) ? -1 : totalBytes;
 }
