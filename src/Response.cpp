@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/25 20:39:27 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/25 20:39:44 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -418,6 +418,9 @@ void Response::HTTPError(std::string status)
     std::string              errorPagePath;
     std::string              requestURI = this->_request.getRequestURI();
     std::vector<std::string> errorPages;
+
+    Logger::warning << "Entered HTTP Error: " << status << ' ' << _statusCodes[status]
+                    << Logger::endl;
 
     std::vector<Location> locations = this->_serverData->getLocations();
 
