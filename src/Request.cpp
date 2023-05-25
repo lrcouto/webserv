@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/23 21:44:28 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/24 20:52:29 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/25 18:51:00 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,34 +75,44 @@ void Request::setError(std::string const &errorCode) { this->_errorCode = errorC
 
 bool Request::hasError(void) const { return this->_hasError; }
 
+std::string Request::str(void) const
+{
+    std::string __str, formattedRaw;
+    size_t      crlfcrlf;
+
+    crlfcrlf = _raw.find("\r\n\r\n");
+    if (crlfcrlf != std::string::npos)
+        formattedRaw.assign(_raw.begin(), (_raw.begin() + crlfcrlf));
+    __str += BLUE "Raw Request:" RESET "\n" + (formattedRaw.empty() ? _raw : formattedRaw) + "\n\n";
+    __str += BLUE "Method: " RESET + _method + "\n";
+    __str += BLUE "Request URI: " RESET + _requestURI + "\n";
+    __str += BLUE "Query String: " RESET + _queryString + "\n";
+    __str += BLUE "Protocol: " RESET + _protocol + "\n";
+    __str += BLUE "Headers:" RESET "\n";
+    std::map<std::string, std::string>::const_iterator it;
+    for (it = _headers.begin(); it != _headers.end(); ++it)
+        __str += it->first + ": " + it->second + "\n";
+    __str += "\n" BLUE "Body:" RESET;
+    if (!_body.empty()) {
+        if (_body.size() > 512)
+            __str += " Suppressed (body too large)";
+        else
+            __str += "\n" + _body;
+    } else {
+        __str += " Empty";
+    }
+    __str += "\n";
+    return (__str);
+}
+
 std::ostream &operator<<(std::ostream &out, Request const &in)
 {
-    out << BLUE "Raw Request:" RESET << std::endl << in.getRawRequest() << std::endl;
-    out << BLUE "Method:" RESET << in.getMethod() << std::endl;
-    out << BLUE "Request URI:" RESET << in.getRequestURI() << std::endl;
-    out << BLUE "Query String:" RESET << in.getQueryString() << std::endl;
-    out << BLUE "Protocol:" RESET << in.getProtocol() << std::endl;
-    out << BLUE "Headers:" RESET << std::endl;
-    std::map<std::string, std::string>                 headers = in.getHeaders();
-    std::map<std::string, std::string>::const_iterator it;
-    for (it = headers.begin(); it != headers.end(); ++it)
-        out << it->first << ": " << it->second << std::endl;
-    out << BLUE "Body:" RESET << std::endl << in.getBody() << std::endl;
+    out << in.str();
     return (out);
 }
 
-std::ostream &operator<<(std::stringstream &out, Request const &in)
+std::ostream &operator<<(std::stringstream &ss, Request const &in)
 {
-    out << BLUE "Raw Request:" RESET << std::endl << in.getRawRequest();
-    out << BLUE "Method: " RESET << in.getMethod() << std::endl;
-    out << BLUE "Request URI: " RESET << in.getRequestURI() << std::endl;
-    out << BLUE "Query String: " RESET << in.getQueryString() << std::endl;
-    out << BLUE "Protocol: " RESET << in.getProtocol() << std::endl;
-    out << BLUE "Headers:" RESET << std::endl;
-    std::map<std::string, std::string>                 headers = in.getHeaders();
-    std::map<std::string, std::string>::const_iterator it;
-    for (it = headers.begin(); it != headers.end(); ++it)
-        out << it->first << ": " << it->second << std::endl;
-    out << BLUE "Body:" RESET << std::endl << in.getBody() << std::endl;
-    return (out);
+    ss << in.str();
+    return (ss);
 }

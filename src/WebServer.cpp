@@ -97,6 +97,11 @@ int WebServer::socksend(Socket *client)
     if (request.hasError())
         response.HTTPError(request.getErrorCode());
     response.assembleResponseString();
+
+#ifdef DEBUG
+    Logger::debug << "Assembled response:\n" << response << Logger::endl;
+#endif /* DEBUG */
+
     Logger::info << "Sending response to client file descriptor " << client->getFd()
                  << Logger::endl;
     if (client->send(response.getResponseString()) <= 0) {

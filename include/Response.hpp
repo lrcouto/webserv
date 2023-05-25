@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/20 22:47:13 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/25 18:29:47 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,11 @@ class Response {
         std::string assemblePath(std::string root, std::string requestURI);
         std::string findResourceByIndex(std::vector<std::string> indexes, std::string resourcePath);
 
-        void clear(void);
+        void        clear(void);
+        std::string str(void) const;
 };
+
+std::ostream &operator<<(std::ostream &out, Response const &in);
+std::ostream &operator<<(std::stringstream &ss, Response const &in);
 
 #endif
