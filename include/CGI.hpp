@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/17 16:57:16 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/24 11:55:19 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/25 20:07:20 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,16 @@ class CGI {
         void execute(void);
 
         std::string const &getOutput(void) const;
+        std::string        str(void) const;
 
     private:
-        void                        _childRoutine(void);
-        void                        _parentRoutine(void);
-        std::string                 _resolveBinaryPath(void);
-        std::vector<std::string>    _formatEnvironment(void);
+        void                     _childRoutine(void);
+        void                     _parentRoutine(void);
+        std::string              _resolveBinaryPath(void);
+        std::vector<std::string> _formatEnvironment(void);
 };
+
+std::ostream &operator<<(std::ostream &out, CGI const &in);
+std::ostream &operator<<(std::stringstream &ss, CGI const &in);
 
 #endif /* CGI_HPP */

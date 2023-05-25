@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/25 18:39:25 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/25 20:39:27 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,11 +150,21 @@ void Response::handleCGI(std::string &binaryPath, std::string &resource)
 {
     CGI cgi(_request, binaryPath, resource, this->_root);
 
+#ifdef DEBUG
+    Logger::debug << "Entered CGI handler" << Logger::endl;
+#endif /* DEBUG */
+
     try {
         cgi.execute();
         this->_body   = cgi.getOutput();
         this->_type   = "html";
         this->_status = _redirected ? "301" : "200";
+
+#ifdef DEBUG
+        Logger::debug << "Assembled CGI:\n" << cgi << Logger::endl;
+        Logger::debug << "CGI succesfully executed" << Logger::endl;
+#endif /* DEBUG */
+
     } catch (std::exception const &e) {
         Logger::error << "Exception caught while handling CGI: " << e.what() << Logger::endl;
         HTTPError("500");
