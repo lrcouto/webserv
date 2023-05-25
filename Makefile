@@ -52,7 +52,7 @@ ifeq ($(SANITIZE_L),true)
 endif
 
 ifeq ($(DEBUG),true)
-	CFLAGS += -g -fno-limit-debug-info
+	CFLAGS += -g -fno-limit-debug-info -DDEBUG
 endif
 
 $(NAME): $(BUILD)

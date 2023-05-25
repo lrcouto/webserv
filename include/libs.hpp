@@ -39,6 +39,7 @@
 #include <csignal>   // Signal handling.
 #include <ctime>     // Time and date functions.
 #include <fstream>   // File stream.
+#include <iomanip>   // Stream manipulation, for pretty formatting.
 #include <iostream>  // Standard input/output operations.
 #include <map>       // Map container class.
 #include <sstream>   // Parsing strings.
@@ -60,5 +61,11 @@
 #define CR         '\r'
 #define LF         '\n'
 #define WHITESPACE ' '
+
+#define BLUE   "\033[0;34m"
+#define PURPLE "\033[0;35m"
+#define YELLOW "\033[0;33m"
+#define RED    "\033[0;31m"
+#define RESET  "\033[0m"
 
 #endif

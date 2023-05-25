@@ -6,30 +6,20 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 21:17:14 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/24 02:12:25 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/24 21:23:58 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
-#include <ctime>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <string>
+#include "libs.hpp"
 
 #define MAX_LEVEL     4
 #define LEVEL_DEBUG   "DEBUG"
 #define LEVEL_INFO    "INFO"
 #define LEVEL_WARNING "WARNING"
 #define LEVEL_ERROR   "ERROR"
-
-#define BLUE   "\033[0;34m"
-#define PURPLE "\033[0;35m"
-#define YELLOW "\033[0;33m"
-#define RED    "\033[0;31m"
-#define RESET  "\033[0m"
 
 #define COLOR_DEBUG   BLUE
 #define COLOR_INFO    PURPLE

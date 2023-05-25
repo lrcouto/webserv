@@ -45,6 +45,7 @@ void WebServer::init(std::string const &inputFilePath)
         socket = new Socket(sockinfo[1], sockinfo[0]);
         socket->connect(SOMAXCONN);
         this->_poll.insertSocket(socket);
+        Logger::info << "Listening at " << sockinfo[0] << ':' << sockinfo[1] << Logger::endl;
     }
 }
 
@@ -87,13 +88,17 @@ int WebServer::socksend(Socket *client)
     parser.parseRequest();
     request = parser.buildRequest();
 
-    // std::cout << request << std::endl; // Debugging purposes
+#ifdef DEBUG
+    Logger::debug << "Received request:\n" << request << Logger::endl;
+#endif /* DEBUG */
 
     Response response(request);
     response.setServerData(getCurrentServer(client->getServerFd()));
     if (request.hasError())
         response.HTTPError(request.getErrorCode());
     response.assembleResponseString();
+    Logger::info << "Sending response to client file descriptor " << client->getFd()
+                 << Logger::endl;
     if (client->send(response.getResponseString()) <= 0) {
         Logger::info << "Unable to read request data on file descriptor " << client->getFd()
                      << Logger::endl;
