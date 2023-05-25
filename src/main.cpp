@@ -27,9 +27,9 @@ int main(int argc, char **argv)
 {
     if (argc != 2) {
         if (argc < 2)
-            Logger::error << "WebServ requires a configuration file" << Logger::endl;
+            std::cerr << "webserv: missing configuration file" << std::endl;
         if (argc > 2)
-            Logger::error << "WebServ received too many arguments" << Logger::endl;
+            std::cerr << "webserv: too many arguments" << std::endl;
         return (1);
     }
 
