@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/22 21:15:24 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/26 02:36:29 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,12 +148,18 @@ void Response::assembleBody()
 void Response::handleCGI(std::string &binaryPath, std::string &resource)
 {
     CGI cgi(_request, binaryPath, resource, this->_root);
+    int cgiResponse;
 
     try {
-        cgi.execute();
-        this->_body   = cgi.getOutput();
-        this->_type   = "html";
-        this->_status = _redirected ? "301" : "200";
+        cgiResponse = cgi.execute();
+
+        if (cgiResponse != 0) {
+            HTTPError("500");
+        } else {
+            this->_body   = cgi.getOutput();
+            this->_type   = "html";
+            this->_status = _redirected ? "301" : "200";
+        }
     } catch (std::exception const &e) {
         std::cerr << e.what() << '\n';
         HTTPError("500");
@@ -257,8 +263,8 @@ void Response::getResource(std::string requestURI)
             return;
         }
         this->_body = body;
+        this->_status = _redirected ? "301" : "200";
     }
-    this->_status = _redirected ? "301" : "200";
 }
 
 void Response::postResource(std::string requestURI)

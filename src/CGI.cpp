@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/17 16:57:16 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/20 22:47:10 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/26 02:15:07 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,13 +68,10 @@ CGI &CGI::operator=(CGI const &rhs)
     return (*this);
 }
 
-void CGI::execute(void)
+int CGI::execute(void)
 {
-    std::vector<std::string> environment = _formatEnvironment();
-    for (size_t i = 0; i < environment.size(); i++)
-    {
-        std::cout << environment[i] << std::endl;
-    }
+    int response = 0;
+    
     pipe_or_throw(_pipedes);
     if (_request.getMethod() == "POST")
         write(_pipedes[1], _request.getBody().c_str(), _request.getBody().length());
@@ -82,11 +79,12 @@ void CGI::execute(void)
     if (_pid == 0) {
         _childRoutine();
     } else if (_pid > 0) {
-        _parentRoutine();
+        response = _parentRoutine();
     } else {
         perror("cgi fork");
         throw std::exception();
     }
+    return response;
 }
 
 std::string const &CGI::getOutput(void) const { return _output; }
@@ -149,14 +147,39 @@ std::vector<std::string> CGI::_formatEnvironment(void)
     return envpVector;
 }
 
-void CGI::_parentRoutine(void)
+int CGI::_parentRoutine(void)
 {
     int const bufsize = 4096;
-    char      buffer[bufsize + 1];
-    int       ret = 1;
+    char buffer[bufsize + 1];
+    int ret = 1;
+    unsigned int timeout = 10000; // Time before timeout, in milliseconds
 
     close_or_throw(_pipedes[1]);
-    waitpid(_pid, NULL, 0);
+    pid_t pid = _pid;
+    struct timeval startTime;
+    gettimeofday(&startTime, NULL);
+
+    while (true) {
+        pid_t result = waitpid(pid, NULL, WNOHANG);
+        if (result == -1) {
+            perror("waitpid");
+            throw std::exception();
+        }
+
+        if (result != 0)
+            break;
+
+        struct timeval currentTime;
+        gettimeofday(&currentTime, NULL);
+        unsigned int elapsedTime = (currentTime.tv_sec - startTime.tv_sec) * 1000 +
+                                   (currentTime.tv_usec - startTime.tv_usec) / 1000;
+        if (elapsedTime >= timeout) {
+            kill(pid, SIGTERM);
+            return 1;
+        }
+        usleep(1000);
+    }
+
     while (ret) {
         ret = read(_pipedes[0], buffer, bufsize);
         if (ret < 0) {
@@ -166,7 +189,9 @@ void CGI::_parentRoutine(void)
         buffer[ret] = '\0';
         _output += buffer;
     }
+
     close_or_throw(_pipedes[0]);
+    return 0;
 }
 
 std::string CGI::_resolveBinaryPath(void)

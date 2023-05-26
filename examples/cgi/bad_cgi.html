@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>CGIs</title>
+  <title>Quebrando o script</title>
   <style>
     * {
       overflow: hidden;
@@ -62,21 +62,18 @@
 </head>
 <body>
   <div class="content">
-    <h1>CGIs</h1>
+    <h1>Quebrando o script</h1>
     <p>
-      CGI é uma sigla para Common Gateway Interface, ou Interface Comum de Ligação. São uma especificação
-      de interface que permite que um servidor execute programas externos, normalmente scripts, e permite
-      que estes programas processem requisições, e permitem que informações sejam passadas para estes
-      scripts através do standard input ou de variáveis de ambiente.
+      Mas e se o nosso CGI for usado para rodar um script com um problema? Por exemplo, um script
+      que contém um loop infinito não terminará a execução do programa, e o servidor não irá
+      enviar uma resposta ao cliente. O que acontece nesse caso?
     </p>
     <p>
-      Nosso Webserv pode executar scripts em Python ou em PHP.
+      Vamos ver?
     </p>
     <br>
     <div class="button-container">
-      <a href="http://localhost:3007/cgi/game.py" class="button">Python 🐍</a>
-      <a href="http://localhost:3007/cgi/calc.php" class="button">PHP 📝</a>
-      <a href="http://localhost:3007/cgi/bad_cgi.html" class="button">Ok, vamos continuar!</a>
+      <a href="http://localhost:3007/cgi/loop.py" class="button">Loop infinito! 🔁</a>
     </div>
   </div>
 </body>
