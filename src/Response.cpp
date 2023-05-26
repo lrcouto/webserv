@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/26 02:36:29 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/26 03:06:48 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,8 @@ void Response::setRequest(Request request) { this->_request = request; }
 
 void Response::assembleResponseString(void)
 {
-    if (!this->_serverData->getValue("server_name").empty())
+    std::vector<std::string> serverNames = this->_serverData->getValue("server_name");
+    if (!serverNames.empty())
         validateServerName();
 
     std::string responseString, headersString;
