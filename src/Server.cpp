@@ -138,6 +138,8 @@ std::string Server::base64Encode(const std::string &unencodedString)
     return encodedString;
 }
 
+std::map<std::string, std::string> Server::getSessionDataMap(void) { return this->_sessionData; }
+
 std::string Server::getSessionData(std::string key)
 {
     std::string                                     value;

@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Quebrando o script</title>
+  <title>E esse é o Webserv!</title>
   <style>
     * {
       overflow: hidden;
@@ -13,10 +13,43 @@
       background: #000;
     }
 
-    .content {
-      max-width: 1000px;
+    @keyframes circle {
+      from {
+        transform: scale(0);
+      }
+      to {
+        transform: scale(6);
+      }
+    }
+
+    .circle {
       margin: 0 auto;
-      text-align: justify;
+      width: 300px;
+      height: 300px;
+      border: 20px solid rgba(0, 186, 188, 0.2);
+      border-radius: 50%;
+      position: absolute;
+      top: 5%;
+      left: 40%;
+    }
+
+    .one {
+      animation: circle 1s infinite linear;
+    }
+
+    .two {
+      animation: circle 3s infinite linear;
+    }
+
+    .three {
+      animation: circle 8s infinite linear;
+    }
+
+    /* Additional styling for the content */
+    .content {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
       color: #fff;
       font-family: "Lucida Console", monospace;
       position: relative;
@@ -26,10 +59,11 @@
       border-radius: 15px;
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
       position: absolute;
-      top: 40%;
+      top: 30%;
       left: 50%;
       transform: translate(-50%, -50%);
     }
+
 
     h1 {
       margin-bottom: 20px;
@@ -38,11 +72,6 @@
     p {
       line-height: 1.5;
       margin-bottom: 20px;
-    }
-
-    .button-container {
-      display: flex;
-      justify-content: space-between;
     }
 
     .button {
@@ -61,20 +90,19 @@
   </style>
 </head>
 <body>
+  <div class="circle one"></div>
+  <div class="circle two"></div>
+  <div class="circle three"></div>
+
   <div class="content">
-    <h1>Quebrando o script</h1>
+    <h1>E esse é o Webserv!</h1>
     <p>
-      Mas e se o nosso CGI for usado para rodar um script com um problema? Por exemplo, um script
-      que contém um loop infinito não terminará a execução do programa, e o servidor não irá
-      enviar uma resposta ao cliente. O que acontece nesse caso?
+      Aqui termina o nosso tour pelas principais features do nosso Webserv. Fique à
+      vontade para fazer perguntas, e agradecemos pela avaliação!
     </p>
     <p>
-      Vamos ver?
+        👋👋👋
     </p>
-    <br>
-    <div class="button-container">
-      <a href="http://localhost:3007/cgi/loop.py" class="button">Loop infinito! 🔁</a>
-    </div>
   </div>
 </body>
 </html>

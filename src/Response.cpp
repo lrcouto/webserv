@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/26 03:06:48 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/26 20:35:08 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,8 +110,12 @@ void Response::assembleHeaders()
     this->_headers.insert(std::make_pair("Server", "Webserv-42SP"));
 
     if (!this->_serverData->getSessionId().empty()) {
-        std::string cookieData = "session_id= " + this->_serverData->getSessionId() + "; path=/; Domain=localhost; SameSite=Lax;";
-        this->_headers.insert(std::make_pair("Set-Cookie", cookieData));
+        std::map<std::string, std::string> sessionData = this->_serverData->getSessionDataMap();
+        this->_headers.insert(std::make_pair("Set-Cookie","session_id=" + this->_serverData->getSessionId() + " ; Domain=localhost; Path=/; SameSite=Lax"));
+
+        for (std::map<std::string, std::string>::const_iterator it = sessionData.begin(); it != sessionData.end(); ++it) {
+            this->_headers.insert(std::make_pair("Set-Cookie", assembleCookie(*it)));
+        }
     }
 }
 
@@ -541,7 +545,7 @@ bool Response::sessionHandler(std::string resource)
         for (size_t i = 0; i < cookies.size(); i++) {
             if (cookies[i].find("session_id") != std::string::npos) {
                 size_t pos = cookies[i].find('=');
-                sessionId  = cookies[i].substr(pos + 1);
+                sessionId  = cookies[i].substr(pos + 1, this->_serverData->getSessionId().length());
                 break;
             }
         }
@@ -573,6 +577,11 @@ bool Response::sessionHandler(std::string resource)
     this->_body   = body;
 
     return true;
+}
+
+std::string Response::assembleCookie(std::pair<std::string, std::string> dataEntry)
+{
+    return dataEntry.first + "=" + dataEntry.second + "; Domain=localhost; Path=/; SameSite=Lax";
 }
 
 void Response::clear(void)

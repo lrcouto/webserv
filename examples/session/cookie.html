@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Quebrando o script</title>
+  <title>Vai um biscoito aí?</title>
   <style>
     * {
       overflow: hidden;
@@ -62,18 +62,16 @@
 </head>
 <body>
   <div class="content">
-    <h1>Quebrando o script</h1>
+    <h1>Vai um biscoito aí?</h1>
     <p>
-      Mas e se o nosso CGI for usado para rodar um script com um problema? Por exemplo, um script
-      que contém um loop infinito não terminará a execução do programa, e o servidor não irá
-      enviar uma resposta ao cliente. O que acontece nesse caso?
-    </p>
-    <p>
-      Vamos ver?
+      Por último, nosso servidor também tem a opção de utilizar <i>cookies</i> - pequenas estruturas de
+      dados que podem ser utilizadas para armazenar informações sobre as interações entre o servidor e o
+      cliente. Cookies podem ser usados para diversos propósitos, como administraçãao de sessão, autenticação,
+      personalização, entre outros. 
     </p>
     <br>
     <div class="button-container">
-      <a href="http://localhost:3007/cgi/loop.py" class="button">Loop infinito! 🔁</a>
+      <a href="http://localhost:3007/session/get_cookie.html?session=start" class="button">Pegue o seu cookie! 🍪</a>
     </div>
   </div>
 </body>
