@@ -53,8 +53,6 @@ int WebServer::sockaccept(Socket *listener)
 {
     Socket *client;
 
-    Logger::info << "Accepting connection on socket file descriptor " << listener->getFd()
-                 << Logger::endl;
     client = new Socket;
     client->accept(listener->getFd());
     if (client->getFd() < 0) {
@@ -62,6 +60,8 @@ int WebServer::sockaccept(Socket *listener)
                       << listener->getFd() << Logger::endl;
         return (-1);
     }
+    Logger::info << "Accepting connection on socket file descriptor " << listener->getFd()
+                 << Logger::endl;
     this->_poll.insertSocket(client);
     return (0);
 }
@@ -69,14 +69,14 @@ int WebServer::sockaccept(Socket *listener)
 int WebServer::sockreceive(Socket *client)
 {
     _rawRequest.clear();
-    Logger::info << "Receiving request on client file descriptor " << client->getFd()
-                 << Logger::endl;
     if (client->receive(_rawRequest) < 0) {
         Logger::error << "Unable to receive request on socket file descriptor " << client->getFd()
                       << Logger::endl;
         this->_poll.removeSocket(client);
         return (-1);
     }
+    Logger::info << "Receiving request on client file descriptor " << client->getFd()
+                 << Logger::endl;
     return (0);
 }
 
