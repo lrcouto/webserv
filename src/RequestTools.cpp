@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/22 19:13:56 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/29 00:57:19 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -614,7 +614,7 @@ void RequestTools::_headerFieldNormalizedInsert(std::string &key, std::string &v
 
     // normalize key and value to lowercase
     std::transform(key.begin(), key.end(), key.begin(), ::tolower);
-    if (key != "cookie")
+    if (key != "cookie" && key != "content-type")
         std::transform(value.begin(), value.end(), value.begin(), ::tolower);
 
     it = _headers.find(key);

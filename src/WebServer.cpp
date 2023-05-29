@@ -87,9 +87,6 @@ int WebServer::socksend(Socket *client)
 
     parser.parseRequest();
     request = parser.buildRequest();
-
-    std::cout << request << std::endl; // Debugging purposes
-
     Response response(request);
     response.setServerData(getCurrentServer(client->getServerFd()));
     if (request.hasError())

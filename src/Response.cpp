@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/26 20:35:08 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/29 01:33:49 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,14 @@ void Response::assembleHeaders()
 
     this->_headers.insert(std::make_pair("Date", ResponseTools::getCurrentDate()));
     this->_headers.insert(std::make_pair("Server", "Webserv-42SP"));
+    
+    if (this->_request.getRawRequest().find("chromium")) {
+        this->_headers.insert(std::make_pair("Access-Control-Allow-Origin", "*"));
+        this->_headers.insert(std::make_pair("Access-Control-Allow-Methods", "GET, POST, DELETE"));
+        this->_headers.insert(std::make_pair("Access-Control-Allow-Headers", "Content-Type, Authorization"));
+        this->_headers.insert(std::make_pair("Access-Control-Allow-Credentials", "true"));
+        this->_headers.insert(std::make_pair("Cache-Control", "no-cache, no-store"));
+    }
 
     if (!this->_serverData->getSessionId().empty()) {
         std::map<std::string, std::string> sessionData = this->_serverData->getSessionDataMap();
