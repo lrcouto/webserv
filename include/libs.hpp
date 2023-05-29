@@ -29,6 +29,7 @@
 #include <string.h>     // C-style string functions like strlen and strcpy.
 #include <sys/socket.h> // Socket-related system calls.
 #include <sys/stat.h>   // Information about files and directories.
+#include <sys/time.h>   // Time-related functions for verifying timeout.
 #include <sys/types.h>  // System types like pid_t and size_t.
 #include <sys/wait.h>   // Child process handling, wait, waitpid.
 #include <unistd.h>     // System calls like read, write, and close.

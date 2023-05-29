@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>500 - Internal Server Error</title>
+  <style>
+    * {
+      overflow: hidden;
+      margin: 0;
+    }
+
+    body {
+      background: #c43025;
+    }
+
+    .content {
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: center;
+      color: #fff;
+      font-family: "Lucida Console", monospace;
+      position: relative;
+      z-index: 1;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.822);
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    p {
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: rgb(146, 52, 62);
+      color: #fff;
+      font-size: 20px;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+
+    .button:hover {
+      background-color: rgb(216, 99, 111);
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <h1>500 - Internal Server Error</h1>
+    <p>
+      Para nos certificarmos de que uma situação como um script que não termina a execução ou
+      que se comporta de uma maneira inesperada impeça o servidor de continuar na sua dinâmica
+      de requisições e respostas, nós usamos um limite de tempo. Se o programa parar de responder,
+      nós assumimos que algo errado aconteceu e matamos o processo. Assim você pode continuar 
+      navegando sem interrupções.
+    </p>
+    <p>
+      Vamos para a próxima feature?
+    </p>
+    <p>
+      <a href="http://localhost:3007/session/cookie.html" class="button">Vamos!</a>
+    </p>
+  </div>
+</body>
+</html>

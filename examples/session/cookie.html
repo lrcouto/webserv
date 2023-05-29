@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>CGIs</title>
+  <title>Vai um biscoito aí?</title>
   <style>
     * {
       overflow: hidden;
@@ -62,21 +62,16 @@
 </head>
 <body>
   <div class="content">
-    <h1>CGIs</h1>
+    <h1>Vai um biscoito aí?</h1>
     <p>
-      CGI é uma sigla para Common Gateway Interface, ou Interface Comum de Ligação. São uma especificação
-      de interface que permite que um servidor execute programas externos, normalmente scripts, e permite
-      que estes programas processem requisições, e permitem que informações sejam passadas para estes
-      scripts através do standard input ou de variáveis de ambiente.
-    </p>
-    <p>
-      Nosso Webserv pode executar scripts em Python ou em PHP.
+      Por último, nosso servidor também tem a opção de utilizar <i>cookies</i> - pequenas estruturas de
+      dados que podem ser utilizadas para armazenar informações sobre as interações entre o servidor e o
+      cliente. Cookies podem ser usados para diversos propósitos, como administração de sessão, autenticação,
+      personalização, entre outros. 
     </p>
     <br>
     <div class="button-container">
-      <a href="http://localhost:3007/cgi/game.py" class="button">Python 🐍</a>
-      <a href="http://localhost:3007/cgi/calc.php" class="button">PHP 📝</a>
-      <a href="http://localhost:3007/cgi/bad_cgi.html" class="button">Ok, vamos continuar!</a>
+      <a href="http://localhost:3007/session/get_cookie.html?session=start" class="button">Pegue o seu cookie! 🍪</a>
     </div>
   </div>
 </body>

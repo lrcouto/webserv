@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/25 18:29:47 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/29 20:35:37 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,9 @@ class Response {
         std::string _root;
         bool        _redirected;
 
-        std::string                        _statusLine;
-        std::map<std::string, std::string> _headers;
-        std::string                        _body;
+        std::string                             _statusLine;
+        std::multimap<std::string, std::string> _headers;
+        std::string                             _body;
 
     public:
         Response(void);
@@ -67,6 +67,7 @@ class Response {
 
         std::string assemblePath(std::string root, std::string requestURI);
         std::string findResourceByIndex(std::vector<std::string> indexes, std::string resourcePath);
+        std::string assembleCookie(std::pair<std::string, std::string> dataEntry);
 
         void        clear(void);
         std::string str(void) const;
