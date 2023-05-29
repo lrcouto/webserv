@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/17 16:57:16 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/20 22:47:08 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/26 02:06:22 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,13 +33,13 @@ class CGI {
         ~CGI(void);
         CGI &operator=(CGI const &rhs);
 
-        void execute(void);
+        int execute(void);
 
         std::string const &getOutput(void) const;
 
     private:
         void                        _childRoutine(void);
-        void                        _parentRoutine(void);
+        int                         _parentRoutine(void);
         std::string                 _resolveBinaryPath(void);
         std::vector<std::string>    _formatEnvironment(void);
 };

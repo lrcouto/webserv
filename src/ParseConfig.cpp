@@ -126,7 +126,8 @@ std::string ParseConfig::findDirective(std::string &line)
     for (std::vector<std::string>::const_iterator it = this->_directives.begin();
          it != this->_directives.end();
          ++it) {
-        if (line.find(*it) != std::string::npos) {
+        size_t pos = line.find(*it);
+        if (line.find(*it) != std::string::npos && pos == 0) {
             std::istringstream iss(line);
             std::string firstToken;
             std::getline(iss, firstToken, ' ');

@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/22 21:15:24 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/29 01:33:49 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,8 @@ void Response::setRequest(Request request) { this->_request = request; }
 
 void Response::assembleResponseString(void)
 {
-    if (!this->_serverData->getValue("server_name").empty())
+    std::vector<std::string> serverNames = this->_serverData->getValue("server_name");
+    if (!serverNames.empty())
         validateServerName();
 
     std::string responseString, headersString;
@@ -107,10 +108,22 @@ void Response::assembleHeaders()
 
     this->_headers.insert(std::make_pair("Date", ResponseTools::getCurrentDate()));
     this->_headers.insert(std::make_pair("Server", "Webserv-42SP"));
+    
+    if (this->_request.getRawRequest().find("chromium")) {
+        this->_headers.insert(std::make_pair("Access-Control-Allow-Origin", "*"));
+        this->_headers.insert(std::make_pair("Access-Control-Allow-Methods", "GET, POST, DELETE"));
+        this->_headers.insert(std::make_pair("Access-Control-Allow-Headers", "Content-Type, Authorization"));
+        this->_headers.insert(std::make_pair("Access-Control-Allow-Credentials", "true"));
+        this->_headers.insert(std::make_pair("Cache-Control", "no-cache, no-store"));
+    }
 
     if (!this->_serverData->getSessionId().empty()) {
-        std::string cookieData = "session_id= " + this->_serverData->getSessionId() + "; path=/; Domain=localhost; SameSite=Lax;";
-        this->_headers.insert(std::make_pair("Set-Cookie", cookieData));
+        std::map<std::string, std::string> sessionData = this->_serverData->getSessionDataMap();
+        this->_headers.insert(std::make_pair("Set-Cookie","session_id=" + this->_serverData->getSessionId() + " ; Domain=localhost; Path=/; SameSite=Lax"));
+
+        for (std::map<std::string, std::string>::const_iterator it = sessionData.begin(); it != sessionData.end(); ++it) {
+            this->_headers.insert(std::make_pair("Set-Cookie", assembleCookie(*it)));
+        }
     }
 }
 
@@ -148,12 +161,18 @@ void Response::assembleBody()
 void Response::handleCGI(std::string &binaryPath, std::string &resource)
 {
     CGI cgi(_request, binaryPath, resource, this->_root);
+    int cgiResponse;
 
     try {
-        cgi.execute();
-        this->_body   = cgi.getOutput();
-        this->_type   = "html";
-        this->_status = _redirected ? "301" : "200";
+        cgiResponse = cgi.execute();
+
+        if (cgiResponse != 0) {
+            HTTPError("500");
+        } else {
+            this->_body   = cgi.getOutput();
+            this->_type   = "html";
+            this->_status = _redirected ? "301" : "200";
+        }
     } catch (std::exception const &e) {
         std::cerr << e.what() << '\n';
         HTTPError("500");
@@ -257,8 +276,8 @@ void Response::getResource(std::string requestURI)
             return;
         }
         this->_body = body;
+        this->_status = _redirected ? "301" : "200";
     }
-    this->_status = _redirected ? "301" : "200";
 }
 
 void Response::postResource(std::string requestURI)
@@ -534,7 +553,7 @@ bool Response::sessionHandler(std::string resource)
         for (size_t i = 0; i < cookies.size(); i++) {
             if (cookies[i].find("session_id") != std::string::npos) {
                 size_t pos = cookies[i].find('=');
-                sessionId  = cookies[i].substr(pos + 1);
+                sessionId  = cookies[i].substr(pos + 1, this->_serverData->getSessionId().length());
                 break;
             }
         }
@@ -566,6 +585,11 @@ bool Response::sessionHandler(std::string resource)
     this->_body   = body;
 
     return true;
+}
+
+std::string Response::assembleCookie(std::pair<std::string, std::string> dataEntry)
+{
+    return dataEntry.first + "=" + dataEntry.second + "; Domain=localhost; Path=/; SameSite=Lax";
 }
 
 void Response::clear(void)

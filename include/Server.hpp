@@ -41,6 +41,7 @@ class Server {
 
         void generateSessionId(void);
         std::string getSessionId(void);
+        std::map<std::string, std::string> getSessionDataMap(void);
         std::string getSessionData(std::string key);
         void insertSessionData(std::string data);
         void endSession(void);

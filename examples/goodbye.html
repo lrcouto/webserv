@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>CGIs</title>
+  <title>E esse é o Webserv!</title>
   <style>
     * {
       overflow: hidden;
@@ -13,10 +13,43 @@
       background: #000;
     }
 
-    .content {
-      max-width: 1000px;
+    @keyframes circle {
+      from {
+        transform: scale(0);
+      }
+      to {
+        transform: scale(6);
+      }
+    }
+
+    .circle {
       margin: 0 auto;
-      text-align: justify;
+      width: 300px;
+      height: 300px;
+      border: 20px solid rgba(0, 186, 188, 0.2);
+      border-radius: 50%;
+      position: absolute;
+      top: 5%;
+      left: 40%;
+    }
+
+    .one {
+      animation: circle 1s infinite linear;
+    }
+
+    .two {
+      animation: circle 3s infinite linear;
+    }
+
+    .three {
+      animation: circle 8s infinite linear;
+    }
+
+    /* Additional styling for the content */
+    .content {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
       color: #fff;
       font-family: "Lucida Console", monospace;
       position: relative;
@@ -26,10 +59,11 @@
       border-radius: 15px;
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
       position: absolute;
-      top: 40%;
+      top: 30%;
       left: 50%;
       transform: translate(-50%, -50%);
     }
+
 
     h1 {
       margin-bottom: 20px;
@@ -38,11 +72,6 @@
     p {
       line-height: 1.5;
       margin-bottom: 20px;
-    }
-
-    .button-container {
-      display: flex;
-      justify-content: space-between;
     }
 
     .button {
@@ -61,23 +90,19 @@
   </style>
 </head>
 <body>
+  <div class="circle one"></div>
+  <div class="circle two"></div>
+  <div class="circle three"></div>
+
   <div class="content">
-    <h1>CGIs</h1>
+    <h1>E esse é o Webserv!</h1>
     <p>
-      CGI é uma sigla para Common Gateway Interface, ou Interface Comum de Ligação. São uma especificação
-      de interface que permite que um servidor execute programas externos, normalmente scripts, e permite
-      que estes programas processem requisições, e permitem que informações sejam passadas para estes
-      scripts através do standard input ou de variáveis de ambiente.
+      Aqui termina o nosso tour pelas principais features do nosso Webserv. Fique à
+      vontade para fazer perguntas, e agradecemos pela avaliação!
     </p>
     <p>
-      Nosso Webserv pode executar scripts em Python ou em PHP.
+        👋👋👋
     </p>
-    <br>
-    <div class="button-container">
-      <a href="http://localhost:3007/cgi/game.py" class="button">Python 🐍</a>
-      <a href="http://localhost:3007/cgi/calc.php" class="button">PHP 📝</a>
-      <a href="http://localhost:3007/cgi/bad_cgi.html" class="button">Ok, vamos continuar!</a>
-    </div>
   </div>
 </body>
 </html>
