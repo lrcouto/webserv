@@ -14,51 +14,41 @@
 #define PARSECONFIG_HPP
 #define PARSECONFIG_HPP
 
-# include "libs.hpp"
-# include "ParseDirectives.hpp"
-# include "Server.hpp"
-# include "Location.hpp"
+#include "Location.hpp"
+#include "ParametricException.hpp"
+#include "ParseDirectives.hpp"
+#include "Server.hpp"
+#include "libs.hpp"
 
 class ParseConfig {
     private:
         typedef ParseDirectives::DirectiveType (*_parseConfigFn)(std::string const &line);
 
-        std::string 							_inputFile;
-		std::vector<std::string>				_directives;
-		std::map<std::string, _parseConfigFn>	_parseConfigFns;
-		std::vector<Server>						_serverData;
+        static std::vector<std::string>              _directives;
+        static std::map<std::string, _parseConfigFn> _parseConfigFns;
 
-    public:
+        std::string         _inputFile;
+        std::vector<Server> _serverData;
+
     public:
         ParseConfig(void);
         ~ParseConfig(void);
-        ParseConfig &operator=(ParseConfig const &other);
 
-		void					initConfigFns(void);
-		void					initDirectiveVector(void);
-        std::vector<Server>		execute(std::string inputFilePath);
-        void    				normalizeWhitespaces(void);
-        bool    				checkCurlyBracesMatch(void);
-        bool    				checkServerBlock(void);
-		std::string				findDirective(std::string &line);
-		void    				processServer(std::string serverBlock);
-		void 					splitOffLocationBlocks(std::string &serverBlock, Server &server);
-		void 					processLocation(std::string locationBlock, Location &location);
+        static std::map<std::string, ParseConfig::_parseConfigFn> initConfigFns(void);
+        static std::vector<std::string>                           initDirectiveVector(void);
 
-        class ParseSyntaxError : public std::exception {
+        std::vector<Server> execute(std::string inputFilePath);
+        bool                checkCurlyBracesMatch(void);
+        bool                checkServerBlock(void);
+        std::string         findDirective(std::string &line);
+        void                processServer(std::string serverBlock);
+        void                splitOffLocationBlocks(std::string &serverBlock, Server &server);
+        void                processLocation(std::string locationBlock, Location &location);
+
+        class ParseConfigException : public ParametricException {
             public:
-                virtual char const *what() const throw()
-                {
-                    return ("\e[0;31mError: Invalid syntax on config file.\e[0m");
-                }
-        };
-
-        class CannotReadFileError : public std::exception {
-            public:
-                virtual char const *what() const throw()
-                {
-                    return ("\e[0;31mError: cannot read input file.\e[0m");
-                }
+                ParseConfigException(std::string const &message);
+                virtual char const *what() const throw();
         };
 };
 
