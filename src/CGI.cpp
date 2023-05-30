@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/17 16:57:16 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/29 20:36:11 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/30 18:26:21 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,18 +141,18 @@ std::vector<std::string> CGI::_formatEnvironment(void)
     envpVector[9]  = "REDIRECT_STATUS=200";
     envpVector[10] = "REQUEST_BODY=" + this->_request.getBody();
 
-    return envpVector;
+    return (envpVector);
 }
 
 int CGI::_parentRoutine(void)
 {
-    int const bufsize = 4096;
-    char buffer[bufsize + 1];
-    int ret = 1;
+    int const    bufsize = 4096;
+    char         buffer[bufsize + 1];
+    int          ret     = 1;
     unsigned int timeout = 10000; // Time before timeout, in milliseconds
 
     close_or_throw(_pipedes[1]);
-    pid_t pid = _pid;
+    pid_t          pid = _pid;
     struct timeval startTime;
     gettimeofday(&startTime, NULL);
 
@@ -168,8 +168,8 @@ int CGI::_parentRoutine(void)
 
         struct timeval currentTime;
         gettimeofday(&currentTime, NULL);
-        unsigned int elapsedTime = (currentTime.tv_sec - startTime.tv_sec) * 1000 +
-                                   (currentTime.tv_usec - startTime.tv_usec) / 1000;
+        unsigned int elapsedTime = (currentTime.tv_sec - startTime.tv_sec) * 1000
+            + (currentTime.tv_usec - startTime.tv_usec) / 1000;
         if (elapsedTime >= timeout) {
             kill(pid, SIGTERM);
             return 1;
@@ -188,7 +188,7 @@ int CGI::_parentRoutine(void)
     }
 
     close_or_throw(_pipedes[0]);
-    return 0;
+    return (0);
 }
 
 std::string CGI::_resolveBinaryPath(void)
