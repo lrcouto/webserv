@@ -162,14 +162,14 @@ void Server::endSession(void) { this->_sessionId.clear(); }
 
 Server::DuplicateDirectiveError::DuplicateDirectiveError(std::string const &directive)
 {
-    _message = "Server: directive " + directive + " must be unique";
+    _message = ERR_PARSE "directive \"" + directive + "\" must be unique";
 }
 
 char const *Server::DuplicateDirectiveError::what(void) const throw() { return (_message.c_str()); }
 
 Server::DirectiveNotAllowedError::DirectiveNotAllowedError(std::string const &directive)
 {
-    _message = "Server: directive " + directive + " not allowed inside server block";
+    _message = ERR_PARSE "directive \"" + directive + "\" not allowed inside server block";
 }
 
 char const *Server::DirectiveNotAllowedError::what(void) const throw()

@@ -31,10 +31,14 @@ void Socket::bind(int optval)
     info.ai_socktype = SOCK_STREAM;
     if (getaddrinfo(_ip.c_str(), _port.c_str(), &info, &response) != 0)
         throw SocketException("failed to getaddrinfo()");
-    if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) != 0)
+    if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) != 0) {
+        freeaddrinfo(response);
         throw SocketException("failed to setsockopt()");
-    if (::bind(_fd, response->ai_addr, response->ai_addrlen) < 0)
+    }
+    if (::bind(_fd, response->ai_addr, response->ai_addrlen) < 0) {
+        freeaddrinfo(response);
         throw SocketException("failed to bind()");
+    }
     freeaddrinfo(response);
 }
 

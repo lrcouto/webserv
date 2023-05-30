@@ -16,22 +16,34 @@ WebServer::WebServer(void) {}
 
 WebServer::~WebServer(void) {}
 
-void WebServer::init(std::string const &inputFilePath)
+int WebServer::init(std::string const &inputFilePath)
 {
-    Socket *socket;
-
-    this->_servers = this->_parseConfig.execute(inputFilePath);
-    for (size_t i = 0; i < this->_servers.size(); ++i) {
-        std::vector<std::string> sockinfo = this->_servers[i].getValue("listen");
-
-        if (sockinfo.size() == 0)
-            socket = new Socket();
-        else
-            socket = new Socket(sockinfo[1], sockinfo[0]);
-        socket->connect(SOMAXCONN);
-        this->_poll.insertSocket(socket);
-        Logger::info << "Listening at " << sockinfo[0] << ':' << sockinfo[1] << Logger::endl;
+    try {
+        this->_servers = this->_parseConfig.execute(inputFilePath);
+    } catch (std::exception const &e) {
+        std::cerr << e.what() << '\n';
+        return (-1);
     }
+
+    Socket *socket;
+    for (size_t i = 0; i < this->_servers.size(); ++i) {
+        try {
+            std::vector<std::string> sockinfo = this->_servers[i].getValue("listen");
+
+            if (sockinfo.size() == 0)
+                socket = new Socket();
+            else
+                socket = new Socket(sockinfo[1], sockinfo[0]);
+            socket->connect(SOMAXCONN);
+            this->_poll.insertSocket(socket);
+            Logger::info << "Listening at " << sockinfo[0] << ':' << sockinfo[1] << Logger::endl;
+        } catch (std::exception const &e) {
+            Logger::error << e.what() << Logger::endl;
+        }
+    }
+    if (!this->_poll.getSize())
+        return (-1);
+    return (0);
 }
 
 int WebServer::sockaccept(Socket *listener)
@@ -119,31 +131,38 @@ void WebServer::setServerSocketFds(void)
     }
 }
 
-void WebServer::run(std::string const &inputFilePath)
+int WebServer::run(std::string const &inputFilePath)
 {
-    init(inputFilePath);
+    if (init(inputFilePath) != 0)
+        return (1);
     Logger::info << "Hello, this is your WebServer ready to go!" << Logger::endl;
+
     while (true) {
-        this->_poll.execute();
-        setServerSocketFds();
-        for (size_t i = 0; i < this->_poll.getSize(); ++i) {
-            if (this->_poll.verifyEventReturn(i)) {
-                Socket *socket = this->_poll.getSocket(i);
-                if (i < this->_servers.size()) {
-                    if (sockaccept(socket) != 0)
-                        continue;
-                } else {
-                    if (sockreceive(socket) != 0)
-                        continue;
-                    if (!_rawRequest.empty()) {
-                        if (socksend(socket) != 0)
+        try {
+            this->_poll.execute();
+            setServerSocketFds();
+            for (size_t i = 0; i < this->_poll.getSize(); ++i) {
+                if (this->_poll.verifyEventReturn(i)) {
+                    Socket *socket = this->_poll.getSocket(i);
+                    if (i < this->_servers.size()) {
+                        if (sockaccept(socket) != 0)
                             continue;
+                    } else {
+                        if (sockreceive(socket) != 0)
+                            continue;
+                        if (!_rawRequest.empty()) {
+                            if (socksend(socket) != 0)
+                                continue;
+                        }
+                        this->_poll.removeSocket(socket);
                     }
-                    this->_poll.removeSocket(socket);
                 }
             }
+        } catch (std::exception const &e) {
+            Logger::error << e.what() << Logger::endl;
         }
     }
+    return (0);
 }
 
 void WebServer::stop(void)

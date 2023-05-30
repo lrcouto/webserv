@@ -39,7 +39,5 @@ int main(int argc, char **argv)
     interruptHandler.sa_flags = 0;
     sigaction(SIGINT, &interruptHandler, 0);
 
-    webserver.run(argv[1]);
-
-    return (0);
+    return (webserver.run(argv[1]));
 }

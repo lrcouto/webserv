@@ -35,8 +35,8 @@ class WebServer {
         WebServer(void);
         ~WebServer(void);
 
-        void run(std::string const &inputFilePath);
-        void init(std::string const &inputFilePath);
+        int  init(std::string const &inputFilePath);
+        int  run(std::string const &inputFilePath);
         void stop(void);
         void setServerSocketFds(void);
 

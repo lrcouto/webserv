@@ -69,4 +69,6 @@
 #define RED    "\033[0;31m"
 #define RESET  "\033[0m"
 
+#define ERR_PARSE "webserv: error in config file: "
+
 #endif

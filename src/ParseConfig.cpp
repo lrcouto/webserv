@@ -210,7 +210,7 @@ void ParseConfig::processLocation(std::string locationBlock, Location &location)
 
 ParseConfig::ParseConfigException::ParseConfigException(std::string const &message)
 {
-    _message = "ParseConfig: " + message;
+    _message = ERR_PARSE + message;
 }
 
 char const *ParseConfig::ParseConfigException::what(void) const throw()

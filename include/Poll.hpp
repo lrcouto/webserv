@@ -13,6 +13,7 @@
 #ifndef POLL_HPP
 #define POLL_HPP
 
+#include "ParametricException.hpp"
 #include "Socket.hpp"
 #include "libs.hpp"
 
@@ -35,12 +36,10 @@ class Poll {
         short   getEventReturn(size_t index);
         void    clear(void);
 
-        class PollError : public std::exception {
+        class PollException : public ParametricException {
             public:
-                virtual char const *what() const throw()
-                {
-                    return ("\e[0;31mError: unable to poll\e[0m");
-                }
+                PollException(std::string const &err);
+                char const *what() const throw();
         };
 };
 
