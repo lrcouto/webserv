@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/29 20:35:37 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/30 16:34:17 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,8 @@
 
 class Response {
     private:
-        std::map<std::string, std::string> _statusCodes;
-        std::map<std::string, std::string> _contentTypes;
+        static std::map<std::string, std::string> _statusCodes;
+        static std::map<std::string, std::string> _contentTypes;
 
         Request     _request;
         Server     *_serverData;
