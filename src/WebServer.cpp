@@ -16,20 +16,6 @@ WebServer::WebServer(void) {}
 
 WebServer::~WebServer(void) {}
 
-WebServer::WebServer(WebServer const &other)
-{
-    std::cout << "WebServer copy constructor called" << std::endl;
-    *this = other;
-}
-
-WebServer &WebServer::operator=(WebServer const &other)
-{
-    if (this != &other) {
-        std::cout << "WebServer copy assignment operator called" << std::endl;
-    }
-    return (*this);
-}
-
 void WebServer::init(std::string const &inputFilePath)
 {
     Socket *socket;
@@ -38,11 +24,10 @@ void WebServer::init(std::string const &inputFilePath)
     for (size_t i = 0; i < this->_servers.size(); ++i) {
         std::vector<std::string> sockinfo = this->_servers[i].getValue("listen");
 
-        if (sockinfo.size() == 0) {
-            sockinfo.push_back("127.0.0.1");
-            sockinfo.push_back("8080");
-        }
-        socket = new Socket(sockinfo[1], sockinfo[0]);
+        if (sockinfo.size() == 0)
+            socket = new Socket();
+        else
+            socket = new Socket(sockinfo[1], sockinfo[0]);
         socket->connect(SOMAXCONN);
         this->_poll.insertSocket(socket);
         Logger::info << "Listening at " << sockinfo[0] << ':' << sockinfo[1] << Logger::endl;
@@ -120,7 +105,7 @@ Server *WebServer::getCurrentServer(int fd)
         if (this->_servers[i].getFd() == fd)
             currentServer = &this->_servers[i];
     }
-    return currentServer;
+    return (currentServer);
 }
 
 void WebServer::setServerSocketFds(void)
@@ -152,7 +137,7 @@ void WebServer::run(std::string const &inputFilePath)
                         continue;
                     if (!_rawRequest.empty()) {
                         if (socksend(socket) != 0)
-                            ; // Handle
+                            continue;
                     }
                     this->_poll.removeSocket(socket);
                 }
@@ -164,12 +149,6 @@ void WebServer::run(std::string const &inputFilePath)
 void WebServer::stop(void)
 {
     Logger::info << "Stopping Webserver" << Logger::endl;
-    this->_poll.clear(); // in the future will also have to clear server data, request data, etc.
+    this->_poll.clear();
     Logger::info << "Bye bye!" << Logger::endl;
-}
-
-std::ostream &operator<<(std::ostream &out, WebServer const &in)
-{
-    (void)in;
-    return (out);
 }

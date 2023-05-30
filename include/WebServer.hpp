@@ -34,8 +34,6 @@ class WebServer {
     public:
         WebServer(void);
         ~WebServer(void);
-        WebServer(WebServer const &other);
-        WebServer &operator=(WebServer const &other);
 
         void run(std::string const &inputFilePath);
         void init(std::string const &inputFilePath);
@@ -48,7 +46,5 @@ class WebServer {
         int sockreceive(Socket *client);
         int socksend(Socket *client);
 };
-
-std::ostream &operator<<(std::ostream &out, WebServer const &in);
 
 #endif
