@@ -135,4 +135,4 @@ int Socket::getServerFd(void) const { return (this->_serverFd); }
 
 Socket::SocketException::SocketException(std::string const &err) { _message = "Socket: " + err; }
 
-char const *Socket::SocketException::what(void) const throw() { return (this->_message.c_str()); }
+char const *Socket::SocketException::what(void) const throw() { return (_message.c_str()); }

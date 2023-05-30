@@ -20,11 +20,11 @@ void Server::insertServerData(std::pair<std::string, std::vector<std::string> > 
 {
     if (_isUniqueDirective(directive.first)) {
         if (_isDirectiveOnMap(directive.first))
-            throw(DuplicateDirectiveError());
+            throw DuplicateDirectiveError(directive.first);
         else
             this->_serverData.insert(directive);
     } else if (_isDirectiveNotAllowed(directive.first)) {
-        throw(DirectiveNotAllowedError());
+        throw DirectiveNotAllowedError(directive.first);
     } else {
         if (!_isDirectiveOnMap(directive.first))
             this->_serverData.insert(directive);
@@ -43,16 +43,16 @@ std::vector<std::string> Server::getValue(std::string key)
     it = this->_serverData.find(key);
     if (it != _serverData.end())
         value = it->second;
-    return value;
+    return (value);
 }
 
 void Server::insertLocation(Location location) { this->_locations.push_back(location); }
 
-std::vector<Location> Server::getLocations(void) { return this->_locations; }
+std::vector<Location> Server::getLocations(void) { return (this->_locations); }
 
-int     Server::getFd(void) { return this->_fd; }
+int Server::getFd(void) { return this->_fd; }
 
-void    Server::setFd(int fd) { this->_fd = fd; }
+void Server::setFd(int fd) { this->_fd = fd; }
 
 bool Server::_isUniqueDirective(std::string const &directive) const
 {
@@ -77,51 +77,46 @@ bool Server::_isDirectiveOnMap(std::string const &directive) const
 
 void Server::generateSessionId(void)
 {
-    std::time_t now = std::time(NULL);
-    int randomNumber = std::rand();
+    std::time_t now           = std::time(NULL);
+    int         randomNumber  = std::rand();
     std::string serverAddress = getValue("listen")[0] + ":" + getValue("listen")[1];
-    char sessionId[64];
+    char        sessionId[64];
 
-    std::snprintf(sessionId, sizeof(sessionId), "%s-%ld-%d", serverAddress.c_str(), now, randomNumber);base64Encode(sessionId);
-    this->_sessionId = base64Encode(std::string(sessionId));
+    std::snprintf(
+        sessionId, sizeof(sessionId), "%s-%ld-%d", serverAddress.c_str(), now, randomNumber);
+    _base64Encode(sessionId);
+    this->_sessionId = _base64Encode(std::string(sessionId));
 }
 
-std::string Server::getSessionId(void)
-{
-    return this->_sessionId;
-}
+std::string Server::getSessionId(void) { return this->_sessionId; }
 
-std::string Server::base64Encode(const std::string &unencodedString)
+std::string Server::_base64Encode(std::string const &unencodedString)
 {
-    const char base64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    char const base64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-    std::string encodedString;
-    int i = 0;
-    int j = 0;
+    std::string   encodedString;
+    int           i = 0, j = 0;
     unsigned char arrayOf3[3];
     unsigned char arrayOf4[4];
-    const char* bytes_to_encode = unencodedString.c_str();
-    int len = unencodedString.size();
+    char const   *bytesToEncode = unencodedString.c_str();
+    int           len           = unencodedString.size();
 
-    while (len--)
-    {
-        arrayOf3[i++] = *(bytes_to_encode++);
-        if (i == 3)
-        {
+    while (len--) {
+        arrayOf3[i++] = *(bytesToEncode++);
+        if (i == 3) {
             arrayOf4[0] = (arrayOf3[0] & 0xfc) >> 2;
             arrayOf4[1] = ((arrayOf3[0] & 0x03) << 4) + ((arrayOf3[1] & 0xf0) >> 4);
             arrayOf4[2] = ((arrayOf3[1] & 0x0f) << 2) + ((arrayOf3[2] & 0xc0) >> 6);
             arrayOf4[3] = arrayOf3[2] & 0x3f;
 
-            for(i = 0; (i <4) ; i++)
+            for (i = 0; (i < 4); i++)
                 encodedString += base64_chars[arrayOf4[i]];
             i = 0;
         }
     }
 
-    if (i)
-    {
-        for(j = i; j < 3; j++)
+    if (i) {
+        for (j = i; j < 3; j++)
             arrayOf3[j] = '\0';
 
         arrayOf4[0] = (arrayOf3[0] & 0xfc) >> 2;
@@ -135,35 +130,49 @@ std::string Server::base64Encode(const std::string &unencodedString)
             encodedString += '=';
     }
 
-    return encodedString;
+    return (encodedString);
 }
 
 std::map<std::string, std::string> Server::getSessionDataMap(void) { return this->_sessionData; }
 
 std::string Server::getSessionData(std::string key)
 {
-    std::string                                     value;
-    std::map<std::string, std::string>::iterator    it;
+    std::string                                  value;
+    std::map<std::string, std::string>::iterator it;
 
     it = this->_sessionData.find(key);
     if (it != _sessionData.end())
         value = it->second;
-    return value;
+    return (value);
 }
 
 void Server::insertSessionData(std::string data)
 {
-    size_t pos = data.find('=');
-    std::pair<std::string, std::string> sessionData = std::make_pair(data.substr(0, pos), data.substr(pos + 1));
+    size_t                              pos = data.find('=');
+    std::pair<std::string, std::string> sessionData;
 
-    if (this->_sessionData.find(sessionData.first) != this->_sessionData.end()) {
+    sessionData = std::make_pair(data.substr(0, pos), data.substr(pos + 1));
+    if (this->_sessionData.find(sessionData.first) != this->_sessionData.end())
         this->_sessionData[sessionData.first] = sessionData.second;
-    } else {
+    else
         this->_sessionData.insert(sessionData);
-    }
 }
 
-void Server::endSession(void)
+void Server::endSession(void) { this->_sessionId.clear(); }
+
+Server::DuplicateDirectiveError::DuplicateDirectiveError(std::string const &directive)
 {
-    this->_sessionId.clear();
+    _message = "Server: directive " + directive + " must be unique";
+}
+
+char const *Server::DuplicateDirectiveError::what(void) const throw() { return (_message.c_str()); }
+
+Server::DirectiveNotAllowedError::DirectiveNotAllowedError(std::string const &directive)
+{
+    _message = "Server: directive " + directive + " not allowed inside server block";
+}
+
+char const *Server::DirectiveNotAllowedError::what(void) const throw()
+{
+    return (_message.c_str());
 }
