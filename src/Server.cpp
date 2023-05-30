@@ -54,27 +54,6 @@ int Server::getFd(void) { return this->_fd; }
 
 void Server::setFd(int fd) { this->_fd = fd; }
 
-bool Server::_isUniqueDirective(std::string const &directive) const
-{
-    char const  *uniqueDirectives[] = {"root", "client_max_body_size", "autoindex", "listen"};
-    size_t const arrayLength        = sizeof(uniqueDirectives) / sizeof(uniqueDirectives[0]);
-
-    for (size_t i = 0; i < arrayLength; ++i)
-        if (directive == uniqueDirectives[i])
-            return (true);
-    return (false);
-}
-
-bool Server::_isDirectiveNotAllowed(std::string const &directive) const
-{
-    return (directive == "limit_except");
-}
-
-bool Server::_isDirectiveOnMap(std::string const &directive) const
-{
-    return (this->_serverData.find(directive) != this->_serverData.end());
-}
-
 void Server::generateSessionId(void)
 {
     std::time_t now           = std::time(NULL);
@@ -159,6 +138,27 @@ void Server::insertSessionData(std::string data)
 }
 
 void Server::endSession(void) { this->_sessionId.clear(); }
+
+bool Server::_isUniqueDirective(std::string const &directive) const
+{
+    char const  *uniqueDirectives[] = {"root", "client_max_body_size", "autoindex", "listen"};
+    size_t const arrayLength        = sizeof(uniqueDirectives) / sizeof(uniqueDirectives[0]);
+
+    for (size_t i = 0; i < arrayLength; ++i)
+        if (directive == uniqueDirectives[i])
+            return (true);
+    return (false);
+}
+
+bool Server::_isDirectiveNotAllowed(std::string const &directive) const
+{
+    return (directive == "limit_except");
+}
+
+bool Server::_isDirectiveOnMap(std::string const &directive) const
+{
+    return (this->_serverData.find(directive) != this->_serverData.end());
+}
 
 Server::DuplicateDirectiveError::DuplicateDirectiveError(std::string const &directive)
 {
