@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/29 01:33:49 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/29 20:40:34 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ void Response::assembleHeaders()
 
     this->_headers.insert(std::make_pair("Date", ResponseTools::getCurrentDate()));
     this->_headers.insert(std::make_pair("Server", "Webserv-42SP"));
-    
+
     if (this->_request.getRawRequest().find("chromium")) {
         this->_headers.insert(std::make_pair("Access-Control-Allow-Origin", "*"));
         this->_headers.insert(std::make_pair("Access-Control-Allow-Methods", "GET, POST, DELETE"));
@@ -163,6 +163,10 @@ void Response::handleCGI(std::string &binaryPath, std::string &resource)
     CGI cgi(_request, binaryPath, resource, this->_root);
     int cgiResponse;
 
+#ifdef DEBUG
+    Logger::debug << "Entered CGI handler" << Logger::endl;
+#endif /* DEBUG */
+
     try {
         cgiResponse = cgi.execute();
 
@@ -172,9 +176,15 @@ void Response::handleCGI(std::string &binaryPath, std::string &resource)
             this->_body   = cgi.getOutput();
             this->_type   = "html";
             this->_status = _redirected ? "301" : "200";
+
+#ifdef DEBUG
+        Logger::debug << "Assembled CGI:\n" << cgi << Logger::endl;
+        Logger::debug << "CGI succesfully executed" << Logger::endl;
+#endif /* DEBUG */
+
         }
     } catch (std::exception const &e) {
-        std::cerr << e.what() << '\n';
+        Logger::error << "Exception caught while handling CGI: " << e.what() << Logger::endl;
         HTTPError("500");
     }
 }
@@ -190,9 +200,10 @@ void Response::getResource(std::string requestURI)
 
             std::string locationPath = locations[i].getPath();
 
-            indexes = locations[i].getValue("index");
-            this->_root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0]
-                                                            : locations[i].getValue("root")[0];
+            indexes      = locations[i].getValue("index");
+            this->_root  = locations[i].getValue("root").empty()
+                 ? this->_serverData->getValue("root")[0]
+                 : locations[i].getValue("root")[0];
             resourcePath = ResponseTools::assemblePath(this->_root, requestURI);
 
             resource  = findResourceByIndex(indexes, resourcePath);
@@ -300,9 +311,10 @@ void Response::postResource(std::string requestURI)
 
             std::string locationPath = locations[i].getPath();
 
-            this->_root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0]
-                                                         : locations[i].getValue("root")[0];
-            resource = ResponseTools::assemblePath(this->_root, requestURI);
+            this->_root = locations[i].getValue("root").empty()
+                ? this->_serverData->getValue("root")[0]
+                : locations[i].getValue("root")[0];
+            resource    = ResponseTools::assemblePath(this->_root, requestURI);
 
             if ((!resource.empty()) && resource.find(locationPath) != std::string::npos) {
                 break;
@@ -313,8 +325,8 @@ void Response::postResource(std::string requestURI)
     }
     if (resource.empty()) {
         this->_root = this->_serverData->getValue("redirect").empty()
-                   ? this->_serverData->getValue("root")[0]
-                   : this->_serverData->getValue("redirect")[0];
+            ? this->_serverData->getValue("root")[0]
+            : this->_serverData->getValue("redirect")[0];
         _redirected = this->_serverData->getValue("redirect").empty() ? false : true;
         resource    = ResponseTools::assemblePath(this->_root, requestURI);
     }
@@ -360,9 +372,10 @@ void Response::deleteResource(std::string requestURI)
 
             std::string locationPath = locations[i].getPath();
 
-            this->_root = locations[i].getValue("root").empty() ? this->_serverData->getValue("root")[0]
-                                                         : locations[i].getValue("root")[0];
-            resource = ResponseTools::assemblePath(this->_root, requestURI);
+            this->_root = locations[i].getValue("root").empty()
+                ? this->_serverData->getValue("root")[0]
+                : locations[i].getValue("root")[0];
+            resource    = ResponseTools::assemblePath(this->_root, requestURI);
 
             if ((!resource.empty()) && resource.find(locationPath) != std::string::npos) {
                 break;
@@ -373,8 +386,8 @@ void Response::deleteResource(std::string requestURI)
     }
     if (resource.empty()) {
         this->_root = this->_serverData->getValue("redirect").empty()
-                   ? this->_serverData->getValue("root")[0]
-                   : this->_serverData->getValue("redirect")[0];
+            ? this->_serverData->getValue("root")[0]
+            : this->_serverData->getValue("redirect")[0];
         _redirected = this->_serverData->getValue("redirect").empty() ? false : true;
         resource    = ResponseTools::assemblePath(this->_root, requestURI);
     }
@@ -424,6 +437,9 @@ void Response::HTTPError(std::string status)
     std::string              requestURI = this->_request.getRequestURI();
     std::vector<std::string> errorPages;
 
+    Logger::warning << "Entered HTTP Error: " << status << ' ' << _statusCodes[status]
+                    << Logger::endl;
+
     std::vector<Location> locations = this->_serverData->getLocations();
 
     for (size_t i = 0; i < locations.size(); i++) {
@@ -438,11 +454,11 @@ void Response::HTTPError(std::string status)
                 errorPagePath         = errorPage.substr(delimiter + 1);
 
                 if (errorCode == status) {
-                   this->_root = locations[i].getValue("root").empty()
-                        ? this->_serverData->getValue("root")[0]
-                        : locations[i].getValue("root")[0];
-                    this->_root      = ResponseTools::assemblePath(this->_root, locationPath);
-                    errorPagePath    = ResponseTools::assemblePath(this->_root, errorPagePath);
+                    this->_root   = locations[i].getValue("root").empty()
+                          ? this->_serverData->getValue("root")[0]
+                          : locations[i].getValue("root")[0];
+                    this->_root   = ResponseTools::assemblePath(this->_root, locationPath);
+                    errorPagePath = ResponseTools::assemblePath(this->_root, errorPagePath);
 
                     if (ResponseTools::fileExists(errorPagePath) && !errorPagePath.empty()
                         && errorPagePath.find(locationPath) != std::string::npos) {
@@ -600,4 +616,38 @@ void Response::clear(void)
     this->_body.clear();
     this->_status.clear();
     this->_type.clear();
+}
+
+std::string Response::str(void) const
+{
+    std::string __str;
+
+    __str += BLUE "Status Line: " RESET + _statusLine + "\n";
+    __str += BLUE "Headers:" RESET "\n";
+    std::map<std::string, std::string>::const_iterator it;
+    for (it = _headers.begin(); it != _headers.end(); ++it)
+        __str += it->first + ": " + it->second + "\n";
+    __str += "\n" BLUE "Body:" RESET;
+    if (!_body.empty()) {
+        if (_body.size() > 512)
+            __str += " Suppressed (body too large)";
+        else
+            __str += "\n" + _body;
+    } else {
+        __str += " Empty";
+    }
+    __str += "\n";
+    return (__str);
+}
+
+std::ostream &operator<<(std::ostream &out, Response const &in)
+{
+    out << in.str();
+    return (out);
+}
+
+std::ostream &operator<<(std::stringstream &ss, Response const &in)
+{
+    ss << in.str();
+    return (ss);
 }

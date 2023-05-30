@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestTools.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/29 00:57:19 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/29 20:36:34 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,17 +88,19 @@ void RequestTools::parseRequest(void)
             _body = _body_data;
         }
     } catch (RequestParsingException const &e) {
-        std::cerr << e.get_error() << ' ' << e.what() << '\n';
+        Logger::error << "Exception caught while parsing request: " << e.get_error() << ' '
+                      << e.what() << Logger::endl;
         _hasError  = true;
         _errorCode = e.get_error();
     } catch (std::exception const &e) {
-        std::cerr << e.what() << '\n';
+        Logger::error << "Exception caught while parsing request: " << e.what() << Logger::endl;
     }
 }
 
 Request RequestTools::buildRequest(void) const
 {
-    return (Request(_headers, _method, _uri, _query_string, _protocol, _body, _raw, _errorCode, _hasError));
+    return (Request(
+        _headers, _method, _uri, _query_string, _protocol, _body, _raw, _errorCode, _hasError));
 }
 
 /******************************************** PRIVATE ********************************************/
@@ -577,7 +579,7 @@ void RequestTools::_parseMultipartData()
     } else {
         throw RequestParsingException(BAD_REQUEST);
     }
-    
+
     size_t start = data.find("\r\n\r\n") + 4;
     size_t end = data.rfind("\r\n--" + boundary + "--");
 

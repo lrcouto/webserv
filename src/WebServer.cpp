@@ -12,12 +12,9 @@
 
 #include "WebServer.hpp"
 
-WebServer::WebServer(void)
-{
-    std::cout << "Hello, this is your WebServer ready to go!" << std::endl;
-}
+WebServer::WebServer(void) {}
 
-WebServer::~WebServer(void) { std::cout << "Bye bye!" << std::endl; }
+WebServer::~WebServer(void) {}
 
 WebServer::WebServer(WebServer const &other)
 {
@@ -48,6 +45,7 @@ void WebServer::init(std::string const &inputFilePath)
         socket = new Socket(sockinfo[1], sockinfo[0]);
         socket->connect(SOMAXCONN);
         this->_poll.insertSocket(socket);
+        Logger::info << "Listening at " << sockinfo[0] << ':' << sockinfo[1] << Logger::endl;
     }
 }
 
@@ -55,13 +53,15 @@ int WebServer::sockaccept(Socket *listener)
 {
     Socket *client;
 
-    std::cout << "Accepting connection on fd " << listener->getFd() << std::endl;
     client = new Socket;
     client->accept(listener->getFd());
     if (client->getFd() < 0) {
-        std::cerr << "\e[0;31mError: unable to accept connection\e[0m" << std::endl;
+        Logger::error << "Unable to accept connection on socket file descriptor "
+                      << listener->getFd() << Logger::endl;
         return (-1);
     }
+    Logger::info << "Accepting connection on socket file descriptor " << listener->getFd()
+                 << Logger::endl;
     this->_poll.insertSocket(client);
     return (0);
 }
@@ -69,13 +69,14 @@ int WebServer::sockaccept(Socket *listener)
 int WebServer::sockreceive(Socket *client)
 {
     _rawRequest.clear();
-    std::cout << "Receiving request on client fd " << client->getFd() << std::endl;
     if (client->receive(_rawRequest) < 0) {
-        std::cerr << "\e[0;31mError: unable to receive request on fd " << client->getFd() << "\e[0m"
-                  << std::endl;
+        Logger::error << "Unable to receive request on socket file descriptor " << client->getFd()
+                      << Logger::endl;
         this->_poll.removeSocket(client);
         return (-1);
     }
+    Logger::info << "Receiving request on client file descriptor " << client->getFd()
+                 << Logger::endl;
     return (0);
 }
 
@@ -84,17 +85,28 @@ int WebServer::socksend(Socket *client)
     RequestTools parser(_rawRequest, getCurrentServer(client->getServerFd()));
     Request      request;
 
-
     parser.parseRequest();
     request = parser.buildRequest();
+
+#ifdef DEBUG
+    Logger::debug << "Received request:\n" << request << Logger::endl;
+#endif /* DEBUG */
+
     Response response(request);
     response.setServerData(getCurrentServer(client->getServerFd()));
     if (request.hasError())
         response.HTTPError(request.getErrorCode());
     response.assembleResponseString();
+
+#ifdef DEBUG
+    Logger::debug << "Assembled response:\n" << response << Logger::endl;
+#endif /* DEBUG */
+
+    Logger::info << "Sending response to client file descriptor " << client->getFd()
+                 << Logger::endl;
     if (client->send(response.getResponseString()) <= 0) {
-        std::cerr << "\e[0;31mError: unable to receive request data on fd" << client->getFd()
-                  << "\e[0m" << std::endl;
+        Logger::info << "Unable to read request data on file descriptor " << client->getFd()
+                     << Logger::endl;
         return (-1);
     }
     return (0);
@@ -125,6 +137,7 @@ void WebServer::setServerSocketFds(void)
 void WebServer::run(std::string const &inputFilePath)
 {
     init(inputFilePath);
+    Logger::info << "Hello, this is your WebServer ready to go!" << Logger::endl;
     while (true) {
         this->_poll.execute();
         setServerSocketFds();
@@ -150,8 +163,9 @@ void WebServer::run(std::string const &inputFilePath)
 
 void WebServer::stop(void)
 {
-    std::cout << "Stopping Webserver..." << std::endl;
+    Logger::info << "Stopping Webserver" << Logger::endl;
     this->_poll.clear(); // in the future will also have to clear server data, request data, etc.
+    Logger::info << "Bye bye!" << Logger::endl;
 }
 
 std::ostream &operator<<(std::ostream &out, WebServer const &in)

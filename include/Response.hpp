@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:45 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/26 19:54:48 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/29 20:35:37 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,11 @@ class Response {
         std::string findResourceByIndex(std::vector<std::string> indexes, std::string resourcePath);
         std::string assembleCookie(std::pair<std::string, std::string> dataEntry);
 
-        void clear(void);
+        void        clear(void);
+        std::string str(void) const;
 };
+
+std::ostream &operator<<(std::ostream &out, Response const &in);
+std::ostream &operator<<(std::stringstream &ss, Response const &in);
 
 #endif

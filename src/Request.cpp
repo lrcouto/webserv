@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/23 21:44:28 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/15 00:50:53 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/25 18:51:00 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,15 +42,15 @@ Request::Request(Request const &other) { *this = other; }
 Request &Request::operator=(Request const &other)
 {
     if (this != &other) {
-        this->_raw          = other._raw;
-        this->_method       = other._method;
-        this->_requestURI   = other._requestURI;
-        this->_queryString  = other._queryString;
-        this->_protocol     = other._protocol;
-        this->_headers      = other._headers;
-        this->_body         = other._body;
-        this->_hasError     = other._hasError;
-        this->_errorCode    = other._errorCode;
+        this->_raw         = other._raw;
+        this->_method      = other._method;
+        this->_requestURI  = other._requestURI;
+        this->_queryString = other._queryString;
+        this->_protocol    = other._protocol;
+        this->_headers     = other._headers;
+        this->_body        = other._body;
+        this->_hasError    = other._hasError;
+        this->_errorCode   = other._errorCode;
     }
     return *this;
 }
@@ -75,19 +75,44 @@ void Request::setError(std::string const &errorCode) { this->_errorCode = errorC
 
 bool Request::hasError(void) const { return this->_hasError; }
 
-std::ostream &operator<<(std::ostream &out, Request &in)
+std::string Request::str(void) const
 {
-    out << "\n\e[1;32mRaw Request:\e[0m" << std::endl << in.getRawRequest() << std::endl;
-    out << "\e[1;32mMethod: \e[0m" << in.getMethod() << std::endl;
-    out << "\e[1;32mRequest URI\e[0m: " << in.getRequestURI() << std::endl;
-    out << "\e[1;32mQuery String\e[0m: " << in.getQueryString() << std::endl;
-    out << "\e[1;32mProtocol\e[0m: " << in.getProtocol() << std::endl;
-    out << "\e[1;32mHeaders:\e[0m" << std::endl;
-    std::map<std::string, std::string>                 headers = in.getHeaders();
+    std::string __str, formattedRaw;
+    size_t      crlfcrlf;
+
+    crlfcrlf = _raw.find("\r\n\r\n");
+    if (crlfcrlf != std::string::npos)
+        formattedRaw.assign(_raw.begin(), (_raw.begin() + crlfcrlf));
+    __str += BLUE "Raw Request:" RESET "\n" + (formattedRaw.empty() ? _raw : formattedRaw) + "\n\n";
+    __str += BLUE "Method: " RESET + _method + "\n";
+    __str += BLUE "Request URI: " RESET + _requestURI + "\n";
+    __str += BLUE "Query String: " RESET + _queryString + "\n";
+    __str += BLUE "Protocol: " RESET + _protocol + "\n";
+    __str += BLUE "Headers:" RESET "\n";
     std::map<std::string, std::string>::const_iterator it;
-    for (it = headers.begin(); it != headers.end(); ++it) {
-        out << it->first << ": " << it->second << std::endl;
+    for (it = _headers.begin(); it != _headers.end(); ++it)
+        __str += it->first + ": " + it->second + "\n";
+    __str += "\n" BLUE "Body:" RESET;
+    if (!_body.empty()) {
+        if (_body.size() > 512)
+            __str += " Suppressed (body too large)";
+        else
+            __str += "\n" + _body;
+    } else {
+        __str += " Empty";
     }
-    out << "\e[1;32mBody:\e[0m" << std::endl << in.getBody() << std::endl;
-    return out;
+    __str += "\n";
+    return (__str);
+}
+
+std::ostream &operator<<(std::ostream &out, Request const &in)
+{
+    out << in.str();
+    return (out);
+}
+
+std::ostream &operator<<(std::stringstream &ss, Request const &in)
+{
+    ss << in.str();
+    return (ss);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/23 21:44:23 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/15 00:36:44 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/25 18:27:18 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,9 @@ class Request {
         std::string const &getErrorCode(void) const;
 
         void setError(std::string const &errorCode);
-
         bool hasError(void) const;
+
+        std::string str(void) const;
 
     private:
         std::map<std::string, std::string> _headers;
@@ -58,6 +59,7 @@ class Request {
         std::string _errorCode;
 };
 
-std::ostream &operator<<(std::ostream &out, Request &in);
+std::ostream &operator<<(std::ostream &out, Request const &in);
+std::ostream &operator<<(std::stringstream &ss, Request const &in);
 
 #endif
