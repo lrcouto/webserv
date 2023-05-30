@@ -14,21 +14,12 @@
 
 Socket::Socket(std::string port, std::string ip) : _port(port), _ip(ip), _fd(-1), _serverFd(-1) {}
 
-Socket::Socket(Socket const &other) { *this = other; }
-
 Socket::~Socket(void) { this->close(); }
-
-Socket &Socket::operator=(Socket const &other)
-{
-    if (this != &other)
-        _fd = other._fd;
-    return *this;
-}
 
 void Socket::socket(void)
 {
     if ((_fd = ::socket(AF_INET, SOCK_STREAM, 0)) < 0)
-        throw CreateSocketError();
+        throw SocketException("failed to socket()");
 }
 
 void Socket::bind(int optval)
@@ -39,18 +30,18 @@ void Socket::bind(int optval)
     info.ai_family   = AF_UNSPEC;
     info.ai_socktype = SOCK_STREAM;
     if (getaddrinfo(_ip.c_str(), _port.c_str(), &info, &response) != 0)
-        throw std::exception(); // TODO: Create custom exception
+        throw SocketException("failed to getaddrinfo()");
     if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) != 0)
-        throw std::exception(); // TODO: Create custom exception
+        throw SocketException("failed to setsockopt()");
     if (::bind(_fd, response->ai_addr, response->ai_addrlen) < 0)
-        throw BindSocketError();
+        throw SocketException("failed to bind()");
     freeaddrinfo(response);
 }
 
 void Socket::listen(int backlog)
 {
     if (::listen(_fd, backlog) < 0)
-        throw BindSocketError();
+        throw SocketException("failed to listen()");
 }
 
 void Socket::connect(int backlog)
@@ -66,11 +57,10 @@ void Socket::accept(int serverFd)
     struct sockaddr_in clientAddr    = {};
     socklen_t          clientAddrLen = sizeof(clientAddr);
 
-    newFd = ::accept(serverFd, (struct sockaddr *)&clientAddr, &clientAddrLen);
-    if (newFd < 0)
-        throw AcceptSocketError();
+    if ((newFd = ::accept(serverFd, (struct sockaddr *)&clientAddr, &clientAddrLen)) < 0)
+        throw SocketException("failed to accept()");
     _serverFd = serverFd;
-    _fd = newFd;
+    _fd       = newFd;
 }
 
 int Socket::send(std::string const response)
@@ -79,11 +69,13 @@ int Socket::send(std::string const response)
 
     while ((size_t)bytesTotal < response.size()) {
         bytesReturned = ::send(_fd, response.c_str(), response.size(), 0);
-        if (bytesReturned <= 0)
+        if (bytesReturned < 0)
+            throw SocketException("failed to send()");
+        if (bytesReturned == 0)
             break;
         bytesTotal += bytesReturned;
     }
-    return bytesReturned;
+    return (bytesReturned);
 }
 
 int Socket::receive(std::string &request)
@@ -102,12 +94,13 @@ int Socket::receive(std::string &request)
         totalBytes += bytesRead;
         if (request.find("multipart/form-data") != std::string::npos) {
             std::string boundary;
-            size_t contentTypePos = request.find("Content-Type: ");
+            size_t      contentTypePos = request.find("Content-Type: ");
 
             if (contentTypePos != std::string::npos) {
                 size_t lineEndPos = request.find("\r\n", contentTypePos);
                 if (lineEndPos != std::string::npos) {
-                    std::string contentTypeLine = request.substr(contentTypePos, lineEndPos - contentTypePos);
+                    std::string contentTypeLine
+                        = request.substr(contentTypePos, lineEndPos - contentTypePos);
                     size_t boundaryPos = contentTypeLine.find("boundary=");
                     if (boundaryPos != std::string::npos) {
                         boundary = contentTypeLine.substr(boundaryPos + 9);
@@ -121,7 +114,7 @@ int Socket::receive(std::string &request)
             break;
         }
     }
-    return (bytesRead == -1) ? -1 : totalBytes;
+    return ((bytesRead == -1) ? -1 : totalBytes);
 }
 
 void Socket::close(void)
@@ -132,10 +125,14 @@ void Socket::close(void)
     }
 }
 
-int Socket::getFd(void) const { return this->_fd; }
+int Socket::getFd(void) const { return (this->_fd); }
 
 void Socket::setFd(int fd) { this->_fd = fd; }
 
-std::string Socket::getPort(void) const { return this->_port; }
+std::string Socket::getPort(void) const { return (this->_port); }
 
-int Socket::getServerFd(void) const { return this->_serverFd; }
+int Socket::getServerFd(void) const { return (this->_serverFd); }
+
+Socket::SocketException::SocketException(std::string const &err) { _message = "Socket: " + err; }
+
+char const *Socket::SocketException::what(void) const throw() { return (this->_message.c_str()); }
