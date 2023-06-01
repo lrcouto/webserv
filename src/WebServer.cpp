@@ -131,7 +131,7 @@ void WebServer::setServerSocketFds(void)
     }
 }
 
-int WebServer::run(std::string const &inputFilePath)
+int WebServer::run(char const *inputFilePath)
 {
     if (init(inputFilePath) != 0)
         return (1);
