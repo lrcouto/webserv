@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/30 16:34:03 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:13:54 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -521,14 +521,17 @@ std::vector<std::string> Response::verifyLocationAutoindexOverride(std::string r
 
 void Response::validateServerName(void)
 {
-    std::vector<std::string>           serverNames = this->_serverData->getValue("server_name");
-    std::map<std::string, std::string> headers     = this->_request.getHeaders();
+    std::map<std::string, std::string> headers = this->_request.getHeaders();
     std::string                        host, name;
     int                                pos;
 
+    if (headers.empty())
+        return;
     host = headers.find("host")->second;
     pos  = host.find(':');
     name = host.substr(0, pos);
+
+    std::vector<std::string> serverNames = this->_serverData->getValue("server_name");
 
     for (size_t i = 0; i < serverNames.size(); i++) {
         if (serverNames[i] == name)
