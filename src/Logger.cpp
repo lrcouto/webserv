@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 21:17:14 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/24 02:37:07 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/30 16:37:04 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ std::string Logger::_timestamp(void)
     char       buffer[32];
 
     current_time = std::time(0);
-    time_struct  = localtime(&current_time);
+    time_struct  = std::localtime(&current_time);
     std::strftime(buffer, sizeof(buffer), "[%d/%m/%Y - %H:%M:%S]", time_struct);
     return (std::string(buffer));
 }

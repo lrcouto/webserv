@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseTools.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:33:38 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/14 17:34:40 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/30 16:37:32 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ std::string ResponseTools::assemblePath(std::string first, std::string second)
     std::string path      = ".";
     std::string delimiter = "/";
 
-    first = ftstring::reduce(first, "./\t\v\f\r\n", "/");
+    first  = ftstring::reduce(first, "./\t\v\f\r\n", "/");
     second = ftstring::reduce(second, "/\t\v\f\r\n", "/");
 
     second = removeOverlap(first, second);
@@ -35,98 +35,100 @@ std::string ResponseTools::assemblePath(std::string first, std::string second)
         path += delimiter;
     }
 
-    return path;
+    return (path);
 }
 
 bool ResponseTools::fileExists(std::string path)
 {
     struct stat buffer;
 
-    return ((stat(path.c_str(), &buffer) == 0) && (!S_ISDIR(buffer.st_mode)));
+    return (stat(path.c_str(), &buffer) == 0) && !S_ISDIR(buffer.st_mode);
 }
 
 std::string ResponseTools::getFileExtension(std::string path)
 {
     size_t period = path.rfind(".");
     if (period == std::string::npos) {
-        return "";
+        return ("");
     } else {
-        return path.substr(period + 1);
+        return (path.substr(period + 1));
     }
 }
 
-bool ResponseTools::endsWith(const std::string& str, const std::string& suffix) {
-    std::string reducedStr = ftstring::reduce(str, "/");
+bool ResponseTools::endsWith(std::string const &str, std::string const &suffix)
+{
+    std::string reducedStr    = ftstring::reduce(str, "/");
     std::string reducedSuffix = ftstring::reduce(suffix, "/");
-    if (reducedSuffix.size() > reducedStr.size()) {
-        return false;
-    }
-    return reducedStr.substr(reducedStr.size() - reducedSuffix.size()) == reducedSuffix;
+    if (reducedSuffix.size() > reducedStr.size())
+        return (false);
+    return (reducedStr.substr(reducedStr.size() - reducedSuffix.size()) == reducedSuffix);
 }
 
-bool ResponseTools::startsWith(const std::string& str, const std::string& prefix) {
-    if (prefix.size() > str.size()) {
-        return false;
-    }
-    return str.substr(0, prefix.size()) == prefix;
+bool ResponseTools::startsWith(std::string const &str, std::string const &prefix)
+{
+    if (prefix.size() > str.size())
+        return (false);
+    return (str.substr(0, prefix.size()) == prefix);
 }
 
-std::string ResponseTools::removeOverlap(const std::string& first, const std::string& second) {
+std::string ResponseTools::removeOverlap(std::string const &first, std::string const &second)
+{
     size_t overlap = second.find(first);
     if (overlap != std::string::npos) {
         std::string newPath = second;
         newPath.erase(overlap, first.size());
         newPath = ftstring::reduce(newPath, "/\t\v\f\r\n", "/");
-        return newPath;
+        return (newPath);
     }
-    return second;
+    return (second);
 }
 
 bool ResponseTools::isDirectory(std::string path)
 {
     struct stat buffer;
-    if (stat(path.c_str(), &buffer) == 0) {
-        return S_ISDIR(buffer.st_mode);
-    }
-    return false;
+    if (stat(path.c_str(), &buffer) == 0)
+        return (S_ISDIR(buffer.st_mode));
+    return (false);
 }
 
 size_t ResponseTools::convertMaxBodySizeToNumber(std::string maxSize)
 {
-    std::string::const_iterator it = maxSize.begin();
-    size_t value = 0;
+    std::string::const_iterator it    = maxSize.begin();
+    size_t                      value = 0;
     while (it != maxSize.end() && std::isdigit(*it)) {
         value = value * 10 + (*it - '0');
         ++it;
     }
     if (it == maxSize.end()) {
-        return value;
+        return (value);
     }
     if (*it == 'm' || *it == 'M') {
-        return value * 1024 * 1024;
+        return (value * 1024 * 1024);
     }
     if (*it == 'g' || *it == 'G') {
-        return value * 1024 * 1024 * 1024;
+        return (value * 1024 * 1024 * 1024);
     }
-    return 0;
+    return (0);
 }
 
 bool ResponseTools::isRequestMethodAllowed(std::string method, std::vector<std::string> limitExcept)
 {
-    std::vector<std::string>::const_iterator it = std::find(limitExcept.begin(), limitExcept.end(), method);
-    return it != limitExcept.end();
+    std::vector<std::string>::const_iterator it;
+    it = std::find(limitExcept.begin(), limitExcept.end(), method);
+    return (it != limitExcept.end());
 }
 
 std::string ResponseTools::autoindex(std::string path, std::string port)
 {
     DIR *dir = opendir(path.c_str());
     if (!dir)
-        return "";
+        return ("");
 
     std::string indexPage = "<!DOCTYPE html>\n\
                             <html>\n\
                             <head>\n\
-                            <title>" + path + "</title>\n\
+                            <title>"
+        + path + "</title>\n\
                             </head>\n\
                             <body>\n\
                             <h1>INDEX</h1>\n\
@@ -134,30 +136,34 @@ std::string ResponseTools::autoindex(std::string path, std::string port)
 
     for (struct dirent *dirEntry = readdir(dir); dirEntry; dirEntry = readdir(dir)) {
         std::stringstream ss;
-        ss << "\t\t<p><a href=\"http://localhost" << ":" << port
-        << path.substr(1) + (path[path.size() - 1] != '/' ? "/" : "") + dirEntry->d_name + "\">" + dirEntry->d_name + "</a></p>\n";
+        ss << "\t\t<p><a href=\"http://localhost"
+           << ":" << port
+           << path.substr(1) + (path[path.size() - 1] != '/' ? "/" : "") + dirEntry->d_name + "\">"
+                + dirEntry->d_name + "</a></p>\n";
         indexPage += ss.str();
     }
     indexPage += "</p>\n</body>\n</html>\n";
     closedir(dir);
-    return indexPage;
+    return (indexPage);
 }
 
 std::string ResponseTools::getCurrentDate(void)
 {
-    time_t now;
+    time_t   now;
     std::tm *local_time;
-    char buffer[64];
+    char     buffer[64];
 
-    now = std::time(NULL);
+    now        = std::time(NULL);
     local_time = std::localtime(&now);
-    std::strftime(buffer, 64, "%a, %d %b %Y %T %Z", local_time);
+    std::strftime(buffer, sizeof(buffer), "%a, %d %b %Y %T %Z", local_time);
 
-    return buffer;
+    return (buffer);
 }
 
-void ResponseTools::initStatusCodes(std::map<std::string, std::string> &statusCodes)
+std::map<std::string, std::string> ResponseTools::initStatusCodes(void)
 {
+    std::map<std::string, std::string> statusCodes;
+
     statusCodes["100"] = "Continue";
     statusCodes["101"] = "Switching Protocols";
     statusCodes["102"] = "Processing";
@@ -219,24 +225,30 @@ void ResponseTools::initStatusCodes(std::map<std::string, std::string> &statusCo
     statusCodes["508"] = "Loop Detected";
     statusCodes["510"] = "Not Extended";
     statusCodes["511"] = "Network Authentication Required";
+
+    return (statusCodes);
 }
 
-void ResponseTools::initContentTypes(std::map<std::string, std::string> &contentTypes)
+std::map<std::string, std::string> ResponseTools::initContentTypes(void)
 {
-    contentTypes["txt"] = "text/plain";
+    std::map<std::string, std::string> contentTypes;
+
+    contentTypes["txt"]  = "text/plain";
     contentTypes["html"] = "text/html";
-    contentTypes["css"] = "text/css";
-    contentTypes["js"] = "text/javascript";
+    contentTypes["css"]  = "text/css";
+    contentTypes["js"]   = "text/javascript";
     contentTypes["json"] = "application/json";
-    contentTypes["xml"] = "application/xml";
-    contentTypes["pdf"] = "application/pdf";
-    contentTypes["zip"] = "application/zip";
+    contentTypes["xml"]  = "application/xml";
+    contentTypes["pdf"]  = "application/pdf";
+    contentTypes["zip"]  = "application/zip";
     contentTypes["gzip"] = "application/gzip";
-    contentTypes["tar"] = "application/x-tar";
-    contentTypes["png"] = "image/png";
-    contentTypes["jpg"] = "image/jpeg";
+    contentTypes["tar"]  = "application/x-tar";
+    contentTypes["png"]  = "image/png";
+    contentTypes["jpg"]  = "image/jpeg";
     contentTypes["jpeg"] = "image/jpeg";
-    contentTypes["gif"] = "image/gif";
-    contentTypes["svg"] = "image/svg+xml";
-    contentTypes["ico"] = "image/x-icon";
+    contentTypes["gif"]  = "image/gif";
+    contentTypes["svg"]  = "image/svg+xml";
+    contentTypes["ico"]  = "image/x-icon";
+
+    return (contentTypes);
 }

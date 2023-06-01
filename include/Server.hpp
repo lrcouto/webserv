@@ -14,17 +14,18 @@
 #define SERVER_HPP
 
 #include "Location.hpp"
+#include "ParametricException.hpp"
 #include "Socket.hpp"
 #include "libs.hpp"
 
 class Server {
     private:
-        std::map<std::string, std::vector<std::string> >    _serverData;
-        std::vector<Location>                               _locations;
-        int                                                 _fd;
+        std::map<std::string, std::vector<std::string> > _serverData;
+        std::vector<Location>                            _locations;
+        int                                              _fd;
 
-        std::string                                         _sessionId;
-        std::map<std::string, std::string>                  _sessionData;
+        std::string                        _sessionId;
+        std::map<std::string, std::string> _sessionData;
 
     public:
         Server(void);
@@ -35,39 +36,34 @@ class Server {
 
         std::vector<std::string> getValue(std::string key);
         std::vector<Location>    getLocations(void);
+        int                      getFd(void);
 
-        int     getFd(void);
-        void    setFd(int fd);
+        void setFd(int fd);
 
-        void generateSessionId(void);
-        std::string getSessionId(void);
+        void                               generateSessionId(void);
+        std::string                        getSessionId(void);
         std::map<std::string, std::string> getSessionDataMap(void);
-        std::string getSessionData(std::string key);
-        void insertSessionData(std::string data);
-        void endSession(void);
+        std::string                        getSessionData(std::string key);
+        void                               insertSessionData(std::string data);
+        void                               endSession(void);
 
-        class DuplicateDirectiveError : public std::exception {
+        class DuplicateDirectiveError : public ParametricException {
             public:
-                virtual char const *what() const throw()
-                {
-                    return ("\e[0;31mError: directives 'listen', 'autoindex', 'root' and "
-                            "'client_max_body_size' must be unique.\e[0m");
-                }
+                DuplicateDirectiveError(std::string const &directive);
+                virtual char const *what() const throw();
         };
 
-        class DirectiveNotAllowedError : public std::exception {
+        class DirectiveNotAllowedError : public ParametricException {
             public:
-                virtual char const *what() const throw()
-                {
-                    return ("\e[0;31mError: directive not allowed inside server block'.\e[0m");
-                }
+                DirectiveNotAllowedError(std::string const &directive);
+                virtual char const *what() const throw();
         };
 
     private:
-        bool _isUniqueDirective(std::string const &directive) const;
-        bool _isDirectiveNotAllowed(std::string const &directive) const;
-        bool _isDirectiveOnMap(std::string const &directive) const;
-        std::string base64Encode(const std::string &unencodedString);
+        bool        _isUniqueDirective(std::string const &directive) const;
+        bool        _isDirectiveNotAllowed(std::string const &directive) const;
+        bool        _isDirectiveOnMap(std::string const &directive) const;
+        std::string _base64Encode(std::string const &unencodedString);
 };
 
 #endif

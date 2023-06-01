@@ -6,25 +6,18 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/29 20:40:34 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:13:54 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
-Response::Response(void) : _redirected(false)
-{
-    ResponseTools::initStatusCodes(this->_statusCodes);
-    ResponseTools::initContentTypes(this->_contentTypes);
-    return;
-}
+std::map<std::string, std::string> Response::_statusCodes  = ResponseTools::initStatusCodes();
+std::map<std::string, std::string> Response::_contentTypes = ResponseTools::initContentTypes();
 
-Response::Response(Request request) : _request(request), _redirected(false)
-{
-    ResponseTools::initStatusCodes(this->_statusCodes);
-    ResponseTools::initContentTypes(this->_contentTypes);
-    return;
-}
+Response::Response(void) : _redirected(false) {}
+
+Response::Response(Request request) : _request(request), _redirected(false) {}
 
 Response::~Response(void) { clear(); }
 
@@ -42,12 +35,12 @@ Response &Response::operator=(Response const &other)
         this->_type           = other._type;
         this->_serverData     = other._serverData;
     }
-    return *this;
+    return (*this);
 }
 
-std::string Response::getResponseString(void) { return this->_responseString; }
+std::string Response::getResponseString(void) { return (this->_responseString); }
 
-std::string Response::getRoot(void) { return this->_root; }
+std::string Response::getRoot(void) { return (this->_root); }
 
 void Response::setServerData(Server *serverData) { this->_serverData = serverData; }
 
@@ -80,10 +73,10 @@ void Response::assembleStatusLine()
 {
     std::string                                  statusCode, statusMessage, protocol;
     std::map<std::string, std::string>::iterator it = this->_statusCodes.find(this->_status);
-    protocol                                        = "HTTP/1.1";
-    statusCode                                      = it->first;
-    statusMessage                                   = it->second;
 
+    protocol          = "HTTP/1.1";
+    statusCode        = it->first;
+    statusMessage     = it->second;
     this->_statusLine = protocol + SP + statusCode + SP + statusMessage;
 }
 
@@ -98,7 +91,9 @@ void Response::assembleHeaders()
     }
 
     std::string                                  contentType;
-    std::map<std::string, std::string>::iterator it = this->_contentTypes.find(this->_type);
+    std::map<std::string, std::string>::iterator it;
+
+    it = this->_contentTypes.find(this->_type);
     if (it == this->_contentTypes.end()) {
         contentType = "application/octet-stream";
     } else {
@@ -112,16 +107,21 @@ void Response::assembleHeaders()
     if (this->_request.getRawRequest().find("chromium")) {
         this->_headers.insert(std::make_pair("Access-Control-Allow-Origin", "*"));
         this->_headers.insert(std::make_pair("Access-Control-Allow-Methods", "GET, POST, DELETE"));
-        this->_headers.insert(std::make_pair("Access-Control-Allow-Headers", "Content-Type, Authorization"));
+        this->_headers.insert(
+            std::make_pair("Access-Control-Allow-Headers", "Content-Type, Authorization"));
         this->_headers.insert(std::make_pair("Access-Control-Allow-Credentials", "true"));
         this->_headers.insert(std::make_pair("Cache-Control", "no-cache, no-store"));
     }
 
     if (!this->_serverData->getSessionId().empty()) {
         std::map<std::string, std::string> sessionData = this->_serverData->getSessionDataMap();
-        this->_headers.insert(std::make_pair("Set-Cookie","session_id=" + this->_serverData->getSessionId() + " ; Domain=localhost; Path=/; SameSite=Lax"));
+        this->_headers.insert(std::make_pair("Set-Cookie",
+                                             "session_id=" + this->_serverData->getSessionId()
+                                                 + " ; Domain=localhost; Path=/; SameSite=Lax"));
 
-        for (std::map<std::string, std::string>::const_iterator it = sessionData.begin(); it != sessionData.end(); ++it) {
+        for (std::map<std::string, std::string>::const_iterator it = sessionData.begin();
+             it != sessionData.end();
+             ++it) {
             this->_headers.insert(std::make_pair("Set-Cookie", assembleCookie(*it)));
         }
     }
@@ -178,10 +178,9 @@ void Response::handleCGI(std::string &binaryPath, std::string &resource)
             this->_status = _redirected ? "301" : "200";
 
 #ifdef DEBUG
-        Logger::debug << "Assembled CGI:\n" << cgi << Logger::endl;
-        Logger::debug << "CGI succesfully executed" << Logger::endl;
+            Logger::debug << "Assembled CGI:\n" << cgi << Logger::endl;
+            Logger::debug << "CGI succesfully executed" << Logger::endl;
 #endif /* DEBUG */
-
         }
     } catch (std::exception const &e) {
         Logger::error << "Exception caught while handling CGI: " << e.what() << Logger::endl;
@@ -286,7 +285,7 @@ void Response::getResource(std::string requestURI)
             this->_body   = "No Content\n";
             return;
         }
-        this->_body = body;
+        this->_body   = body;
         this->_status = _redirected ? "301" : "200";
     }
 }
@@ -420,15 +419,15 @@ std::string Response::findResourceByIndex(std::vector<std::string> indexes,
                 ? resourcePath
                 : resourcePath + indexes[i];
             if (ResponseTools::fileExists(resource)) {
-                return resource;
+                return (resource);
             }
         }
     }
     resource = resourcePath;
     if (ResponseTools::fileExists(resource)) {
-        return resource;
+        return (resource);
     }
-    return "";
+    return ("");
 }
 
 void Response::HTTPError(std::string status)
@@ -513,23 +512,26 @@ std::vector<std::string> Response::verifyLocationAutoindexOverride(std::string r
             if (resourcePath.find(locations[i].getPath()) != std::string::npos) {
                 std::vector<std::string> autoindex = locations[i].getValue("autoindex");
                 if (!autoindex.empty())
-                    return autoindex;
+                    return (autoindex);
             }
         }
     }
-    return this->_serverData->getValue("autoindex");
+    return (this->_serverData->getValue("autoindex"));
 }
 
 void Response::validateServerName(void)
 {
-    std::vector<std::string>           serverNames = this->_serverData->getValue("server_name");
-    std::map<std::string, std::string> headers     = this->_request.getHeaders();
+    std::map<std::string, std::string> headers = this->_request.getHeaders();
     std::string                        host, name;
     int                                pos;
 
+    if (headers.empty())
+        return;
     host = headers.find("host")->second;
     pos  = host.find(':');
     name = host.substr(0, pos);
+
+    std::vector<std::string> serverNames = this->_serverData->getValue("server_name");
 
     for (size_t i = 0; i < serverNames.size(); i++) {
         if (serverNames[i] == name)
@@ -546,7 +548,7 @@ bool Response::sessionHandler(std::string resource)
     for (size_t i = 0; i < parameters.size(); i++) {
         size_t pos = parameters[i].find('=');
         if (pos == std::string::npos || pos == 0 || pos == parameters[i].size() - 1) {
-            return false;
+            return (false);
         }
         if (parameters[i].substr(0, pos) == "retrieve")
             dataToRetrieve = parameters[i].substr(pos + 1);
@@ -576,21 +578,21 @@ bool Response::sessionHandler(std::string resource)
 
         if (sessionId != this->_serverData->getSessionId()) {
             HTTPError("403");
-            return true;
+            return (true);
         }
     } else if (sessionStatus == "stop") {
         this->_serverData->endSession();
         std::map<std::string, std::string>::iterator it = this->_headers.find("Set-Cookie");
         this->_headers.erase(it);
     } else {
-        return false;
+        return (false);
     }
 
     if (!dataToRetrieve.empty()) {
         this->_type   = "txt";
         this->_status = "200";
         this->_body   = this->_serverData->getSessionData(dataToRetrieve);
-        return true;
+        return (true);
     }
 
     this->_type = ResponseTools::getFileExtension(resource);
@@ -600,12 +602,12 @@ bool Response::sessionHandler(std::string resource)
     this->_status = "200";
     this->_body   = body;
 
-    return true;
+    return (true);
 }
 
 std::string Response::assembleCookie(std::pair<std::string, std::string> dataEntry)
 {
-    return dataEntry.first + "=" + dataEntry.second + "; Domain=localhost; Path=/; SameSite=Lax";
+    return (dataEntry.first + "=" + dataEntry.second + "; Domain=localhost; Path=/; SameSite=Lax");
 }
 
 void Response::clear(void)

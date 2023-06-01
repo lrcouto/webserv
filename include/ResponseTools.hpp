@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseTools.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/14 15:55:37 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/05/30 16:30:14 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,19 +17,22 @@
 
 class ResponseTools {
     public:
-        static std::string  assemblePath(std::string root, std::string requestURI);
-        static bool         fileExists(std::string path);
-        static std::string  getFileExtension(std::string path);
-        static bool         endsWith(const std::string& str, const std::string& suffix);
-        static bool         startsWith(const std::string& str, const std::string& prefix);
-        static std::string  removeOverlap(const std::string& requestURI, const std::string& root);
-        static bool         isDirectory(std::string path);
-        static bool         isRequestMethodAllowed(std::string method, std::vector<std::string> limitExcept);
-        static size_t       convertMaxBodySizeToNumber(std::string maxSize);
-        static std::string  autoindex(std::string path, std::string port);
-        static std::string  getCurrentDate(void);
-        static void         initStatusCodes(std::map<std::string, std::string> &statusCodes);
-        static void         initContentTypes(std::map<std::string, std::string> &contentTypes);
+        static std::string assemblePath(std::string root, std::string requestURI);
+        static std::string removeOverlap(std::string const &requestURI, std::string const &root);
+        static std::string autoindex(std::string path, std::string port);
+        static size_t      convertMaxBodySizeToNumber(std::string maxSize);
+        static bool        fileExists(std::string path);
+        static bool        endsWith(std::string const &str, std::string const &suffix);
+        static bool        startsWith(std::string const &str, std::string const &prefix);
+        static bool        isDirectory(std::string path);
+        static bool        isRequestMethodAllowed(std::string              method,
+                                                  std::vector<std::string> limitExcept);
+
+        static std::string getFileExtension(std::string path);
+        static std::string getCurrentDate(void);
+
+        static std::map<std::string, std::string> initStatusCodes(void);
+        static std::map<std::string, std::string> initContentTypes(void);
 };
 
 #endif

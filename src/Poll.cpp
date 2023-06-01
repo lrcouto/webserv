@@ -25,8 +25,6 @@ void Poll::insertSocket(Socket *socket)
     pollFdToInsert.events  = POLLIN | POLLPRI | POLLOUT | POLLWRBAND;
     pollFdToInsert.revents = 0;
     this->_pollfds.push_back(pollFdToInsert);
-
-    return;
 }
 
 void Poll::removeSocket(Socket *socket)
@@ -40,7 +38,8 @@ void Poll::removeSocket(Socket *socket)
         }
     }
 
-    std::vector<Socket *>::iterator itsock = std::find(_sockets.begin(), _sockets.end(), socket);
+    std::vector<Socket *>::iterator itsock;
+    itsock = std::find(_sockets.begin(), _sockets.end(), socket);
     if (itsock != _sockets.end()) {
         delete *itsock;
         _sockets.erase(itsock);
@@ -51,8 +50,7 @@ void Poll::execute(void)
 {
     int retValue = poll(this->_pollfds.data(), this->getSize(), 0);
     if (retValue == -1)
-        throw(PollError());
-    return;
+        throw PollException("unable to poll()");
 }
 
 bool Poll::verifyEventReturn(size_t index)
@@ -90,3 +88,7 @@ void Poll::clear(void)
         delete *itsock;
     _sockets.clear();
 }
+
+Poll::PollException::PollException(std::string const &err) { _message = "Poll: " + err; }
+
+char const *Poll::PollException::what(void) const throw() { return (_message.c_str()); }

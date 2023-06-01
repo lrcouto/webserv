@@ -12,41 +12,49 @@
 
 #include "ParseConfig.hpp"
 
-ParseConfig::ParseConfig(void)
-{
-    initConfigFns();
-    initDirectiveVector();
-}
+std::map<std::string, ParseConfig::_parseConfigFn> ParseConfig::_parseConfigFns
+    = ParseConfig::initConfigFns();
+
+std::vector<std::string> ParseConfig::_directives = ParseConfig::initDirectiveVector();
+
+ParseConfig::ParseConfig(void) {}
 
 ParseConfig::~ParseConfig(void) {}
 
-ParseConfig &ParseConfig::operator=(ParseConfig const &other)
+std::map<std::string, ParseConfig::_parseConfigFn> ParseConfig::initConfigFns(void)
 {
-    if (this != &other)
-        std::cout << "ParseConfig copy assignment operator called" << std::endl;
-    return (*this);
+    std::map<std::string, ParseConfig::_parseConfigFn> parseConfigFns;
+
+    parseConfigFns["autoindex"]            = ParseDirectives::parseAutoindex;
+    parseConfigFns["cgi"]                  = ParseDirectives::parseCgi;
+    parseConfigFns["client_max_body_size"] = ParseDirectives::parseClientMaxBodySize;
+    parseConfigFns["error_page"]           = ParseDirectives::parseErrorPage;
+    parseConfigFns["index"]                = ParseDirectives::parseIndex;
+    parseConfigFns["limit_except"]         = ParseDirectives::parseLimitExcept;
+    parseConfigFns["listen"]               = ParseDirectives::parseListen;
+    parseConfigFns["redirect"]             = ParseDirectives::parseRedirect;
+    parseConfigFns["root"]                 = ParseDirectives::parseRoot;
+    parseConfigFns["server_name"]          = ParseDirectives::parseServerName;
+
+    return (parseConfigFns);
 }
 
-void ParseConfig::initConfigFns(void)
+std::vector<std::string> ParseConfig::initDirectiveVector(void)
 {
-    this->_parseConfigFns["autoindex"]            = ParseDirectives::parseAutoindex;
-    this->_parseConfigFns["cgi"]                  = ParseDirectives::parseCgi;
-    this->_parseConfigFns["client_max_body_size"] = ParseDirectives::parseClientMaxBodySize;
-    this->_parseConfigFns["error_page"]           = ParseDirectives::parseErrorPage;
-    this->_parseConfigFns["index"]                = ParseDirectives::parseIndex;
-    this->_parseConfigFns["limit_except"]         = ParseDirectives::parseLimitExcept;
-    this->_parseConfigFns["listen"]               = ParseDirectives::parseListen;
-    this->_parseConfigFns["redirect"]             = ParseDirectives::parseRedirect;
-    this->_parseConfigFns["root"]                 = ParseDirectives::parseRoot;
-    this->_parseConfigFns["server_name"]          = ParseDirectives::parseServerName;
-}
+    std::vector<std::string> directives;
 
-void ParseConfig::initDirectiveVector(void)
-{
-    for (std::map<std::string, _parseConfigFn>::iterator it = this->_parseConfigFns.begin();
-         it != this->_parseConfigFns.end();
-         ++it)
-        this->_directives.push_back(it->first);
+    directives.push_back("autoindex");
+    directives.push_back("cgi");
+    directives.push_back("client_max_body_size");
+    directives.push_back("error_page");
+    directives.push_back("index");
+    directives.push_back("limit_except");
+    directives.push_back("listen");
+    directives.push_back("redirect");
+    directives.push_back("root");
+    directives.push_back("server_name");
+
+    return (directives);
 }
 
 std::vector<Server> ParseConfig::execute(std::string inputFilePath)
@@ -56,7 +64,7 @@ std::vector<Server> ParseConfig::execute(std::string inputFilePath)
     std::vector<Server> serverData;
 
     if (!inputFile.is_open()) {
-        throw (CannotReadFileError());
+        throw ParseConfigException("failed to open input file");
     }
 
     content << inputFile.rdbuf();
@@ -64,30 +72,29 @@ std::vector<Server> ParseConfig::execute(std::string inputFilePath)
     inputFile.close();
 
     if (!checkCurlyBracesMatch() || !checkServerBlock())
-        throw ParseSyntaxError();
+        throw ParseConfigException("syntax error detected in input file");
 
-    int     braces = 0;
-    size_t  blockStart = 0;
-    bool    insideServerBlock = false;
+    int    braces            = 0;
+    size_t blockStart        = 0;
+    bool   insideServerBlock = false;
     for (size_t i = 0; i < this->_inputFile.size(); i++) {
         char c = this->_inputFile[i];
         if (c == '{') {
             if (insideServerBlock == false) {
                 insideServerBlock = true;
-                blockStart = i;                
+                blockStart        = i;
             }
             braces++;
-        }
-        else if (c == '}') {
+        } else if (c == '}') {
             braces--;
             if (braces == 0) {
                 processServer(this->_inputFile.substr(blockStart, i - blockStart + 1));
                 insideServerBlock = false;
-                blockStart = i;
+                blockStart        = i;
             }
         }
     }
-    return this->_serverData;
+    return (this->_serverData);
 }
 
 bool ParseConfig::checkServerBlock(void)
@@ -123,35 +130,37 @@ bool ParseConfig::checkCurlyBracesMatch(void)
 
 std::string ParseConfig::findDirective(std::string &line)
 {
-    for (std::vector<std::string>::const_iterator it = this->_directives.begin();
-         it != this->_directives.end();
-         ++it) {
+    std::vector<std::string>::const_iterator it;
+    for (it = this->_directives.begin(); it != this->_directives.end(); ++it) {
         size_t pos = line.find(*it);
+
         if (line.find(*it) != std::string::npos && pos == 0) {
             std::istringstream iss(line);
-            std::string firstToken;
+            std::string        firstToken;
+
             std::getline(iss, firstToken, ' ');
             if (firstToken != *it)
-                throw (ParseSyntaxError());
-            return *it;
+                throw ParseConfigException("syntax error detected in input file");
+            return (*it);
         }
     }
-    return "";
+    return ("");
 }
 
 void ParseConfig::processServer(std::string serverBlock)
 {
     Server server;
     splitOffLocationBlocks(serverBlock, server);
+
     serverBlock = ftstring::trim(serverBlock, " {}\n\t\v\f\r");
     std::istringstream iss(serverBlock);
-    std::string line, key;
+    std::string        line, key;
 
     while (std::getline(iss, line)) {
         std::map<std::string, _parseConfigFn>::iterator it;
         line = ftstring::reduce(line, " \f\n\r\t\v");
-        key = findDirective(line);
-        it  = this->_parseConfigFns.find(key);
+        key  = findDirective(line);
+        it   = this->_parseConfigFns.find(key);
         if (it != this->_parseConfigFns.end()) {
             server.insertServerData(it->second(line));
         }
@@ -162,11 +171,11 @@ void ParseConfig::processServer(std::string serverBlock)
 void ParseConfig::splitOffLocationBlocks(std::string &serverBlock, Server &server)
 {
     std::string delimiter = "location ";
-    size_t pos = 0;
+    size_t      pos       = 0;
 
     while ((pos = serverBlock.find(delimiter, pos)) != std::string::npos) {
         size_t blockStart = pos;
-        size_t blockEnd = serverBlock.find_first_of('}', pos);
+        size_t blockEnd   = serverBlock.find_first_of('}', pos);
 
         Location location;
         processLocation(serverBlock.substr(blockStart, blockEnd - blockStart + 1), location);
@@ -179,7 +188,7 @@ void ParseConfig::splitOffLocationBlocks(std::string &serverBlock, Server &serve
 void ParseConfig::processLocation(std::string locationBlock, Location &location)
 {
     std::istringstream iss(locationBlock);
-    std::string line, key, token;
+    std::string        line, key, token;
 
     std::getline(iss, line);
     std::istringstream firstLine(line);
@@ -197,4 +206,14 @@ void ParseConfig::processLocation(std::string locationBlock, Location &location)
             location.insertLocationData(it->second(line));
         }
     }
+}
+
+ParseConfig::ParseConfigException::ParseConfigException(std::string const &message)
+{
+    _message = ERR_PARSE + message;
+}
+
+char const *ParseConfig::ParseConfigException::what(void) const throw()
+{
+    return (_message.c_str());
 }

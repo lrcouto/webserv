@@ -16,8 +16,6 @@
 #include "ParametricException.hpp"
 #include "libs.hpp"
 
-#define ERR_PARSE "webserv: error in config file: "
-
 class ParseDirectives {
     public:
         typedef std::pair<std::string, std::vector<std::string> > DirectiveType;
