@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/31 21:13:54 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/06/03 00:44:37 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -530,6 +530,10 @@ void Response::validateServerName(void)
     host = headers.find("host")->second;
     pos  = host.find(':');
     name = host.substr(0, pos);
+
+    if ((name == "localhost" || name == "127.0.0.1")
+        && this->_serverData->getValue("listen")[0] == "127.0.0.1")
+        return;
 
     std::vector<std::string> serverNames = this->_serverData->getValue("server_name");
 
