@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/31 21:13:54 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/06/03 00:44:02 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -293,18 +293,31 @@ void Response::getResource(std::string requestURI)
 void Response::postResource(std::string requestURI)
 {
     std::string resource;
+    std::vector<std::string> maxSizeVector;
 
-    std::vector<std::string> maxSizeVector = this->_serverData->getValue("client_max_body_size");
+    std::vector<Location> locations = this->_serverData->getLocations();
+    if (!locations.empty()) {
+        for (size_t i = 0; i < locations.size(); i++) {
+            if (requestURI.find(locations[i].getPath()) != std::string::npos) {
+                maxSizeVector = locations[i].getValue("client_max_body_size");
+                break;
+            }
+        }
+    }
+
+    if (maxSizeVector.empty())
+        maxSizeVector = this->_serverData->getValue("client_max_body_size");
+
     if (!maxSizeVector.empty()) {
         size_t maxSize = ResponseTools::convertMaxBodySizeToNumber(maxSizeVector[0]);
 
         if (this->_request.getBody().length() > maxSize) {
+            std::cout << this->_request.getBody().length() << std::endl;
             HTTPError("413");
             return;
         }
     }
 
-    std::vector<Location> locations = this->_serverData->getLocations();
     if (!locations.empty()) {
         for (size_t i = 0; i < locations.size(); i++) {
 
