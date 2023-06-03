@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestTools.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
+/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:31:07 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/22 13:59:57 by lcouto           ###   ########.fr       */
+/*   Updated: 2023/06/03 01:07:35 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define REQUEST_TOOLS_HPP
 
 #include "Request.hpp"
+#include "ResponseTools.hpp"
 #include "Server.hpp"
 #include "libs.hpp"
 
