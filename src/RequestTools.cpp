@@ -6,7 +6,7 @@
 /*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 18:25:27 by maolivei          #+#    #+#             */
-/*   Updated: 2023/05/29 20:36:34 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/06/03 01:08:03 by maolivei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ RequestTools::RequestTools(std::string &raw, Server *server) :
 
     max_body_size_vec = _server->getValue("client_max_body_size");
     if (!max_body_size_vec.empty())
-        _max_body_size = ftstring::strtoi(max_body_size_vec[0]);
+        _max_body_size = ResponseTools::convertMaxBodySizeToNumber(max_body_size_vec[0]);
 }
 
 RequestTools::~RequestTools(void) {}
@@ -581,7 +581,7 @@ void RequestTools::_parseMultipartData()
     }
 
     size_t start = data.find("\r\n\r\n") + 4;
-    size_t end = data.rfind("\r\n--" + boundary + "--");
+    size_t end   = data.rfind("\r\n--" + boundary + "--");
 
     if (start != std::string::npos && end != std::string::npos) {
         _body_data = data.substr(start, end - start);
