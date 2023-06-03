@@ -25,7 +25,7 @@ int WebServer::init(std::string const &inputFilePath)
         return (-1);
     }
 
-    Socket *socket;
+    Socket *socket = NULL;
     for (size_t i = 0; i < this->_servers.size(); ++i) {
         try {
             std::vector<std::string> sockinfo = this->_servers[i].getValue("listen");
@@ -39,6 +39,10 @@ int WebServer::init(std::string const &inputFilePath)
             Logger::info << "Listening at " << sockinfo[0] << ':' << sockinfo[1] << Logger::endl;
         } catch (std::exception const &e) {
             Logger::error << e.what() << Logger::endl;
+            if (socket)
+                delete socket;
+            this->_poll.clear();
+            return (-1);
         }
     }
     if (!this->_poll.getSize())

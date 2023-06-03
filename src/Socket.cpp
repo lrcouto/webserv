@@ -37,7 +37,7 @@ void Socket::bind(int optval)
     }
     if (::bind(_fd, response->ai_addr, response->ai_addrlen) < 0) {
         freeaddrinfo(response);
-        throw SocketException("failed to bind()");
+        throw SocketException("failed to bind(): " + _ip + ":" + _port);
     }
     freeaddrinfo(response);
 }
@@ -137,6 +137,9 @@ std::string Socket::getPort(void) const { return (this->_port); }
 
 int Socket::getServerFd(void) const { return (this->_serverFd); }
 
-Socket::SocketException::SocketException(std::string const &err) { _message = "Socket: " + err; }
+Socket::SocketException::SocketException(std::string const &err)
+{
+    _message = "Socket: " + err + ": " + strerror(errno);
+}
 
 char const *Socket::SocketException::what(void) const throw() { return (_message.c_str()); }
