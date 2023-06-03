@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Método POST</title>
+  <title>Tudo tem limite!</title>
   <style>
     * {
       overflow: hidden;
@@ -81,12 +81,12 @@
 
         var formData = new FormData(form);
 
-        fetch("http://localhost:3008/methods/image.jpg", {
+        fetch("http://localhost:3009/methods/image.jpg", {
           method: "POST",
           body: formData
         })
         .then(function(response) {
-          window.location.href = "http://localhost:3008/methods/post.html";
+          window.location.href = "http://localhost:3009/methods/too_large.html";
         })
         .catch(function(error) {
           console.log("Error:", error);
@@ -98,23 +98,24 @@
 <body>
   <div class="content">
     <div class="text-box">
-      <h1>Método POST</h1>
+      <h1>Tudo tem limite!</h1>
       <p>
-        O método POST permite que o usuário envie uma entidade (feita de bytes, não um fantasma) para
-        o endereço desejado, causando uma mudança de estado ou efeitos colaterais no servidor.
+        Na página anterior, podíamos enviar qualquer arquivo com o formato .jpg para o nosso Webserv.
+        Mas o que podemos fazer para impedir que um usuário entupa o nosso servidor com arquivos gigantescos?
+        Afinal, nada te impede de mandar uma imagem com a resolução de um outdoor em 600dpi.
       </p>
       <p>
-        Neste caso, você pode escolher uma imagem com o formato .jpg para enviar para o Webserv,
-        que substituirá a que está nessa página.
+        Para isso, usamos a diretiva <i>client max body size</i>, que, nesse caso, impede que imagems de tamanho
+        acima de 200 kilobytes sejam enviadas para o nosso server. Faça o experimento!
       </p>
       <br>
-      <form action="http://localhost:3008/methods/image.jpg" method="POST" enctype="multipart/form-data">
+      <form action="http://localhost:3009/methods/image.jpg" method="POST" enctype="multipart/form-data">
         <input type="file" name="image" accept="image/jpeg">
         <input type="submit" value="Enviar 🖼️" class="button">
       </form>
       <p>
         <br>
-        <a href="http://localhost:3009/methods/too_large.html" class="button">Próxima página! ➡️</a>
+        <a href="http://localhost:3008/methods/delete.html" class="button">Próxima página! ➡️</a>
       </p>
     </div>
     <div class="image">

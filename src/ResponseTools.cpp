@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseTools.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maolivei <maolivei@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 01:33:38 by lcouto            #+#    #+#             */
-/*   Updated: 2023/05/30 16:37:32 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/06/03 00:58:18 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ size_t ResponseTools::convertMaxBodySizeToNumber(std::string maxSize)
         ++it;
     }
     if (it == maxSize.end()) {
-        return (value);
+        return (value * 1024);
     }
     if (*it == 'm' || *it == 'M') {
         return (value * 1024 * 1024);
