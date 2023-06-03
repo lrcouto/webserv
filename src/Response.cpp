@@ -6,7 +6,7 @@
 /*   By: lcouto <lcouto@student.42sp.org.br>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 23:27:53 by lcouto            #+#    #+#             */
-/*   Updated: 2023/06/03 00:44:37 by maolivei         ###   ########.fr       */
+/*   Updated: 2023/06/03 17:21:27 by lcouto           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -312,7 +312,6 @@ void Response::postResource(std::string requestURI)
         size_t maxSize = ResponseTools::convertMaxBodySizeToNumber(maxSizeVector[0]);
 
         if (this->_request.getBody().length() > maxSize) {
-            std::cout << this->_request.getBody().length() << std::endl;
             HTTPError("413");
             return;
         }
